@@ -1,9 +1,9 @@
 # Virtuemart 2 - Svea WebPay betalmodul installationsguide
 
 ##Index
-* [Krav] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#Krav)
-* [Installation] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#Installation)
-* [Viktig info] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#Viktiginfo)
+* [Krav] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#krav)
+* [Installation] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#installation)
+* [Viktig info] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#viktig-info)
 
 
 ## Krav
