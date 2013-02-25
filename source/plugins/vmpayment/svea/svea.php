@@ -4,10 +4,11 @@ defined('_JEXEC') or die('Restricted access');
 
 
 /**
+ * SveaWebPay payment module made from:
  * @version $Id: standard.php,v 1.4 2005/05/27 19:33:57 ei
  *
  * a special type of 'cash on delivey':
- * @author Max Milbers, Valérie Isaksen
+ * @author Max Milbers, Valï¿½rie Isaksen
  * @version $Id: standard.php 5122 2011-12-18 22:24:49Z alatak $
  * @package VirtueMart
  * @subpackage payment
@@ -41,7 +42,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 
 	/**
 	 * Create the table for this plugin if it does not yet exist.
-	 * @author Valérie Isaksen
+	 * @author Valï¿½rie Isaksen
 	 */
 	public function getVmPluginCreateTableSQL() {
 		return $this->createTableSQL('Payment Standard Table');
@@ -71,7 +72,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	/**
 	 *
 	 *
-	 * @author Valérie Isaksen
+	 * @author Valï¿½rie Isaksen
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
 
@@ -293,7 +294,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	 * Create the table for this plugin if it does not yet exist.
 	 * This functions checks if the called plugin is active one.
 	 * When yes it is calling the standard method to create the tables
-	 * @author Valérie Isaksen
+	 * @author Valï¿½rie Isaksen
 	 *
 	 */
 	function plgVmOnStoreInstallPaymentPluginTable($jplugin_id) {
@@ -305,7 +306,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	 * additional payment info in the cart.
 	 *
 	 * @author Max Milbers
-	 * @author Valérie isaksen
+	 * @author Valï¿½rie isaksen
 	 *
 	 * @param VirtueMartCart $cart: the actual cart
 	 * @return null if the payment was not selected, true if the data is valid, error message if the data is not vlaid
