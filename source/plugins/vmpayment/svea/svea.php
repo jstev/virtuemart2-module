@@ -7,7 +7,7 @@ defined('_JEXEC') or die('Restricted access');
  * @version $Id: standard.php,v 1.4 2005/05/27 19:33:57 ei
  *
  * a special type of 'cash on delivey':
- * @author Max Milbers, ValÃ©rie Isaksen
+ * @author Max Milbers, Valérie Isaksen
  * @version $Id: standard.php 5122 2011-12-18 22:24:49Z alatak $
  * @package VirtueMart
  * @subpackage payment
@@ -41,7 +41,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 
 	/**
 	 * Create the table for this plugin if it does not yet exist.
-	 * @author ValÃ©rie Isaksen
+	 * @author Valérie Isaksen
 	 */
 	public function getVmPluginCreateTableSQL() {
 		return $this->createTableSQL('Payment Standard Table');
@@ -71,7 +71,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	/**
 	 *
 	 *
-	 * @author ValÃ©rie Isaksen
+	 * @author Valérie Isaksen
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
 
@@ -293,7 +293,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	 * Create the table for this plugin if it does not yet exist.
 	 * This functions checks if the called plugin is active one.
 	 * When yes it is calling the standard method to create the tables
-	 * @author ValÃ©rie Isaksen
+	 * @author Valérie Isaksen
 	 *
 	 */
 	function plgVmOnStoreInstallPaymentPluginTable($jplugin_id) {
@@ -305,7 +305,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	 * additional payment info in the cart.
 	 *
 	 * @author Max Milbers
-	 * @author ValÃ©rie isaksen
+	 * @author Valérie isaksen
 	 *
 	 * @param VirtueMartCart $cart: the actual cart
 	 * @return null if the payment was not selected, true if the data is valid, error message if the data is not vlaid
@@ -586,15 +586,15 @@ class plgVmPaymentSvea extends vmPSPlugin {
            
                 //update the whole order
                 $db = JFactory::getDbo();
-                //TODO replace vm2 to #
-                $db->select('#_virtuemart_orders');
-                $q =    'UPDATE vm2_virtuemart_orders SET
+                $prefix = $db->getPrefix();              
+                $db->select($prefix.'virtuemart_orders');
+                $q =    'UPDATE '.$prefix.'virtuemart_orders SET
                         `order_total`= '. $order['details']['BT']->order_total.', 
                         `order_billTaxAmount`= '. $order['details']['BT']->order_tax.',
                         `order_subtotal`= '. $order['details']['BT']->order_subtotal.',
                         `order_salesPrice`= '. $order['details']['BT']->order_total.',
                         `order_tax`='. $order['details']['BT']->order_tax.'
-                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
+                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;              
                $query = $db->setQuery($q);
                $db->execute($query);
 
