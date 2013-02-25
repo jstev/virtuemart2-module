@@ -11,7 +11,7 @@ Joomla 2.5
 VirtueMart 2.0 och uppåt
 
 ## Installation
-1.	Kör scriptet från install.sql med prefixet från din egen joomlatabell
+1.	Kör scriptet från install.sql med prefixet från joomlatabellen
 2.	Kopiera över resterande filer till rootkatalogen för din joomlainstallation
 3.	Gå in under inställningarna för virtuemart, under shop->payment methods
 4.	Välj New
