@@ -116,99 +116,96 @@ class plgVmPaymentSvea extends vmPSPlugin {
 		$this->storePSPluginInternalData($dbValues);
         
         
-        //SVEA settings and include
-        include("svea_files/SveaConfig.php");
-        //SveaConfig::getConfig()->setTestMode(true);
-        $config = SveaConfig::getConfig();
-        $config->merchantId = $method->merchantid;
-        $config->secret = $method->secretword;
-        
-        $paymentRequest = new SveaPaymentRequest();
-        $sveaOrder = new SveaOrder();
-        $paymentRequest->order = $sveaOrder;
-        
-        foreach($order['items'] as $items){
-            
-            $sveaOrderRow = new SveaOrderRow();
-            $sveaOrderRow->amount = number_format($items->product_final_price,2,'','');
-            $sveaOrderRow->vat = number_format($items->product_tax,2,'','');
-            $sveaOrderRow->name = $items->order_item_name;
-            $sveaOrderRow->quantity = $items->product_quantity;
-            $sveaOrderRow->unit = "st";
-            
-            $sveaOrder->addOrderRow($sveaOrderRow);
-        }
-        
-        //If shipment is set
-        if ($order['details']['BT']->order_shipment > 0){
-            
-            $shipmentVAT   = $order['details']['BT']->order_shipment_tax;
-            $shipmentPrice = $order['details']['BT']->order_shipment + $shipmentVAT;
-            
-            $sveaOrderRow = new SveaOrderRow();            
-            $sveaOrderRow->amount = number_format($shipmentPrice,2,'','');
-            $sveaOrderRow->vat = number_format($shipmentVAT,2,'','');
-            $sveaOrderRow->name = "Fraktkostnad";
-            $sveaOrderRow->quantity = "1";
-            $sveaOrderRow->unit = "st";
-            
-            $sveaOrder->addOrderRow($sveaOrderRow);
-        }
-        
-        //If campaign is set
-        if ($order['details']['BT']->coupon_discount > 0){
-            
-            $vat = $order['details']['BT']->coupon_discount * 0.2;
-            
-            $sveaOrderRow = new SveaOrderRow();            
-            $sveaOrderRow->amount = - number_format($order['details']['BT']->coupon_discount,2,'','');
-            $sveaOrderRow->vat = - number_format($vat,2,'','');
-            $sveaOrderRow->name = $order['details']['BT']->coupon_code;
-            $sveaOrderRow->quantity = "1";
-            $sveaOrderRow->unit = "st";
-            
-            $sveaOrder->addOrderRow($sveaOrderRow);
-        }
-        
-        $sveaOrder->amount = number_format($order['details']['BT']->order_total,2,'','');
-        $sveaOrder->customerRefno = "test".$order['details']['BT']->virtuemart_order_id;
-        $sveaOrder->returnUrl = JROUTE::_ (JURI::root () . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' . $order['details']['BT']->order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
-        $sveaOrder->vat = number_format($order['details']['BT']->order_tax,2,'','');
-        $sveaOrder->currency = $currency_code_3;
-        
-        $paymentRequest->createPaymentMessage();
-        $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;">Skickar till SveaWebPay...<br /><img src="'.JURI::root ().'/images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
-        
-        //Testmode check
-        if ($method->testmode == 1){
-            $html .= $paymentRequest->getPaymentForm(true);
-        }else{
-            $html .= $paymentRequest->getPaymentForm(false);
-        }
+            //SVEA settings and include
+            include("svea_files/SveaConfig.php");
+           // SveaConfig::getConfig()->setTestMode(true);
+            $config = SveaConfig::getConfig();
+            $config->merchantId = $method->merchantid;
+            $config->secret = $method->secretword;
+            $paymentRequest = new SveaPaymentRequest();
+            $sveaOrder = new SveaOrder();
+            $paymentRequest->order = $sveaOrder;
 
-        $html .= ' <script type="text/javascript">';
-		$html .= ' document.sveaPaymentForm.submit();';
-		$html .= ' </script></body></html>'; 
+            foreach($order['items'] as $items){
 
-        $cart->_confirmDone = FALSE;
-		$cart->_dataValidated = FALSE;
+                $sveaOrderRow = new SveaOrderRow();
+                $sveaOrderRow->amount = number_format($items->product_final_price,2,'','');
+                $sveaOrderRow->vat = number_format($items->product_tax,2,'','');
+                $sveaOrderRow->name = $items->order_item_name;
+                $sveaOrderRow->quantity = $items->product_quantity;
+                $sveaOrderRow->unit = "st";
 
- 	    $modelOrder = VmModel::getModel ('orders');
+                $sveaOrder->addOrderRow($sveaOrderRow);
+            }
+
+            //If shipment is set
+            if ($order['details']['BT']->order_shipment > 0){
+
+                $shipmentVAT   = $order['details']['BT']->order_shipment_tax;
+                $shipmentPrice = $order['details']['BT']->order_shipment + $shipmentVAT;
+
+                $sveaOrderRow = new SveaOrderRow();            
+                $sveaOrderRow->amount = number_format($shipmentPrice,2,'','');
+                $sveaOrderRow->vat = number_format($shipmentVAT,2,'','');
+                $sveaOrderRow->name = "Fraktkostnad";
+                $sveaOrderRow->quantity = "1";
+                $sveaOrderRow->unit = "st";
+
+                $sveaOrder->addOrderRow($sveaOrderRow);
+            }
+
+            //If campaign is set
+            if ($order['details']['BT']->coupon_discount > 0){
+
+                $vat = $order['details']['BT']->coupon_discount * 0.2;
+
+                $sveaOrderRow = new SveaOrderRow();            
+                $sveaOrderRow->amount = - number_format($order['details']['BT']->coupon_discount,2,'','');
+                $sveaOrderRow->vat = - number_format($vat,2,'','');
+                $sveaOrderRow->name = $order['details']['BT']->coupon_code;
+                $sveaOrderRow->quantity = "1";
+                $sveaOrderRow->unit = "st";
+
+                $sveaOrder->addOrderRow($sveaOrderRow);
+            }
+
+            $sveaOrder->amount = number_format($order['details']['BT']->order_total,2,'','');
+            $sveaOrder->customerRefno = "test".$order['details']['BT']->virtuemart_order_id. rand(0, 10000);
+            $sveaOrder->returnUrl = JROUTE::_ (JURI::root () . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' . $order['details']['BT']->order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
+            $sveaOrder->vat = number_format($order['details']['BT']->order_tax,2,'','');
+            $sveaOrder->currency = $currency_code_3;         
+            $paymentRequest->createPaymentMessage();
+            $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;">Skickar till SveaWebPay...<br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
+                    
+            //Testmode check
+            if ($method->testmode == 1){
+                $html .= $paymentRequest->getPaymentForm(true);
+            }else{
+                $html .= $paymentRequest->getPaymentForm(false);
+            }       
         
-		$order['order_status'] = 'X';
-		$order['customer_notified'] = 0;
-		//$order['comments'] = '';
-		$modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
+            $html .= ' <script type="text/javascript">';
+                    $html .= ' document.sveaPaymentForm.submit();';
+                    $html .= ' </script></body></html>'; 
+          
+            $cart->_confirmDone = FALSE;
+            $cart->_dataValidated = FALSE;
 
-		JRequest::setVar ('html', $html);
+            $modelOrder = VmModel::getModel ('orders');
 
+            $order['order_status'] = 'X';
+            $order['customer_notified'] = 0;
+            //$order['comments'] = '';
+            $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
+
+            JRequest::setVar ('html', $html);
 	}
 
 	/**
 	 * Display stored payment data for an order
 	 *
 	 */
-	function plgVmOnShowOrderBEPayment($virtuemart_order_id, $virtuemart_payment_id) {
+	function plgVmOnShowOrderBEPayment($virtuemart_order_id, $virtuemart_payment_id) {            
 		if (!$this->selectedThisByMethodId($virtuemart_payment_id)) {
 			return NULL; // Another method was selected, do nothing
 		}
@@ -513,7 +510,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	 *
 	 */
 	function plgVmOnPaymentResponseReceived(&$virtuemart_order_id, &$html) {
-
+          
     //SVEA settings and include  
     require_once('svea_files/SveaConfig.php');   
     
@@ -558,18 +555,21 @@ class plgVmPaymentSvea extends vmPSPlugin {
              */
              //check if the paymentmethod begins with SVEAINVOICE
             if(substr((string)$simpleXml->transaction->paymentmethod,0,11) == "SVEAINVOICE"){
+                $priceExMoms = $order['details']['BT']->order_subtotal;
                 //if the shops total is not the same as sveas total
                 if(((int)$simpleXml->transaction->amount * 0.01) != $order['details']['BT']->order_total){
                     //assume the difference is the invoicefee   //        
                     $invoiceFee = ((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total;
-                }
-                //create a new orderrow
+                    $priceExMoms = $invoiceFee / 1.25;
+                    
+                }               
+               
+                /**create a new orderrow
                 $invoiceFeeObject = new SveaItem();
                 $invoiceFeeObject->virtuemart_order_id = $virtuemart_order_id;
                 $invoiceFeeObject->product_quantity = 1;
                 $invoiceFeeObject->order_item_name = "Svea fakturaavgift";
                 $invoiceFeeObject->order_item_sku = "SveaInvoceFee";
-                $priceExMoms = $invoiceFee / 1.25;
                 $invoiceFeeObject->product_item_price = $priceExMoms; //pris exl. moms for sweden
                 $invoiceFeeObject->product_tax = $invoiceFee - $priceExMoms;
                 $invoiceFeeObject->product_final_price = $invoiceFee;//pris inkl. moms
@@ -578,8 +578,11 @@ class plgVmPaymentSvea extends vmPSPlugin {
                 $invoiceFeeObject->order_status = "C";
                 //add orderrow to VM order
                 $order['items'][] = $invoiceFeeObject;
+               
                 //add to db 
                 $modelOrder->saveOrderLineItem($invoiceFeeObject); 
+                 * 
+                 */
                 //update total
                 $order['details']['BT']->order_total = (int)$simpleXml->transaction->amount * 0.01;
                 $order['details']['BT']->order_subtotal = ((int)$simpleXml->transaction->amount * 0.01) / 1.25;
@@ -589,11 +592,10 @@ class plgVmPaymentSvea extends vmPSPlugin {
                 $db = JFactory::getDbo();
                 $prefix = $db->getPrefix();              
                 $db->select($prefix.'virtuemart_orders');
-                $q =    'UPDATE '.$prefix.'virtuemart_orders SET
-                        `order_total`= '. $order['details']['BT']->order_total.', 
-                        `order_billTaxAmount`= '. $order['details']['BT']->order_tax.',
+                $q =    'UPDATE '.$prefix.'virtuemart_orders SET  
                         `order_subtotal`= '. $order['details']['BT']->order_subtotal.',
-                        `order_salesPrice`= '. $order['details']['BT']->order_total.',
+                        `order_payment`= '. $priceExMoms.',
+                        `order_payment_tax`= '. ($invoiceFee - $priceExMoms).',
                         `order_tax`='. $order['details']['BT']->order_tax.'
                         WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;              
                $query = $db->setQuery($q);
