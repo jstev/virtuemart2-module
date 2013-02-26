@@ -8,7 +8,7 @@ defined('_JEXEC') or die('Restricted access');
  * @version $Id: standard.php,v 1.4 2005/05/27 19:33:57 ei
  *
  * a special type of 'cash on delivey':
- * @author Max Milbers, Val�rie Isaksen
+ * @author Max Milbers, Val?rie Isaksen
  * @version $Id: standard.php 5122 2011-12-18 22:24:49Z alatak $
  * @package VirtueMart
  * @subpackage payment
@@ -42,7 +42,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 
 	/**
 	 * Create the table for this plugin if it does not yet exist.
-	 * @author Val�rie Isaksen
+	 * @author Val?rie Isaksen
 	 */
 	public function getVmPluginCreateTableSQL() {
 		return $this->createTableSQL('Payment Standard Table');
@@ -72,7 +72,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	/**
 	 *
 	 *
-	 * @author Val�rie Isaksen
+	 * @author Val?rie Isaksen
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
 
@@ -170,7 +170,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
             }
 
             $sveaOrder->amount = number_format($order['details']['BT']->order_total,2,'','');
-            $sveaOrder->customerRefno = "test".$order['details']['BT']->virtuemart_order_id. rand(0, 10000);
+            $sveaOrder->customerRefno = "test".$order['details']['BT']->virtuemart_order_id. rand(0, 100);
             $sveaOrder->returnUrl = JROUTE::_ (JURI::root () . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' . $order['details']['BT']->order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
             $sveaOrder->vat = number_format($order['details']['BT']->order_tax,2,'','');
             $sveaOrder->currency = $currency_code_3;         
@@ -291,7 +291,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	 * Create the table for this plugin if it does not yet exist.
 	 * This functions checks if the called plugin is active one.
 	 * When yes it is calling the standard method to create the tables
-	 * @author Val�rie Isaksen
+	 * @author Val?rie Isaksen
 	 *
 	 */
 	function plgVmOnStoreInstallPaymentPluginTable($jplugin_id) {
@@ -303,7 +303,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	 * additional payment info in the cart.
 	 *
 	 * @author Max Milbers
-	 * @author Val�rie isaksen
+	 * @author Val?rie isaksen
 	 *
 	 * @param VirtueMartCart $cart: the actual cart
 	 * @return null if the payment was not selected, true if the data is valid, error message if the data is not vlaid
@@ -556,47 +556,25 @@ class plgVmPaymentSvea extends vmPSPlugin {
              //check if the paymentmethod begins with SVEAINVOICE
             if(substr((string)$simpleXml->transaction->paymentmethod,0,11) == "SVEAINVOICE"){
                 $priceExMoms = $order['details']['BT']->order_subtotal;
-                //if the shops total is not the same as sveas total
-                if(((int)$simpleXml->transaction->amount * 0.01) != $order['details']['BT']->order_total){
-                    //assume the difference is the invoicefee   //        
-                    $invoiceFee = ((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total;
-                    $priceExMoms = $invoiceFee / 1.25;
-                    
+             
+                //assume the difference is the invoicefee    
+                $invoiceFee = ((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total;
+                if($invoiceFee > 0){
+                    $priceExMoms = $invoiceFee / 1.25;                    
                 }               
-               
-                /**create a new orderrow
-                $invoiceFeeObject = new SveaItem();
-                $invoiceFeeObject->virtuemart_order_id = $virtuemart_order_id;
-                $invoiceFeeObject->product_quantity = 1;
-                $invoiceFeeObject->order_item_name = "Svea fakturaavgift";
-                $invoiceFeeObject->order_item_sku = "SveaInvoceFee";
-                $invoiceFeeObject->product_item_price = $priceExMoms; //pris exl. moms for sweden
-                $invoiceFeeObject->product_tax = $invoiceFee - $priceExMoms;
-                $invoiceFeeObject->product_final_price = $invoiceFee;//pris inkl. moms
-                $invoiceFeeObject->product_basePriceWithTax = $invoiceFee;//pris inkl. moms
-                $invoiceFeeObject->product_subtotal_with_tax = $invoiceFee;
-                $invoiceFeeObject->order_status = "C";
-                //add orderrow to VM order
-                $order['items'][] = $invoiceFeeObject;
-               
-                //add to db 
-                $modelOrder->saveOrderLineItem($invoiceFeeObject); 
-                 * 
-                 */
                 //update total
                 $order['details']['BT']->order_total = (int)$simpleXml->transaction->amount * 0.01;
-                $order['details']['BT']->order_subtotal = ((int)$simpleXml->transaction->amount * 0.01) / 1.25;
-                $order['details']['BT']->order_tax =   $order['details']['BT']->order_total - $order['details']['BT']->order_subtotal;
-           
+               // $order['details']['BT']->order_subtotal = ((int)$simpleXml->transaction->amount * 0.01) / 1.25;
+                $order['details']['BT']->order_tax =   $order['details']['BT']->order_total - $order['details']['BT']->order_subtotal;           
                 //update the whole order
                 $db = JFactory::getDbo();
                 $prefix = $db->getPrefix();              
                 $db->select($prefix.'virtuemart_orders');
                 $q =    'UPDATE '.$prefix.'virtuemart_orders SET  
-                        `order_subtotal`= '. $order['details']['BT']->order_subtotal.',
                         `order_payment`= '. $priceExMoms.',
+                        `order_total`= '. ($order['details']['BT']->order_salesPrice + $invoiceFee).',
                         `order_payment_tax`= '. ($invoiceFee - $priceExMoms).',
-                        `order_tax`='. $order['details']['BT']->order_tax.'
+                        `order_billTaxAmount`= '. (($invoiceFee - $priceExMoms) +  $order['details']['BT']->order_billTaxAmount).'
                         WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;              
                $query = $db->setQuery($q);
                $db->execute($query);
