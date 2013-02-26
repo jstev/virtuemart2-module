@@ -170,7 +170,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
             }
 
             $sveaOrder->amount = number_format($order['details']['BT']->order_total,2,'','');
-            $sveaOrder->customerRefno = "test".$order['details']['BT']->virtuemart_order_id. rand(0, 100);
+            $sveaOrder->customerRefno = $order['details']['BT']->virtuemart_order_id;
             $sveaOrder->returnUrl = JROUTE::_ (JURI::root () . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' . $order['details']['BT']->order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
             $sveaOrder->vat = number_format($order['details']['BT']->order_tax,2,'','');
             $sveaOrder->currency = $currency_code_3;         
@@ -554,7 +554,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
              * By Anneli Halld'n
              */
              //check if the paymentmethod begins with SVEAINVOICE
-            if(substr((string)$simpleXml->transaction->paymentmethod,0,11) == "SVEAINVOICE"){
+            if(substr((string)$simpleXml->transaction->paymentmethod,0,11) == "SVEAINVOICE" && (((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total) != 0){
                 $priceExMoms = $order['details']['BT']->order_subtotal;
              
                 //assume the difference is the invoicefee    
