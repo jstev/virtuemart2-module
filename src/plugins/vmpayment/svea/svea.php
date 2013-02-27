@@ -538,21 +538,15 @@ class plgVmPaymentSvea extends vmPSPlugin {
     $merchantid = $_REQUEST['merchantid'];
     $secretWord = $method->secretword;  
     $resp = new SveaPaymentResponse($response);
-    //WIP
-    
-   // print_r($resp->payment);die();
-    $xmlDecoded = base64_decode($resp->payment);
-   
-    $simpleXml = new SimpleXMLElement($xmlDecoded);
-   
-   
-    
+      
     if($resp->validateMac($mac,$secretWord) == true){
         if ($resp->statuscode == '0'){
             /**
              * Bugfix 2013-02-25 for not adding invoicefee when using paypage
              * By Anneli Halld'n
              */
+            $xmlDecoded = base64_decode($resp->payment);
+            $simpleXml = new SimpleXMLElement($xmlDecoded);           
              //check if the paymentmethod begins with SVEAINVOICE
             if(substr((string)$simpleXml->transaction->paymentmethod,0,11) == "SVEAINVOICE" && (((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total) != 0){
                 $priceExMoms = $order['details']['BT']->order_subtotal;
@@ -570,14 +564,23 @@ class plgVmPaymentSvea extends vmPSPlugin {
                 $db = JFactory::getDbo();
                 $prefix = $db->getPrefix();              
                 $db->select($prefix.'virtuemart_orders');
-                $q =    'UPDATE '.$prefix.'virtuemart_orders SET  
-                        `order_payment`= '. $priceExMoms.',
+                $orderSql =    
+                        'UPDATE '.$prefix.'virtuemart_orders 
+                        SET `order_payment`= '. $priceExMoms.',
                         `order_total`= '. ($order['details']['BT']->order_salesPrice + $invoiceFee).',
                         `order_payment_tax`= '. ($invoiceFee - $priceExMoms).',
                         `order_billTaxAmount`= '. (($invoiceFee - $priceExMoms) +  $order['details']['BT']->order_billTaxAmount).'
-                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;              
-               $query = $db->setQuery($q);
-               $db->execute($query);
+                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
+                  $orderQuery = $db->setQuery($orderSql);
+                     $db->execute($orderQuery);
+                $paymentSql =   
+                        'UPDATE '.$prefix.'virtuemart_payment_plg_svea 
+                        SET `payment_order_total`='.$order['details']['BT']->order_total.'                       
+                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
+             
+               $paymentQuery = $db->setQuery($paymentSql);
+            
+               $db->execute($paymentQuery);
 
             }
             /**
