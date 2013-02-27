@@ -560,26 +560,25 @@ class plgVmPaymentSvea extends vmPSPlugin {
                 $order['details']['BT']->order_total = (int)$simpleXml->transaction->amount * 0.01;
                // $order['details']['BT']->order_subtotal = ((int)$simpleXml->transaction->amount * 0.01) / 1.25;
                 $order['details']['BT']->order_tax =   $order['details']['BT']->order_total - $order['details']['BT']->order_subtotal;           
-                //update the whole order
+                //update the whole order              
                 $db = JFactory::getDbo();
                 $prefix = $db->getPrefix();              
                 $db->select($prefix.'virtuemart_orders');
                 $orderSql =    
                         'UPDATE '.$prefix.'virtuemart_orders 
                         SET `order_payment`= '. $priceExMoms.',
-                        `order_total`= '. ($order['details']['BT']->order_salesPrice + $invoiceFee).',
+                        `order_total`= '.$order['details']['BT']->order_total.',
                         `order_payment_tax`= '. ($invoiceFee - $priceExMoms).',
                         `order_billTaxAmount`= '. (($invoiceFee - $priceExMoms) +  $order['details']['BT']->order_billTaxAmount).'
                         WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
-                  $orderQuery = $db->setQuery($orderSql);
-                     $db->execute($orderQuery);
+                $orderQuery = $db->setQuery($orderSql);
+                $db->execute($orderQuery);
                 $paymentSql =   
                         'UPDATE '.$prefix.'virtuemart_payment_plg_svea 
                         SET `payment_order_total`='.$order['details']['BT']->order_total.'                       
                         WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
              
-               $paymentQuery = $db->setQuery($paymentSql);
-            
+               $paymentQuery = $db->setQuery($paymentSql);            
                $db->execute($paymentQuery);
 
             }
