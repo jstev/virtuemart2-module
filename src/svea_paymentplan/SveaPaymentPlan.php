@@ -1,32 +1,20 @@
 <?php
-
-defined('_JEXEC') or die('Restricted access');
-
-
-/**
- * SveaWebPay payment module made from:
- * @version $Id: standard.php,v 1.4 2005/05/27 19:33:57 ei
- *
- * a special type of 'cash on delivey':
- * @author Max Milbers, Val?rie Isaksen
- * @version $Id: standard.php 5122 2011-12-18 22:24:49Z alatak $
- * @package VirtueMart
- * @subpackage payment
- * @copyright Copyright (C) 2004-2008 soeren - All rights reserved.
- * @license http://www.gnu.org/copyleft/gpl.html GNU/GPL, see LICENSE.php
- * VirtueMart is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
- * See /administrator/components/com_virtuemart/COPYRIGHT.php for copyright notices and details.
- *
- * http://virtuemart.net
- */
-if (!class_exists('vmPSPlugin')) {
-	require(JPATH_VM_PLUGINS . DS . 'vmpsplugin.php');
+if (!class_exists('plgVmPaymentSvea')) {
+	require('Svea.php');
 }
+if (!class_exists( 'VmConfig' )) require(JPATH_ADMINISTRATOR.DS.'components'.DS.'com_virtuemart'.DS.'helpers'.DS.'config.php');
+defined('_JEXEC') or die('Direct Access to ' . basename(__FILE__) . ' is not allowed.');
+JHTML::_('behavior.tooltip');
 
-class plgVmPaymentSvea extends vmPSPlugin {
+if (!class_exists('vmPSPlugin'))
+    require(JPATH_VM_PLUGINS . DS . 'vmpsplugin.php');
+
+
+
+class plgVmPaymentSveaInvoice extends vmPSPlugin {
+
+        // instance of class
+	public static $_this = FALSE;
 
 	function __construct(& $subject, $config) {
 
@@ -34,8 +22,10 @@ class plgVmPaymentSvea extends vmPSPlugin {
 		// 		vmdebug('Plugin stuff',$subject, $config);
 		$this->_loggable   = true;
 		$this->tableFields = array_keys($this->getTableSQLFields());
+                $this->_tablepkey = 'id';
+                $this->_tableId = 'id';
 
-		$varsToPush = $this->getVarsToPush();
+                $varsToPush = $this->getVarsToPush();
 		$this->setConfigParameterable($this->_configTableFieldName, $varsToPush);
 
 	}
@@ -45,7 +35,7 @@ class plgVmPaymentSvea extends vmPSPlugin {
 	 * @author Val?rie Isaksen
 	 */
 	public function getVmPluginCreateTableSQL() {
-		return $this->createTableSQL('Payment Standard Table');
+		return $this->createTableSQL('Payment Svea PaymentPlan Table');
 	}
 
 	/**
