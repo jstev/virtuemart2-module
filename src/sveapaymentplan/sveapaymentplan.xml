@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <install version="1.5" type="plugin" group="vmpayment" >
-    <name>SWP_PAYMENT</name>
+    <name>SWP_PAYMENT_PAYMENTPLAN</name>
     <creationDate>July 30 2012</creationDate>
     <author>Shaho Ghobadi</author>
     <authorUrl>http://www.sveawebpay.se</authorUrl>
@@ -9,10 +9,10 @@
     <version>2.0.8e</version>
     <description>SveaWebPay payment plugin</description>
     <languages>
-	<language tag="en-GB">en-GB.plg_vmpayment_svea.ini</language>
+	<language tag="en-GB">en-GB.plg_vmpayment_svea_paymentplan.ini</language>
     </languages>
     <files>
-	<filename plugin="svea">svea.php</filename>
+	<filename plugin="sveapaymentplan">sveapaymentplan.php</filename>
     </files>
     <params addpath="/administrator/components/com_virtuemart/elements">
 	<param type="vmjpluginwarning" />
@@ -22,16 +22,17 @@
 		default="default" hide_default="1" hide_none="1"
 		stripext="0"   exclude="^_" />
 
-    <param name="merchantid" type="text"  label="VMPAYMENT_SVEA_MERCHANT_ID" description="VMPAYMENT_SVEA_MERCHANT_ID_EXPLAIN" />
-    <param name="secretword" type="text"  label="VMPAYMENT_SVEA_SECRET_WORD" description="VMPAYMENT_SVEA_SECRET_WORD_EXPLAIN" />
+   <param name="testmode_paymentplan_se" type="radio" default="1" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
+        <option value="1">COM_VIRTUEMART_YES</option>
+        <option value="0">COM_VIRTUEMART_NO</option>
+    </param>
+    <param name="clientid_paymentplan_se" type="text"  label="VMPAYMENT_SVEA_CLIENTID" description="VMPAYMENT_SVEA_CLIENTID_EXPLAIN" />
+    <param name="username_paymentplan_se" type="text"  label="VMPAYMENT_SVEA_USERNAME" description="VMPAYMENT_SVEA_USERNAME_EXPLAIN" />
+    <param name="password_paymentplan_se" type="text"  label="VMPAYMENT_SVEA_PASSWORD" description="VMPAYMENT_SVEA_PASSWORD_EXPLAIN" />
 
 	<param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
     <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
 
-    <param name="testmode" type="radio" default="1" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
-	    <option value="1">COM_VIRTUEMART_YES</option>
-        <option value="0">COM_VIRTUEMART_NO</option>
-	</param>
 
 	<param name="min_amount" type="text"  label="VMPAYMENT_SVEA_MIN_AMOUNT" description="VMPAYMENT_SVEA_MIN_AMOUNT_EXPLAIN" />
 	<param name="max_amount" type="text"  label="VMPAYMENT_SVEA_MAX_AMOUNT" description="VMPAYMENT_SVEA_MAX_AMOUNT_EXPLAIN" />
@@ -40,7 +41,4 @@
 	<param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
 	<param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
     </params>
-
-
-
 </install>
