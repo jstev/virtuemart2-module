@@ -23,7 +23,11 @@ defined('_JEXEC') or die('Restricted access');
  * http://virtuemart.net
  */
 if (!class_exists('vmPSPlugin')) {
-	require(JPATH_VM_PLUGINS . DS . 'vmpsplugin.php');
+    require(JPATH_VM_PLUGINS . DS . 'vmpsplugin.php');
+}
+
+ if (!class_exists('Includes.php')) {
+                   require (  JPATH_ROOT . DS . 'plugins' . DS . 'vmpayment' . DS . 'sveaLib' . DS . 'Includes.php');
 }
 
 class plgVmPaymentSveainvoice extends vmPSPlugin {
@@ -82,6 +86,21 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		if (!$this->selectedThisElement($method->payment_element)) {
 			return false;
 		}
+
+try {
+     $sveaConfig = new SveaVmConfigurationProviderTest($method);
+    $svea = WebPay::createOrder($sveaConfig);
+} catch (Exception $e) {
+    vmError ($e->getMessage (), $e->getMessage ());
+			return NULL;
+}
+
+
+
+
+
+
+
 
         //$cart->setCartIntoSession ();
 		$lang     = JFactory::getLanguage();
