@@ -95,7 +95,7 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider{
  * @return type
  */
     public function getPassword($type, $country) {
-          $country = strtoupper($country);
+          $country = strtolower($country);
         $lowertype = strtolower($type);
         if($lowertype == "paymentplan"){
              switch ($country) {
@@ -166,7 +166,7 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider{
      * @return type
      */
     public function getUsername($type, $country) {
-         $country = strtoupper($country);
+         $country = strtolower($country);
         $lowertype = strtolower($type);
           if($lowertype == "paymentplan"){
               switch ($country) {
@@ -195,22 +195,22 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider{
         }
         switch ($country) {
                   case "se":
-                      return $this->config->username_paymentplan_se;
+                      return $this->config->username_invoice_se;
                       break;
                   case "no":
-                      return $this->config->username_paymentplan_no;
+                      return $this->config->username_invoice_no;
                       break;
                   case "fi":
-                      return $this->config->username_paymentplan_fi;
+                      return $this->config->username_invoice_fi;
                       break;
                   case "dk":
-                      return $this->config->username_paymentplan_dk;
+                      return $this->config->username_invoice_dk;
                       break;
                   case "de":
-                      return $this->config->username_paymentplan_de;
+                      return $this->config->username_invoice_de;
                       break;
                   case "nl":
-                      return $this->config->username_paymentplan_nl;
+                      return $this->config->username_invoice_nl;
                       break;
                   default:
                       break;

@@ -28,7 +28,10 @@ if (!class_exists('vmPSPlugin')) {
 }
 
  if (!class_exists('Includes.php')) {
-                   require (  JPATH_ROOT . DS . 'plugins' . DS . 'vmpayment' . DS . 'sveaLib' . DS . 'integrationLib'. DS . 'Includes.php');
+    require (  JPATH_ROOT . DS . 'plugins' . DS . 'vmpayment' . DS . 'svealib' . DS . 'integrationlib'. DS . 'Includes.php');
+}
+if(!class_exists('VirtueMartModelOrders')){
+    require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
 }
 
 class plgVmPaymentSveainvoice extends vmPSPlugin {
@@ -377,7 +380,6 @@ try {
 			}
 		}
                 //keep end
-//selected = 5, method_name = 'payment_name'
 		$html = array();
 		$method_name = $this->_psType . '_name';
 		foreach ($this->methods as $method) {
@@ -385,8 +387,16 @@ try {
 				$methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
-                                //svea stuff
-                                $html[] = $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id);
+                                //include svea stuff on editpayment page
+
+                                $countryId = $cart->BT['virtuemart_country_id'];
+                                $query = 'SELECT `country_2_code` FROM `#__virtuemart_countries` WHERE `virtuemart_country_id`="'.$countryId.'"';
+                                $dbo = JFactory::getDbo();
+                                $dbo->setQuery($query);
+                                $countryCode = $dbo->loadResult();
+                                $html[] = $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id,$countryCode);
+                                //svea stuff end
+
 			}
 		}
 		if (!empty($html)) {
@@ -682,25 +692,53 @@ try {
 	}
 
     /**
+     * will catch ajaxcall
+     * Svea getAddress->doRequest()
+     * @param type $type
+     * @param type $name
+     * @param type $render
+     */
+
+    public function plgVmOnSelfCallFE($type,$name,&$render) {
+        $request = JRequest::get();
+        //$ssn = JRequest::getVar('sveaid');
+        if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
+			return NULL; // Another method was selected, do nothing
+		}
+        $sveaconfig = new SveaVmConfigurationProviderTest($method);
+
+        try {
+
+          $svea = WebPay::getAddresses($sveaconfig)
+                  ->setOrderTypeInvoice()
+                  ->setCountryCode(JRequest::getVar('countrycode'))
+                  ->prepareRequest();
+        } catch (Exception $e) {
+            vmError ($e->getMessage (), $e->getMessage ());
+                                return NULL;
+        }
+
+
+print_r($svea);die;
+
+        $array =  array(
+            'type' => 'json',
+            'value' => 'cool man!'
+        );
+        echo json_encode($array);
+        jexit();
+	}
+
+    /**
      * TODO: översättningar, hämta från språkfil
      * TODO: img-loader
+     * TODO: Implementera länder
      * Svea GetAddress view for html and jQuery
      * @return string
      */
-    public function getSveaGetAddressHtml($paymentId) {
-
-        /**
-        $document->addScriptDeclaration ('
-		 sveainvoice.ajaxPath = "' . juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice";
-	');
-         *
-         */
+    public function getSveaGetAddressHtml($paymentId,$countryCode) {
         $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice';
-
-       // $sveaUrlAjax = JURI::base().'index.php?option=com_virtuemart&task=getCustomerJson&selectedCustomer=';
-
-
-        $html = '<form name="svea_form" method="post" action="'.$sveaUrlAjax.'">
+        $html = '<form>
                     <fieldset id="svea_getaddress" style="border: thin #03B4CA solid; padding : 10px; ">
                         <input type="hidden" id="paymenttypesvea" value="'. $paymentId . '" />
                         <fieldset id="svea_customertype_div">
@@ -712,7 +750,6 @@ try {
                             <input type="text" id="svea_ssn" name="svea_ssn" /><span style="color: red; "> * </span>
                         </fieldset>
                         <div id="svea_getaddress_error" style="color: red; "></div>
-
                         <fieldset>
                             <input type="button" id="svea_getaddress_submit" value="Get Address" />
                         </fieldset>
@@ -724,30 +761,22 @@ try {
         $html .= '<script type="text/javascript">
                     jQuery(document).ready(function ($){
                         var checked = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                        if(checked != jQuery("#paymenttypesvea").val()){
+                        var sveaid = jQuery("#paymenttypesvea").val();
+                        if(checked != sveaid){
                             jQuery("#svea_getaddress").hide();
                         }else{
                              jQuery("#svea_getaddress").show();
                         }
                         jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
                             checked = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                            if(checked == jQuery("#paymenttypesvea").val()){
+                            if(checked == sveaid){
                                   jQuery("#svea_getaddress").show();
                             }else{
                                 jQuery("#svea_getaddress").hide();
                             }
-                            });
-
-
-
-
-
-
-
-                          ';
+                            });';
 
         //ajax to getAddress
-
         $html .= "jQuery('#svea_getaddress_submit').click(function (){
 
                         var ssn = jQuery('#svea_ssn').val();
@@ -755,15 +784,25 @@ try {
                             if(ssn == ''){
                                 jQuery('#svea_getaddress_error').empty().append('Svea Error');
                             }else{
+                                var countrycode = '$countryCode';
                                 var url = '$sveaUrlAjax';
-                                var data = {action: 'getaddress'}
+                                var data = {action: 'getaddress'
+
+                                }
                                 jQuery.ajax({
                                     type: 'GET',
-                                    data: data,
-                                    url:    url,
+                                    data: {
+                                        sveaid: sveaid,
+                                        type: 'getAddress',
+                                        ssn: ssn,
+                                        customertype: customertype,
+                                        countrycode: countrycode
+                                    },
+                                    url: url,
                                     success: function(data){
-                                      //console.log(data);
-                                      alert(data);
+                                        var json = JSON.parse(data);
+                                        console.log(json);
+
                                     }
                                 });
 
@@ -777,45 +816,10 @@ try {
 
                 </script>";
 
-// jQuery("#svea_getaddress").hide();
-        /**
-         *
-         *  var request = new Request({
-                                    url: url,
-                                    method: 'get',
-                                    data: data,
-                                    onSuccess: function(msg){
-                                            alert(msg);
 
-                                    }
-
-                                }).send();
-         */
         return $html;
     }
-    public function getAddress(){
 
-        echo 'ssn=simple';
-    }
-
-    public function plgVmOnPaymentGetAddress(){
-
-        //print_r('oooohaj');die;
-        $ssn = JRequest::getvar ('ssn', '');
-        echo 'ssn='.$ssn;
-
-        /**
-        $string = "<?xml version='1.0'" . "?" . ">\n";
-        $string .= "<getAddress>\n";
-        $string .= "<address>\n";
-        $string .= "hi hi hi";
-        $string .= "</address>\n";
-        $string .= "</getAddress>";
-
-        return array('type' => 'text/xml','value' => $string);
-         *
-         */
-    }
 
 }
 
