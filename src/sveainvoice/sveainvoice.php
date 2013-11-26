@@ -97,9 +97,6 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
 		$vendorId = 0;
-
-
-
 		$this->getPaymentCurrency($method, true);
 
 		// END printing out HTML Form code (Payment Extra Info)
@@ -130,7 +127,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 return NULL;
            }
             //order items
-            $svea = SveaHelper::formatOrderRows($svea, $order);
+            $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
              //add shipping
             $svea = SveaHelper::formatShippingRows($svea,$order);
              //add coupons TODO: kolla checkbetween to rates i opencart
@@ -565,7 +562,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 *
 	 */
 	function plgVmOnPaymentResponseReceived(&$virtuemart_order_id, &$html) {
-
+            return NULL;
     //SVEA settings and include
     require_once('svea_files/SveaConfig.php');
 

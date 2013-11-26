@@ -28,12 +28,14 @@ if (!class_exists('Includes.php')) {
 class SveaHelper {
     /**
      * TODO: språköversättning st
-     * TODO: kolla amountExVat convert i klarna handler
+     * TODO: testa amountExVat convert
      * @param type $svea
      * @param type $products
      * @return type
      */
-    static function formatOrderRows($svea,$order){
+    static function formatOrderRows($svea,$order,$currency){
+        $paymentCurrency        = CurrencyDisplay::getInstance($currency);
+
         $taxPercent = 0;
         foreach ($order['items'] as $product) {
             //tax
@@ -42,10 +44,11 @@ class SveaHelper {
                     $taxPercent = $rule->calc_value;
                 }
             }
+
              $svea = $svea
                     ->addOrderRow(Item::orderRow()
                     ->setQuantity(floatval($product->product_quantity))
-                    ->setAmountExVat(floatval($product->product_item_price))
+                    ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency, $product->product_item_price, false), 2))
                     ->setVatPercent(intval($taxPercent))
                     ->setName($product->order_item_name)
                     ->setUnit("unit")
