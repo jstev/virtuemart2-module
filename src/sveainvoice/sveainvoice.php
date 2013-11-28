@@ -64,15 +64,18 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 */
 	function getTableSQLFields() {
 		$SQLfields = array(
-			'id'                          => 'int(1) UNSIGNED NOT NULL AUTO_INCREMENT',
-			'virtuemart_order_id'         => 'int(1) UNSIGNED',
-			'order_number'                => 'char(64)',
-			'virtuemart_paymentmethod_id' => 'mediumint(1) UNSIGNED',
-			'payment_name'                => 'varchar(5000)',
-			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
-			'payment_currency'            => 'char(3)',
-			'cost_per_transaction'        => 'decimal(10,2)',
-			'tax_id'                      => 'smallint(1)'
+			'id'                            => 'int(1) UNSIGNED NOT NULL AUTO_INCREMENT',
+			'virtuemart_order_id'           => 'int(1) UNSIGNED',
+			'order_number'                  => 'char(64)',
+			'virtuemart_paymentmethod_id'   => 'mediumint(1) UNSIGNED',
+			'payment_name'                  => 'varchar(5000)',
+			'payment_order_total'           => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
+			'payment_currency'              => 'char(3)',
+			'cost_per_transaction'          => 'decimal(10,2)',
+			'tax_id'                        => 'smallint(1)',
+                        'svea_order_id'                 => 'int(1) UNSIGNED',
+                        'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
+                        'svea_expiration_date'          => 'datetime',
                         //add: customerinfo, sveaorderid,
 		);
 
@@ -99,8 +102,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$vendorId = 0;
 		$this->getPaymentCurrency($method, true);
 
-		// END printing out HTML Form code (Payment Extra Info)
-		$q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
+                $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
 		$db = JFactory::getDBO();
 		$db->setQuery($q);
 		$currency_code_3        = $db->loadResult();
@@ -108,15 +110,6 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
 		$cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
-
-		$dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
-		$dbValues['order_number']                = $order['details']['BT']->order_number;
-		$dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
-		$dbValues['cost_per_transaction']        = $method->cost_per_transaction;
-		$dbValues['payment_currency']            = $currency_code_3;
-		$dbValues['payment_order_total']         = $totalInPaymentCurrency;
-		$dbValues['tax_id']                      = $method->tax_id;
-		$this->storePSPluginInternalData($dbValues);
 
             //Svea Create order
             try {
@@ -128,10 +121,12 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
            }
             //order items
             $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
+            //invoice fee
+            $svea = SveaHelper::formatInvoiceFee($svea,$order,$method->payment_currency);
              //add shipping
-            $svea = SveaHelper::formatShippingRows($svea,$order);
+            $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
              //add coupons TODO: kolla checkbetween to rates i opencart
-            $svea = SveaHelper::formatCoupon($svea,$order);
+            $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
             $countryId = $order['details']['BT']->virtuemart_country_id;
             if(isset($countryId) == FALSE){
                 return;
@@ -153,9 +148,23 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
+
             if ($svea->accepted == 1) {
+
+		$dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
+		$dbValues['order_number']                = $order['details']['BT']->order_number;
+		$dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
+		$dbValues['cost_per_transaction']        = $method->cost_per_transaction;
+		$dbValues['payment_currency']            = $currency_code_3;
+		$dbValues['payment_order_total']         = $totalInPaymentCurrency;
+		$dbValues['tax_id']                      = $method->tax_id;
+                $dbValues['svea_order_id']               = $svea->sveaOrderId;
+                $dbValues['svea_approved_amount']        = $svea->amount;
+                $dbValues['svea_expiration_date']        = $svea->expirationDate;
+
+		$this->storePSPluginInternalData($dbValues);
                 //from vm
-                $html = '<table class="vmorder-done">' . "\n";
+                $html = '<d class="vmorder-done">' . "\n";
 		$html .= $this->getHtmlRow ('STANDARD_PAYMENT_INFO', $dbValues['payment_name'], 'class="vmorder-done-payinfo"');
 		if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
@@ -175,15 +184,17 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
 		$html .= '</table>' . "\n";
+                $modelOrder = VmModel::getModel ('orders');
+                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
-		$modelOrder = VmModel::getModel ('orders');
-		//$order['order_status'] = $this->getNewStatus ($method);
+		//$order['order_status'] = $this->getNewStatus ($method); what TODO wiht this?
 		$order['customer_notified'] = 1;
 		$order['comments'] = '';
-		$modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                //from vm end
+
+
             }  else {
-               $html .= "svea error";
+                $html = SveaHelper::errorResponse($svea,$method);
+
             }
 
             //We delete the old stuff
@@ -212,7 +223,13 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$html .= '</table>' . "\n";
 		return $html;
 	}
-
+        /**
+         * returns Svea invoicefee
+         * @param VirtueMartCart $cart
+         * @param type $method
+         * @param type $cart_prices
+         * @return type
+         */
 	function getCosts(VirtueMartCart $cart, $method, $cart_prices) {
 		if (preg_match('/%$/', $method->cost_percent_total)) {
 			$cost_percent_total = substr($method->cost_percent_total, 0, -1);
@@ -563,103 +580,6 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 */
 	function plgVmOnPaymentResponseReceived(&$virtuemart_order_id, &$html) {
             return NULL;
-    //SVEA settings and include
-    require_once('svea_files/SveaConfig.php');
-
-
-
-    $modelOrder = VmModel::getModel ('orders');
-
-    $order_number = JRequest::getString ('on', '');
-    $virtuemart_paymentmethod_id = JRequest::getString ('pm', '');
-    $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
-
-	$order = $modelOrder->getOrder ($virtuemart_order_id);
-
-    if (!($method = $this->getVmPluginMethod ($virtuemart_paymentmethod_id))) {
-		return NULL; // Another method was selected, do nothing
-	}
-
-
-
-    //GETs
-    $response = $_REQUEST['response'];
-    $mac = $_REQUEST['mac'];
-    $merchantid = $_REQUEST['merchantid'];
-    $secretWord = $method->secretword;
-    $resp = new SveaPaymentResponse($response);
-
-    if($resp->validateMac($mac,$secretWord) == true){
-        if ($resp->statuscode == '0'){
-            /**
-             * Bugfix 2013-02-25 for not adding invoicefee when using paypage
-             * By Anneli Halld'n
-             */
-            $xmlDecoded = base64_decode($resp->payment);
-            $simpleXml = new SimpleXMLElement($xmlDecoded);
-             //check if the paymentmethod begins with SVEAINVOICE
-            if(substr((string)$simpleXml->transaction->paymentmethod,0,11) == "SVEAINVOICE" && (((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total) != 0){
-                $priceExMoms = $order['details']['BT']->order_subtotal;
-
-                //assume the difference is the invoicefee
-                $invoiceFee = ((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total;
-                if($invoiceFee > 0){
-                    $priceExMoms = $invoiceFee / 1.25;
-                }
-                //update total
-                $order['details']['BT']->order_total = (int)$simpleXml->transaction->amount * 0.01;
-               // $order['details']['BT']->order_subtotal = ((int)$simpleXml->transaction->amount * 0.01) / 1.25;
-                $order['details']['BT']->order_tax =   $order['details']['BT']->order_total - $order['details']['BT']->order_subtotal;
-                //update the whole order
-                $db = JFactory::getDbo();
-                $prefix = $db->getPrefix();
-                $db->select($prefix.'virtuemart_orders');
-                $orderSql =
-                        'UPDATE '.$prefix.'virtuemart_orders
-                        SET `order_payment`= '. $priceExMoms.',
-                        `order_total`= '.$order['details']['BT']->order_total.',
-                        `order_payment_tax`= '. ($invoiceFee - $priceExMoms).',
-                        `order_billTaxAmount`= '. (($invoiceFee - $priceExMoms) +  $order['details']['BT']->order_billTaxAmount).'
-                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
-                $orderQuery = $db->setQuery($orderSql);
-                $db->execute($orderQuery);
-                $paymentSql =
-                        'UPDATE '.$prefix.'virtuemart_payment_plg_svea_invoice
-                        SET `payment_order_total`='.$order['details']['BT']->order_total.'
-                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
-
-               $paymentQuery = $db->setQuery($paymentSql);
-               $db->execute($paymentQuery);
-
-            }
-            /**
-             * bugfix end
-             */
-
-            $order['order_status'] = 'C';
-        	$order['customer_notified'] = 1;
-        	$order['comments'] = '';
-        	$modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-
-        }else{
-            $order['order_status'] = 'X';
-        	$order['customer_notified'] = 0;
-        	$order['comments'] = '';
-        	$modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-            return FALSE;
-        }
-    }else{
-        die('knas');
-       	return FALSE;
-    }
-
-     /* Load the cart helper */
-    if (!class_exists('VirtueMartCart'))
-	   require(JPATH_VM_SITE . DS . 'helpers' . DS . 'cart.php');
-
-    $cart = VirtueMartCart::getCart ();
-	$cart->emptyCart ();
-    return TRUE;
 	}
 
     /**
@@ -671,8 +591,6 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
      */
 
     public function plgVmOnSelfCallFE($type,$name,&$render) {
-        $request = JRequest::get();
-        //$ssn = JRequest::getVar('sveaid');
         if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
 			return NULL; // Another method was selected, do nothing
 		}

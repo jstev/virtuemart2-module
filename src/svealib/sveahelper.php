@@ -34,7 +34,7 @@ class SveaHelper {
      * @return type
      */
     static function formatOrderRows($svea,$order,$currency){
-        $paymentCurrency        = CurrencyDisplay::getInstance($currency);
+        $paymentCurrency = CurrencyDisplay::getInstance($currency);
 
         $taxPercent = 0;
         foreach ($order['items'] as $product) {
@@ -48,7 +48,7 @@ class SveaHelper {
              $svea = $svea
                     ->addOrderRow(Item::orderRow()
                     ->setQuantity(floatval($product->product_quantity))
-                    ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency, $product->product_item_price, false), 2))
+                    ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$product->product_item_price,FALSE)))
                     ->setVatPercent(intval($taxPercent))
                     ->setName($product->order_item_name)
                     ->setUnit("unit")
@@ -114,11 +114,12 @@ class SveaHelper {
      * @param type $order
      * @return $svea object
      */
-    public static function formatCoupon($svea, $order) {
+    public static function formatCoupon($svea, $order,$currency) {
+        $paymentCurrency = CurrencyDisplay::getInstance($currency);
         if (isset($order['details']['BT']->coupon_code)) {
             $svea = $svea->addDiscount(
                             WebPayItem::fixedDiscount()
-                                ->setAmountIncVat(floatval($order['details']['BT']->coupon_discount))
+                                ->setAmountIncVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->coupon_discount,FALSE)))
                                 ->setName($order['details']['BT']->coupon_code)
                             );
         }
@@ -130,21 +131,56 @@ class SveaHelper {
      * @param type $order
      * @return type
      */
-    public static function formatShippingRows($svea, $order) {
+    public static function formatShippingRows($svea, $order,$currency) {
+        $paymentCurrency = CurrencyDisplay::getInstance($currency);
         $shippingTaxPercent = 0;
         foreach ($order['calc_rules'] as $calc_rule) {
-				if ($calc_rule->calc_kind== 'shipment') {
-					$shippingTaxPercent=$calc_rule->calc_value;
-					break;
-				}
-			}
+                if ($calc_rule->calc_kind== 'shipment') {
+                        $shippingTaxPercent=$calc_rule->calc_value;
+                        break;
+                }
+        }
         $svea = $svea->addFee(
                         WebPayItem::shippingFee()
-                            ->setAmountExVat(floatval($order['details']['BT']->order_shipment))
-                            ->setName("shipping")
-                            ->setVatPercent(floatval($shippingTaxPercent))
-                            ->setUnit("unit")
+                            ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_shipment,FALSE)))
+                            ->setName("shipping translate me")
+                            ->setVatPercent(intval($shippingTaxPercent))
+                            ->setUnit("unit translate me")
                        );
         return $svea;
     }
+
+    public static function formatInvoiceFee($svea, $order, $currency) {
+        $paymentCurrency = CurrencyDisplay::getInstance($currency);
+        $fee_tax_percent = 0;
+        foreach ($order['calc_rules'] as $calc_rule) {
+                if ( $calc_rule->calc_kind== 'payment') {
+                        $fee_tax_percent = $calc_rule->calc_value;
+                        break;
+                }
+        }
+        $svea = $svea->addFee(
+                    WebPayItem::invoiceFee()
+                        ->setName('Svea fee translate me')
+                        ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_payment,FALSE)))
+                        ->setVatPercent(intval($paymentCurrency))
+                        ->setUnit("unit translate me")
+                    );
+        return $svea;
+    }
+
+
+    public static function errorResponse($svea, $method) {
+        $order['customer_notified'] = 0;
+        $order['order_status'] = $method->status_denied;
+        $order['comments'] = "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage;
+        $app = JFactory::getApplication ();
+        $app->enqueueMessage ( "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage);
+        $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart'));
+        $html = '<div>' ."Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage. "\n";
+
+        return $html;
+    }
+
+
 }
