@@ -204,6 +204,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	}
 
 	/**
+         * TODO: CHECK WHAT IT DOES
 	 * Display stored payment data for an order
 	 *
 	 */
@@ -347,6 +348,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		return $this->displayListFE($cart, $selected, $htmlIn);
 	}
         /**
+         * loads Svea getAddress html
 	 * This event is fired to display the pluginmethods in the cart (edit shipment/payment) for example
 	 *
 	 * @param object  $cart Cart object
@@ -374,11 +376,11 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$method_name = $this->_psType . '_name';
 		foreach ($this->methods as $method) {
 			if ($this->checkConditions ($cart, $method, $cart->pricesUnformatted)) {
+
 				$methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
                                 //include svea stuff on editpayment page
-
                                 $countryId = $cart->BT['virtuemart_country_id'];
                                 if(isset($countryId) == FALSE){
                                     return ;
@@ -636,7 +638,6 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
      * @return string
      */
     public function getSveaGetAddressHtml($paymentId,$countryCode) {
-        $session = JFactory::getSession();
         $inputFields = '';
         $getAddressButton = '';
         //NORDIC fields
@@ -647,7 +648,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                             <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype">Company</option>
                         </fieldset>
                         <fieldset id="svea_ssn_div>
-                            <label for "svea_ssn">Social security number</label>
+                            <label for="svea_ssn">Social security number</label>
                             <input type="text" id="svea_ssn" name="svea_ssn" /><span style="color: red; "> * </span>
                         </fieldset>';
         //EU fields
@@ -696,14 +697,16 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                         </fieldset>';
         }
         $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice';
+        //box for form
         $html = '<fieldset id="svea_getaddress">
                     <input type="hidden" id="paymenttypesvea" value="'. $paymentId . '" />'
                         .$inputFields.
                         '
                         <div id="svea_getaddress_error" style="color: red; "></div>'
                        .$getAddressButton.
-                    '</fieldset>
-                    <div id="svea_address_div"></div>';
+                    '<div id="svea_address_div"></div>
+
+                </fieldset>';
         //hide show get address div
         $html .= '<script type="text/javascript">
                     jQuery(document).ready(function ($){
@@ -733,9 +736,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                             }else{
                                 var countrycode = '$countryCode';
                                 var url = '$sveaUrlAjax';
-                                var data = {action: 'getaddress'
 
-                                }
                                 jQuery.ajax({
                                     type: 'GET',
                                     data: {
@@ -748,7 +749,6 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                     url: url,
                                     success: function(data){
                                         var json = JSON.parse(data);
-                                        console.log(json);
                                          if (json.svea_error){
                                             jQuery('#svea_getaddress_error').empty().show().append('<br>'+json.svea_error);
                                         }else{

@@ -6,10 +6,10 @@
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
-    <version>2.0.8e</version>
+    <version>3.0.0</version>
     <description>SveaWebPay payment plugin</description>
     <languages>
-	<language tag="en-GB">en-GB.plg_vmpayment_svea_paymentplan.ini</language>
+	<language tag="en-GB">en-GB.plg_vmpayment_svea_invoice.ini</language>
     </languages>
     <files>
 	<filename plugin="sveapaymentplan">sveapaymentplan.php</filename>
