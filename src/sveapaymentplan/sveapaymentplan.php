@@ -95,20 +95,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 			return false;
 		}
 
-        //$cart->setCartIntoSession ();
 		$lang     = JFactory::getLanguage();
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
 		$vendorId = 0;
-
-
-		if (!class_exists('VirtueMartModelOrders')) {
-			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
-		}
 		$this->getPaymentCurrency($method, true);
 
-		// END printing out HTML Form code (Payment Extra Info)
-		$q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
+                $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
 		$db = JFactory::getDBO();
 		$db->setQuery($q);
 		$currency_code_3        = $db->loadResult();
@@ -116,105 +109,95 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
 		$cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
+  //Svea Create order
+            try {
+                $sveaConfig = $method->testmode_paymentplan_se == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $svea = WebPay::createOrder($sveaConfig);
+           } catch (Exception $e) {
+                vmError ($e->getMessage (), $e->getMessage ());
+                return NULL;
+           }
+             //order items
+            $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
+             //add shipping
+            $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
+             //add coupons TODO: kolla checkbetween to rates i opencart
+            $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
+            $countryId = $order['details']['BT']->virtuemart_country_id;
+            if(isset($countryId) == FALSE){
+                return;
+            }
+            $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
+
+             //add customer
+             $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
+              $session = JFactory::getSession();
+           try {
+                $svea = $svea
+                      ->setCountryCode($countryCode)
+                      ->setCurrency($currency_code_3)
+                      ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
+                      ->setOrderDate(date('c'))
+                      ->usePaymentPlanPayment($session->get('svea_campaigncode'))
+                        ->doRequest();
+           } catch (Exception $e) {
+                vmError ($e->getMessage (), $e->getMessage ());
+                return NULL;
+           }
+
+                     if ($svea->accepted == 1) {
 
 		$dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
 		$dbValues['order_number']                = $order['details']['BT']->order_number;
 		$dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
 		$dbValues['cost_per_transaction']        = $method->cost_per_transaction;
-		//$dbValues['cost_percent_total']          = $method->cost_percent_total;
 		$dbValues['payment_currency']            = $currency_code_3;
 		$dbValues['payment_order_total']         = $totalInPaymentCurrency;
 		$dbValues['tax_id']                      = $method->tax_id;
+                $dbValues['svea_order_id']               = $svea->sveaOrderId;
+                $dbValues['svea_approved_amount']        = $svea->amount;
+                $dbValues['svea_expiration_date']        = $svea->expirationDate;
+
 		$this->storePSPluginInternalData($dbValues);
+                //from vm
+                $html = '<d class="vmorder-done">' . "\n";
+		$html .= $this->getHtmlRow ('STANDARD_PAYMENT_INFO', $dbValues['payment_name'], 'class="vmorder-done-payinfo"');
+		if (!empty($payment_info)) {
+			$lang = JFactory::getLanguage ();
+			if ($lang->hasKey ($method->payment_info)) {
+				$payment_info = JText::_ ($method->payment_info);
+			} else {
+				$payment_info = $method->payment_info;
+			}
+			$html .= $this->getHtmlRow ('STANDARD_PAYMENTINFO', $payment_info, 'class="vmorder-done-payinfo"');
+		}
+		if (!class_exists ('VirtueMartModelCurrency')) {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
+		}
+		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
+		$html .= $this->getHtmlRow ('STANDARD_ORDER_NUMBER', $order['details']['BT']->order_number, "vmorder-done-nr");
+		$html .= $this->getHtmlRow ('STANDARD_AMOUNT', $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
+		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
+		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
+		$html .= '</table>' . "\n";
+                $modelOrder = VmModel::getModel ('orders');
+                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
+
+		//$order['order_status'] = $this->getNewStatus ($method); what TODO wiht this?
+		$order['customer_notified'] = 1;
+		$order['comments'] = '';
 
 
-            //SVEA settings and include
-            include("svea_files/SveaConfig.php");
-           // SveaConfig::getConfig()->setTestMode(true);
-            $config = SveaConfig::getConfig();
-            $config->merchantId = $method->merchantid;
-            $config->secret = $method->secretword;
-            $paymentRequest = new SveaPaymentRequest();
-            $sveaOrder = new SveaOrder();
-            $paymentRequest->order = $sveaOrder;
+            }  else {
+                $html = SveaHelper::errorResponse($svea,$method);
 
-            foreach($order['items'] as $items){
-
-                $sveaOrderRow = new SveaOrderRow();
-                $sveaOrderRow->amount = number_format($items->product_final_price,2,'','');
-                $sveaOrderRow->vat = number_format($items->product_tax,2,'','');
-                $sveaOrderRow->name = $items->order_item_name;
-                $sveaOrderRow->quantity = $items->product_quantity;
-                $sveaOrderRow->unit = "st";
-
-                $sveaOrder->addOrderRow($sveaOrderRow);
             }
 
-            //If shipment is set
-            if ($order['details']['BT']->order_shipment > 0){
-
-                $shipmentVAT   = $order['details']['BT']->order_shipment_tax;
-                $shipmentPrice = $order['details']['BT']->order_shipment + $shipmentVAT;
-
-                $sveaOrderRow = new SveaOrderRow();
-                $sveaOrderRow->amount = number_format($shipmentPrice,2,'','');
-                $sveaOrderRow->vat = number_format($shipmentVAT,2,'','');
-                $sveaOrderRow->name = "Fraktkostnad";
-                $sveaOrderRow->quantity = "1";
-                $sveaOrderRow->unit = "st";
-
-                $sveaOrder->addOrderRow($sveaOrderRow);
-            }
-
-            //If campaign is set
-            if ($order['details']['BT']->coupon_discount > 0){
-
-                $vat = $order['details']['BT']->coupon_discount * 0.2;
-
-                $sveaOrderRow = new SveaOrderRow();
-                $sveaOrderRow->amount = - number_format($order['details']['BT']->coupon_discount,2,'','');
-                $sveaOrderRow->vat = - number_format($vat,2,'','');
-                $sveaOrderRow->name = $order['details']['BT']->coupon_code;
-                $sveaOrderRow->quantity = "1";
-                $sveaOrderRow->unit = "st";
-
-                $sveaOrder->addOrderRow($sveaOrderRow);
-            }
-            /**
-             * Hotfix. Invoicefee is added in system. Should not be included in request.
-             * Remove configured fee from total, before sending request.
-             * For history: Removed ability to set amount in percent
-             */
-            $sveaOrder->amount = number_format(($order['details']['BT']->order_total - floatval($order['details']['BT']->order_payment + $order['details']['BT']->order_payment_tax)),2,'','');
-            $sveaOrder->customerRefno = $order['details']['BT']->virtuemart_order_id;
-            $sveaOrder->returnUrl = JROUTE::_ (JURI::root () . 'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' . $order['details']['BT']->order_number . '&pm=' . $order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
-            $sveaOrder->vat = number_format($order['details']['BT']->order_tax,2,'','');
-            $sveaOrder->currency = $currency_code_3;
-            $paymentRequest->createPaymentMessage();
-            $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;">Skickar till SveaWebPay...<br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
-
-            //Testmode check
-            if ($method->testmode == 1){
-                $html .= $paymentRequest->getPaymentForm(true);
-            }else{
-                $html .= $paymentRequest->getPaymentForm(false);
-            }
-
-            $html .= ' <script type="text/javascript">';
-                    $html .= ' document.sveaPaymentForm.submit();';
-                    $html .= ' </script></body></html>';
-
-            $cart->_confirmDone = FALSE;
-            $cart->_dataValidated = FALSE;
-
-            $modelOrder = VmModel::getModel ('orders');
-
-            $order['order_status'] = 'X';
-            $order['customer_notified'] = 0;
-            //$order['comments'] = '';
-            $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-
+            //We delete the old stuff
+            $cart->emptyCart ();
             JRequest::setVar ('html', $html);
+            return TRUE;
+	
 	}
 
 	/**
@@ -327,10 +310,16 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 *
 	 */
 	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) {
-              $request = JRequest::get();
-              print_r($request);die;
+            $request = JRequest::get();
+            $session = JFactory::getSession();
+            foreach ($request as $key => $value) {
+                $sveaName = substr($key, 0,4);
+                if($sveaName == "svea"){
+                    $session->set($key, $value);
+                }
+            }
 
-		return $this->OnSelectCheck($cart);
+            return $this->OnSelectCheck($cart);
 	}
 
 	/**
@@ -703,7 +692,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         if(JRequest::getVar('type') == 'getAddress'){
             try {
               $svea = WebPay::getAddresses($sveaconfig);
-              $svea     ->setOrderTypePaymentPlan()
+              $svea = $svea->setOrderTypePaymentPlan()
                         ->setCountryCode(JRequest::getVar('countrycode'))
                         ->setIndividual(JRequest::getVar('ssn'))
                             ->doRequest();
@@ -711,7 +700,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 vmError ($e->getMessage (), $e->getMessage ());
                     return NULL;
             }
-
             if($svea->accepted == 0){
                 $returnArray = array("svea_error" => $svea->errormessage);
                 vmError ('Svea Error: '.$svea->errormessage, 'Svea Error: '.$svea->errormessage);
@@ -739,7 +727,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     return NULL;
             }
             if (isset($svea_params->errormessage)) {
-            $returnArray = array("svea_error" => "Svea error: " .$svea_params->errormessage);
+                $returnArray = array("svea_error" => "Svea error: " .$svea_params->errormessage);
             } else {
                 $formattedPrice = round(JRequest::getVar('sveacarttotal'), 2);//TODO: check if needs to format currency
                 $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params);
@@ -831,8 +819,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                  '
                  <div id="svea_getaddress_error_pp" style="color: red; "></div>'
                 .$getAddressButton.
-                '<ul id="svea_params_div" style="list-style-type: none;"></ul>
-                <div id="svea_address_div_pp"></div>
+                ' <div id="svea_address_div_pp"></div>
+                <ul id="svea_params_div" style="list-style-type: none;"></ul>
              </fieldset>';
       //start skript and set vars
         $html .= "<script type='text/javascript'>
@@ -854,7 +842,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             success: function(data){
                                 var json = JSON.parse(data);
                                  if (json.svea_error ){
-                                    jQuery('#svea_getaddress_error_pp').empty().show().append('<br>'+json.svea_error);
+                                    jQuery('#svea_getaddress_error_pp').empty().append('<br>'+json.svea_error).show();
                                 }else{
                                     jQuery('#svea_params_div').hide();
                                     var count = 0;
@@ -902,7 +890,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                         var ssn = jQuery('#svea_ssn_pp').val();
                             if(ssn == ''){
-                                jQuery('#svea_getaddress_error_pp').empty().append('Svea Error');
+                                jQuery('#svea_getaddress_error_pp').empty().append('Svea Error: * required').show();
                             }else{
                                 jQuery.ajax({
                                     type: 'GET',
@@ -915,17 +903,17 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                     url: url,
                                     success: function(data){
                                         var json = JSON.parse(data);
+                                         jQuery('#svea_getaddress_error_pp').hide();
                                          if (json.svea_error){
-                                            jQuery('#svea_getaddress_error_pp').empty().show().append('<br>'+json.svea_error);
+                                             jQuery('#svea_getaddress_error_pp').empty().append(' Svea Error: <br>'+json.svea_error).show();
                                         }else{
                                             jQuery('#svea_address_div_pp').hide();
                                             jQuery('#sveaAddressDiv_pp').remove();
-                                            jQuery('#svea_address_div_pp').append('<div id=\"sveaAddressDiv\"><strong>'+json[0].fullName+'</strong><br> '+json[0].street+' <br>'+json[0].zipCode+' '+json[0].locality+'</div>');
+                                            jQuery('#svea_address_div_pp').append('<div id=\"sveaAddressDiv\"><strong>'+json.fullName+'</strong><br> '+json.street+' <br>'+json.zipCode+' '+json.locality+'</div>');
 
 
                                         }
                                         jQuery('#svea_address_div_pp').show();
-                                        jQuery('#svea_getaddress_error_pp').hide();
                                     }
                                 });
 

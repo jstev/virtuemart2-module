@@ -750,7 +750,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                     success: function(data){
                                         var json = JSON.parse(data);
                                          if (json.svea_error){
-                                            jQuery('#svea_getaddress_error').empty().show().append('<br>'+json.svea_error);
+                                            jQuery('#svea_getaddress_error').empty().append('<br>'+json.svea_error).show();
                                         }else{
                                             if(customertype == 'svea_invoice_customertype_company'){
                                               jQuery('#svea_address_div').empty().append('<select id=\"sveaAddressDiv\" name=\"svea_addressselector\"></select>');
