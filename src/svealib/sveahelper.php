@@ -182,5 +182,63 @@ class SveaHelper {
         return $html;
     }
 
+    public static function updateBTAddress($svea,$orderId) {
+        $data = SveaHelper::buildAddressArray($svea);
+        $db = JFactory::getDBO();
+        $query = "UPDATE `#__virtuemart_order_userinfos` SET ";
+            $row = "";
+            $counter = 0;
+            foreach ($data as $key => $value){
+                $counter == 0 ? $row = "" : $row .= ",";
+                $row .= $db->escape($key)." = '".$db->escape($value)."'";
+                $counter ++;
+            }
+            $query .= $row;
+            $query .=  ' WHERE `virtuemart_order_id`="' . $orderId . '"
+                        AND `address_type`= "BT"';
+            $formattedQuery = $db->setQuery($query);
+            $db->execute($formattedQuery);
+           return TRUE;
+    }
+
+    public static function buildAddressArray($svea) {
+        $sveaAddresses = array();
+        if ($svea->customerIdentity->customerType == 'Company'){
+            if( isset($svea->customerIdentity->firstName) &&  isset($svea->customerIdentity->lastName) ){
+                $sveaAddresses["first_name"] = $svea->customerIdentity->firstName;
+                $sveaAddresses["last_name"] = $svea->customerIdentity->lastName;
+            }elseif( isset($svea->customerIdentity->firstName) == false ||
+                    isset($svea->customerIdentity->lastName) == false &&
+                    isset($svea->customerIdentity->fullName) ){
+                $sveaAddresses["first_name"] = $svea->customerIdentity->fullName;
+                $sveaAddresses["last_name"] = "";
+            }
+            isset($svea->customerIdentity->fullName) ? $sveaAddresses["company"] = $svea->customerIdentity->fullName : "";
+            isset($svea->customerIdentity->street) ? $sveaAddresses["address_1"] = $svea->customerIdentity->street : "";
+            isset($svea->customerIdentity->coAddress) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
+            isset($svea->customerIdentity->locality) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
+            isset($svea->customerIdentity->zipCode) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
+        }
+        else {
+            if( isset($svea->customerIdentity->firstName) &&  isset($svea->customerIdentity->lastName) ){
+               $sveaAddresses["first_name"] = $svea->customerIdentity->firstName;
+               $sveaAddresses["last_name"] = $svea->customerIdentity->lastName;
+            }elseif( isset($svea->customerIdentity->firstName) == false ||
+                    isset($svea->customerIdentity->lastName) == false &&
+                    isset($svea->customerIdentity->fullName)){
+                $sveaAddresses["first_name"] = $svea->customerIdentity->fullName;
+                $sveaAddresses["last_name"] = "";
+            }
+            isset($svea->customerIdentity->firstName) ? $sveaAddresses["first_name"] = $svea->customerIdentity->firstName : "";
+            isset($svea->customerIdentity->lastName) ? $sveaAddresses["last_name"] = $svea->customerIdentity->lastName : "";
+            isset($svea->customerIdentity->street) ? $sveaAddresses["address_1"] = $svea->customerIdentity->street : "";
+            isset($svea->customerIdentity->coAddress) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
+            isset($svea->customerIdentity->locality) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
+            isset($svea->customerIdentity->zipCode) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
+
+        }
+        return $sveaAddresses;
+    }
+
 
 }

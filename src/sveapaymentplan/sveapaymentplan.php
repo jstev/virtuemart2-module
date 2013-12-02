@@ -147,6 +147,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                      if ($svea->accepted == 1) {
 
+                SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
+                
 		$dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
 		$dbValues['order_number']                = $order['details']['BT']->order_number;
 		$dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
@@ -183,6 +185,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $modelOrder = VmModel::getModel ('orders');
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
+
+
 		//$order['order_status'] = $this->getNewStatus ($method); what TODO wiht this?
 		$order['customer_notified'] = 1;
 		$order['comments'] = '';
@@ -197,7 +201,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $cart->emptyCart ();
             JRequest::setVar ('html', $html);
             return TRUE;
-	
+
 	}
 
 	/**
