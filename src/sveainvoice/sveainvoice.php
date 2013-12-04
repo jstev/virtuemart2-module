@@ -145,6 +145,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                       ->useInvoicePayment()
                         ->doRequest();
            } catch (Exception $e) {
+                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -195,7 +196,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
 
             }  else {
-                $html = SveaHelper::errorResponse($svea,$method);
+                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
 
             }
 
@@ -651,7 +652,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                         </fieldset>
                         <fieldset id="svea_ssn_div>
                             <label for="svea_ssn">Social security number</label>
-                            <input type="text" id="svea_ssn" name="svea_ssn" /><span style="color: red; "> * </span>
+                            <input type="text" id="svea_ssn" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
                         </fieldset>';
         //EU fields
         }elseif($countryCode == "NL" || $countryCode == "DE"){
@@ -689,7 +690,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
             $inputFields = $birthDay . $birthMonth . $birthYear;
               if($countryCode == "NL"){
-                $inputFields .= ' Initials: <input type="text" id="svea_initials" name="initials" />';
+                $inputFields .= ' Initials: <input type="text" id="svea_initials" name="initials" class="required" /><span style="color: red; "> * </span>';
             }
         }
         if($countryCode == "SE" || $countryCode == "DK") {
@@ -730,11 +731,12 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
         //ajax to getAddress
         $html .= "jQuery('#svea_getaddress_submit').click(function (){
-
+                        jQuery('#svea_ssn_pp').removeClass('invalid');
                         var ssn = jQuery('#svea_ssn').val();
                         var customertype = jQuery('#svea_customertype_div :input:checked').val();
                             if(ssn == ''){
-                                jQuery('#svea_getaddress_error').empty().append('Svea Error');
+                                jQuery('#svea_ssn').addClass('invalid');
+                                jQuery('#svea_getaddress_error').empty().append('Svea Error: * required');
                             }else{
                                 var countrycode = '$countryCode';
                                 var url = '$sveaUrlAjax';

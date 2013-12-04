@@ -66,7 +66,7 @@ class SveaHelper {
         $pattern = "/^(?:\s)*([0-9]*[A-ZÄÅÆÖØÜßäåæöøüa-z]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]+)(?:\s*)([0-9]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]*[^\s])?(?:\s)*$/";
         preg_match($pattern, $order['details']['BT']->address_1, $addressArr);
         if( !array_key_exists( 2, $addressArr ) ) { $addressArr[2] = ""; } //fix for addresses w/o housenumber
-         $ssn = ($session->get('svea_ssn')) ? $session->get('svea_ssn') : 0;
+         $ssn = ($session->get('svea_ssn')) ? $session->get('svea_ssn') : "";
          if ($customerType == "svea_invoice_customertype_company"){
 
             $item = Item::companyCustomer();
@@ -170,14 +170,14 @@ class SveaHelper {
     }
 
 
-    public static function errorResponse($svea, $method) {
+    public static function errorResponse($resultcode,$errormessage, $method) {
         $order['customer_notified'] = 0;
         $order['order_status'] = $method->status_denied;
-        $order['comments'] = "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage;
+        $order['comments'] = "Translate me Svea error: [". $resultcode . " ] ".$errormessage;
         $app = JFactory::getApplication ();
-        $app->enqueueMessage ( "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage);
+        $app->enqueueMessage ( "Translate me Svea error: [". $resultcode . " ] ".$errormessage);
         $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart'));
-        $html = '<div>' ."Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage. "\n";
+        $html = '<div>' ."Translate me Svea error: [". $resultcode . " ] ".$errormessage. "\n";
 
         return $html;
     }

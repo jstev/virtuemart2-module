@@ -114,6 +114,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $sveaConfig = $method->testmode_paymentplan_se == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
+                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -141,6 +142,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                       ->usePaymentPlanPayment($session->get('svea_campaigncode'))
                         ->doRequest();
            } catch (Exception $e) {
+                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -193,7 +195,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
 
             }  else {
-                $html = SveaHelper::errorResponse($svea,$method);
+                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
 
             }
 
@@ -768,7 +770,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         '
                         <fieldset id="svea_ssn_div_pp>
                             <label for="svea_ssn_pp">Social security number</label>
-                            <input type="text" id="svea_ssn_pp" name="svea_ssn" /><span style="color: red; "> * </span>
+                            <input type="text" id="svea_ssn_pp" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
                         </fieldset>';
         //EU fields
         }elseif($countryCode == "NL" || $countryCode == "DE"){
@@ -806,7 +808,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
             $inputFields = $birthDay . $birthMonth . $birthYear;
               if($countryCode == "NL"){
-                $inputFields .= ' Initials: <input type="text" id="svea_initials_pp" name="initials" />';
+                $inputFields .= ' Initials: <input type="text" id="svea_initials_pp" name="initials" class="required" /><span style="color: red; "> * </span>';
             }
         }
         if($countryCode == "SE" || $countryCode == "DK") {
@@ -868,7 +870,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             }
                         });";
        //Document ready start
-        $html .= " jQuery(document).ready(function ($){";
+        $html .= " jQuery(document).ready(function ($){
+                         jQuery('#svea_ssn_pp').removeClass('invalid');";
 
          //hide show box
         $html .= "
@@ -891,9 +894,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
         //ajax to getAddress
         $html .= "jQuery('#svea_getaddress_submit_pp').click(function (){
-
+                         jQuery('#svea_ssn_pp').removeClass('invalid');
                         var ssn = jQuery('#svea_ssn_pp').val();
                             if(ssn == ''){
+                                jQuery('#svea_ssn_pp').addClass('invalid');
                                 jQuery('#svea_getaddress_error_pp').empty().append('Svea Error: * required').show();
                             }else{
                                 jQuery.ajax({
