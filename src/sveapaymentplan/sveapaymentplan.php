@@ -185,14 +185,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
 		$html .= '</table>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
-                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-
-
-
 		//$order['order_status'] = $this->getNewStatus ($method); what TODO wiht this?
 		$order['customer_notified'] = 1;
 		$order['comments'] = '';
-
+                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
             }  else {
                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
@@ -700,7 +696,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
               $svea = WebPay::getAddresses($sveaconfig);
               $svea = $svea->setOrderTypePaymentPlan()
                         ->setCountryCode(JRequest::getVar('countrycode'))
-                        ->setIndividual(JRequest::getVar('ssn'))
+                        ->setIndividual(JRequest::getVar('svea_ssn'))
                             ->doRequest();
             } catch (Exception $e) {
                 vmError ($e->getMessage (), $e->getMessage ());
@@ -768,9 +764,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         if($countryCode == "SE" || $countryCode == "DK" || $countryCode == "NO" || $countryCode == "FI"){
              $inputFields =
                         '
-                        <fieldset id="svea_ssn_div_pp>
+                        <fieldset id="svea_form_pp>
                             <label for="svea_ssn_pp">Social security number</label>
-                            <input type="text" id="svea_ssn_pp" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
+                            <input type="text" id="svea_ssn_pp" name="svea_ssn_pp" class="required" /><span style="color: red; "> * </span>
                         </fieldset>';
         //EU fields
         }elseif($countryCode == "NL" || $countryCode == "DE"){
@@ -895,8 +891,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         //ajax to getAddress
         $html .= "jQuery('#svea_getaddress_submit_pp').click(function (){
                          jQuery('#svea_ssn_pp').removeClass('invalid');
-                        var ssn = jQuery('#svea_ssn_pp').val();
-                            if(ssn == ''){
+                        var svea_ssn = jQuery('#svea_ssn_pp').val();
+                            if(svea_ssn == ''){
                                 jQuery('#svea_ssn_pp').addClass('invalid');
                                 jQuery('#svea_getaddress_error_pp').empty().append('Svea Error: * required').show();
                             }else{
@@ -905,7 +901,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                     data: {
                                         sveaid: sveaid,
                                         type: 'getAddress',
-                                        ssn: ssn,
+                                        svea_ssn: svea_ssn,
                                         countrycode: countrycode
                                     },
                                     url: url,
@@ -930,6 +926,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         });";
         //append form to parent form in Vm
         $html .=        "jQuery('#svea_form_pp').parents('form').submit( function(){
+                          if(checked != sveaid){
                             var action = jQuery('#svea_form_pp').parents('form').attr('action');
                             var form = jQuery('<form></form>');
                             form.attr('method', 'post');
@@ -938,6 +935,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             jQuery(document.body).append(sveaform);
                             sveaform.submit();
                             return false;
+                            }else{
+                            return;
+                            }
                         });";
         //Document ready end and script end
         $html .= " });

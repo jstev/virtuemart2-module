@@ -88,14 +88,14 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 * @author Val?rie Isaksen
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
-
+                //while processing set to pending
+                $order['order_status'] = SveaHelper::SVEA_STATUS_PENDING;
 		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
 			return NULL; // Another method was selected, do nothing
 		}
 		if (!$this->selectedThisElement($method->payment_element)) {
 			return false;
 		}
-
 		$lang     = JFactory::getLanguage();
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
@@ -110,7 +110,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
 		$cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
-
+            $sveaConfig = "";
             //Svea Create order
             try {
                 $sveaConfig = $method->testmode_invoice_se == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
@@ -132,10 +132,9 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 return;
             }
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-
+             $session = JFactory::getSession();
              //add customer
              $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
-
            try {
                 $svea = $svea
                       ->setCountryCode($countryCode)
@@ -188,13 +187,45 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
 		$html .= '</table>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
+
+		$order['order_status'] = SveaHelper::SVEA_STATUS_CONFIRMED;
+
+		$order['comments'] = ' Order created at Svea. ';
+
+                //WIP deliver order
+                if($method->autodeliver == TRUE){
+                    $deliverObj = WebPay::deliverOrder($sveaConfig);
+                     //order items
+                    $deliverObj = SveaHelper::formatOrderRows($deliverObj, $order,$method->payment_currency);
+                    //invoice fee
+                    $deliverObj = SveaHelper::formatInvoiceFee($deliverObj,$order,$method->payment_currency);
+                     //add shipping
+                    $deliverObj = SveaHelper::formatShippingRows($deliverObj,$order,$method->payment_currency);
+                     //add coupons TODO: kolla checkbetween to rates i opencart
+                    $deliverObj = SveaHelper::formatCoupon($deliverObj,$order,$method->payment_currency);
+
+                    try {
+                        $deliverObj = $deliverObj->setCountryCode($countryCode)
+                                            ->setOrderId($svea->sveaOrderId)
+                                            ->setInvoiceDistributionType("Post")//TODO: config!!
+                                            ->deliverInvoiceOrder()
+                                                ->doRequest();
+                    } catch (Exception $e) {
+                        $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                        vmError ($e->getMessage (), $e->getMessage ());
+                        return NULL;
+                    }
+
+                    if($deliverObj->accepted == 1){
+                        $order['comments'] = 'Order delivered at Svea';
+                        $order['order_status'] = SveaHelper::SVEA_STATUS_SHIPPED;
+
+                    }
+
+                }
+                $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-
-		//$order['order_status'] = $this->getNewStatus ($method); what TODO wiht this?
-		$order['customer_notified'] = 1;
-		$order['comments'] = '';
-
-
+                //WIP
             }  else {
                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
 
@@ -605,9 +636,9 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                   ->setOrderTypeInvoice()
                   ->setCountryCode(JRequest::getVar('countrycode'));
             if(JRequest::getVar('customertype')== "svea_invoice_customertype_company"){
-              $svea = $svea->setCompany(JRequest::getVar('ssn'));
+              $svea = $svea->setCompany(JRequest::getVar('svea_ssn'));
             }  else {
-              $svea = $svea->setIndividual(JRequest::getVar('ssn'));
+              $svea = $svea->setIndividual(JRequest::getVar('svea_ssn'));
             }
            $svea = $svea->doRequest();
         } catch (Exception $e) {
@@ -646,13 +677,15 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         //NORDIC fields
         if($countryCode == "SE" || $countryCode == "DK" || $countryCode == "NO" || $countryCode == "FI"){
              $inputFields =
-                        '<fieldset id="svea_customertype_div">
-                            <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype" checked>Private</option>
-                            <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype">Company</option>
-                        </fieldset>
-                        <fieldset id="svea_ssn_div>
-                            <label for="svea_ssn">Social security number</label>
-                            <input type="text" id="svea_ssn" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
+                        '<fieldset id="svea_form">
+                            <fieldset id="svea_customertype_div">
+                                <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype" checked>Private</option>
+                                <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype">Company</option>
+                            </fieldset>
+                            <fieldset id="svea_ssn_div>
+                                <label for="svea_ssn">Social security number</label>
+                                <input type="text" id="svea_ssn" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
+                            </fieldset>
                         </fieldset>';
         //EU fields
         }elseif($countryCode == "NL" || $countryCode == "DE"){
@@ -732,9 +765,9 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         //ajax to getAddress
         $html .= "jQuery('#svea_getaddress_submit').click(function (){
                         jQuery('#svea_ssn_pp').removeClass('invalid');
-                        var ssn = jQuery('#svea_ssn').val();
+                        var svea_ssn = jQuery('#svea_ssn').val();
                         var customertype = jQuery('#svea_customertype_div :input:checked').val();
-                            if(ssn == ''){
+                            if(svea_ssn == ''){
                                 jQuery('#svea_ssn').addClass('invalid');
                                 jQuery('#svea_getaddress_error').empty().append('Svea Error: * required');
                             }else{
@@ -746,7 +779,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                     data: {
                                         sveaid: sveaid,
                                         type: 'getAddress',
-                                        ssn: ssn,
+                                        svea_ssn: svea_ssn,
                                         customertype: customertype,
                                         countrycode: countrycode
                                     },
@@ -780,14 +813,18 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
                         });";
         $html .=        "jQuery('#svea_form').parents('form').submit( function(){
+                          if(checked != sveaid){
                             var action = jQuery('#svea_form').parents('form').attr('action');
                             var form = jQuery('<form></form>');
                             form.attr('method', 'post');
                             form.attr('action', action);
-                            var sveaform = jQuery(form).append('form#svea_form');
+                            var sveaform = jQuery(form).append('#svea_form');
                             jQuery(document.body).append(sveaform);
                             sveaform.submit();
                             return false;
+                            }else{
+                            return;
+                            }
                         });
 
                     });

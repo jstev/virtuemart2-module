@@ -26,6 +26,14 @@ if (!class_exists('Includes.php')) {
     require (  JPATH_ROOT . DS . 'plugins' . DS . 'vmpayment' . DS . 'svealib' . DS . 'integrationlib'. DS . 'Includes.php');
 }
 class SveaHelper {
+
+    const SVEA_STATUS_PENDING = "P";
+    const SVEA_STATUS_CONFIRMED_BY_SHOPPER = "U";
+    const SVEA_STATUS_CONFIRMED = "C";
+    const SVEA_STATUS_CANCELLED = "X";
+    const SVEA_STATUS_REFUNDED = "R";
+    const SVEA_STATUS_SHIPPED = "S";
+
     /**
      * TODO: språköversättning st
      * TODO: testa amountExVat convert
@@ -66,7 +74,7 @@ class SveaHelper {
         $pattern = "/^(?:\s)*([0-9]*[A-ZÄÅÆÖØÜßäåæöøüa-z]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]+)(?:\s*)([0-9]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]*[^\s])?(?:\s)*$/";
         preg_match($pattern, $order['details']['BT']->address_1, $addressArr);
         if( !array_key_exists( 2, $addressArr ) ) { $addressArr[2] = ""; } //fix for addresses w/o housenumber
-         $ssn = ($session->get('svea_ssn')) ? $session->get('svea_ssn') : "";
+        $ssn = ($session->get('svea_ssn')) ? $session->get('svea_ssn') : "";
          if ($customerType == "svea_invoice_customertype_company"){
 
             $item = Item::companyCustomer();
@@ -171,6 +179,8 @@ class SveaHelper {
 
 
     public static function errorResponse($resultcode,$errormessage, $method) {
+
+        $order['customer_notified'] = 1;
         $order['customer_notified'] = 0;
         $order['order_status'] = $method->status_denied;
         $order['comments'] = "Translate me Svea error: [". $resultcode . " ] ".$errormessage;
