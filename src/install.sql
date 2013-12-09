@@ -10,3 +10,7 @@ INSERT INTO `#_extensions` (`extension_id`, `type`, `name`, `element`, `folder`,
 INSERT INTO `#_extensions` (`extension_id`, `type`, `name`, `element`, `folder`, `access`, `ordering`
 , `enabled`, `protected`, `client_id`, `checked_out`, `checked_out_time`, `params`) VALUES
 (NULL, 'plugin', 'Svea Payment Plan', 'sveapaymentplan', 'vmpayment', 1, 0, 1, 0, 0, 0, '0000-00-00 00:00:00', '');
+
+INSERT INTO `#_extensions` (`extension_id`, `type`, `name`, `element`, `folder`, `access`, `ordering`
+, `enabled`, `protected`, `client_id`, `checked_out`, `checked_out_time`, `params`) VALUES
+(NULL, 'plugin', 'Svea Directbank', 'sveadirectbank', 'vmpayment', 1, 0, 1, 0, 0, 0, '0000-00-00 00:00:00', '');
