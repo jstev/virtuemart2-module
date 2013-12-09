@@ -67,7 +67,7 @@ class SveaHelper {
 
         return $svea;
     }
-
+//svea_ssn
     public static function formatCustomer($svea, $order,$countryCode) {
         $session = JFactory::getSession();
         $customerType = $session->get("svea_customertype");

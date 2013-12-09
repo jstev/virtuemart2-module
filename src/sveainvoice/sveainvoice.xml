@@ -41,5 +41,9 @@
             <option value="0">COM_VIRTUEMART_NO</option>
             <option value="1">COM_VIRTUEMART_YES</option>
         </param>
+        <param name="distributiontype" type="radio" default="Post" label="VMPAYMENT_SVEA_DISTRIBUTIONTYPE" description="VMPAYMENT_SVEA_DISTRIBUTIONTYPE_DESC">
+            <option value="Post">Post</option>
+            <option value="Email">Email</option>
+        </param>
     </params>
 </install>

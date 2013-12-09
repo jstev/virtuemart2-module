@@ -192,7 +192,6 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
 		$order['comments'] = ' Order created at Svea. ';
 
-                //WIP deliver order
                 if($method->autodeliver == TRUE){
                     $deliverObj = WebPay::deliverOrder($sveaConfig);
                      //order items
@@ -207,7 +206,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                     try {
                         $deliverObj = $deliverObj->setCountryCode($countryCode)
                                             ->setOrderId($svea->sveaOrderId)
-                                            ->setInvoiceDistributionType("Post")//TODO: config!!
+                                            ->setInvoiceDistributionType($method->distributiontype)
                                             ->deliverInvoiceOrder()
                                                 ->doRequest();
                     } catch (Exception $e) {
@@ -225,7 +224,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 }
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                //WIP
+
             }  else {
                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
 
@@ -676,8 +675,8 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         $getAddressButton = '';
         //NORDIC fields
         if($countryCode == "SE" || $countryCode == "DK" || $countryCode == "NO" || $countryCode == "FI"){
-             $inputFields =
-                        '<fieldset id="svea_form">
+             $inputFields .=
+                        '
                             <fieldset id="svea_customertype_div">
                                 <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype" checked>Private</option>
                                 <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype">Company</option>
@@ -686,7 +685,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                 <label for="svea_ssn">Social security number</label>
                                 <input type="text" id="svea_ssn" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
                             </fieldset>
-                        </fieldset>';
+                       ';
         //EU fields
         }elseif($countryCode == "NL" || $countryCode == "DE"){
 
@@ -813,18 +812,15 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
                         });";
         $html .=        "jQuery('#svea_form').parents('form').submit( function(){
-                          if(checked != sveaid){
                             var action = jQuery('#svea_form').parents('form').attr('action');
-                            var form = jQuery('<form></form>');
+                            var form = jQuery('<form id=\"svea_form\"></form>');
                             form.attr('method', 'post');
                             form.attr('action', action);
-                            var sveaform = jQuery(form).append('#svea_form');
+                            var sveaform = jQuery(form).append('form#svea_form');
                             jQuery(document.body).append(sveaform);
                             sveaform.submit();
                             return false;
-                            }else{
-                            return;
-                            }
+
                         });
 
                     });

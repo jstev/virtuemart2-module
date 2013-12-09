@@ -40,5 +40,14 @@
 	<!--<param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />-->
 	<param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
 	<param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
+         <!--autodeliver-->
+        <param name="autodeliver" type="radio" default="0" label="VMPAYMENT_SVEA_AUTODELIVER" description="VMPAYMENT_SVEA_AUTODELIVER_DESC">
+            <option value="0">COM_VIRTUEMART_NO</option>
+            <option value="1">COM_VIRTUEMART_YES</option>
+        </param>
+         <param name="distributiontype" type="radio" default="Post" label="VMPAYMENT_SVEA_DISTRIBUTIONTYPE" description="VMPAYMENT_SVEA_DISTRIBUTIONTYPE_DESC">
+            <option value="Post">Post</option>
+            <option value="Email">Email</option>
+        </param>
     </params>
 </install>

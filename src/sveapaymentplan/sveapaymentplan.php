@@ -131,8 +131,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
 
              //add customer
+             $session = JFactory::getSession();
              $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
-              $session = JFactory::getSession();
            try {
                 $svea = $svea
                       ->setCountryCode($countryCode)
@@ -185,11 +185,33 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
 		$html .= '</table>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
-		//$order['order_status'] = $this->getNewStatus ($method); what TODO wiht this?
-		$order['customer_notified'] = 1;
-		$order['comments'] = '';
-                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
+		$order['order_status'] = SveaHelper::SVEA_STATUS_CONFIRMED;
 
+		$order['comments'] = ' Order created at Svea. ';
+
+                  if($method->autodeliver == TRUE){     
+                    try {
+                        $deliverObj = WebPay::deliverOrder($sveaConfig)
+                                            ->setCountryCode($countryCode)
+                                            ->setOrderId($svea->sveaOrderId)
+                                            ->deliverPaymentPlanOrder()
+                                                ->doRequest();
+                    } catch (Exception $e) {
+                        $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                        vmError ($e->getMessage (), $e->getMessage ());
+                        return NULL;
+                    }
+
+                    if($deliverObj->accepted == 1){
+                        $order['comments'] = 'Order delivered at Svea';
+                        $order['order_status'] = SveaHelper::SVEA_STATUS_SHIPPED;
+
+                    }
+
+                }
+
+                $order['customer_notified'] = 1;
+                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
             }  else {
                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
 
@@ -762,11 +784,11 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         $getAddressButton = '';
         //NORDIC fields
         if($countryCode == "SE" || $countryCode == "DK" || $countryCode == "NO" || $countryCode == "FI"){
-             $inputFields =
+             $inputFields .=
                         '
-                        <fieldset id="svea_form_pp>
+                        <fieldset id="svea_ssn_div_pp>
                             <label for="svea_ssn_pp">Social security number</label>
-                            <input type="text" id="svea_ssn_pp" name="svea_ssn_pp" class="required" /><span style="color: red; "> * </span>
+                            <input type="text" id="svea_ssn_pp" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
                         </fieldset>';
         //EU fields
         }elseif($countryCode == "NL" || $countryCode == "DE"){
@@ -926,18 +948,15 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         });";
         //append form to parent form in Vm
         $html .=        "jQuery('#svea_form_pp').parents('form').submit( function(){
-                          if(checked != sveaid){
                             var action = jQuery('#svea_form_pp').parents('form').attr('action');
-                            var form = jQuery('<form></form>');
+                            var form = jQuery('<form id=\"svea_form_pp\"></form>');
                             form.attr('method', 'post');
                             form.attr('action', action);
                             var sveaform = jQuery(form).append('form#svea_form_pp');
                             jQuery(document.body).append(sveaform);
                             sveaform.submit();
                             return false;
-                            }else{
-                            return;
-                            }
+
                         });";
         //Document ready end and script end
         $html .= " });
