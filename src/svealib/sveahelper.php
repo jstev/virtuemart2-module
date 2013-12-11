@@ -153,7 +153,7 @@ class SveaHelper {
                             ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_shipment,FALSE)))
                             ->setName("shipping translate me")
                             ->setVatPercent(intval($shippingTaxPercent))
-                            ->setUnit("unit translate me")
+                            ->setUnit("unit")
                        );
         return $svea;
     }
@@ -172,7 +172,7 @@ class SveaHelper {
                         ->setName('Svea fee translate me')
                         ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_payment,FALSE)))
                         ->setVatPercent(intval($paymentCurrency))
-                        ->setUnit("unit translate me")
+                        ->setUnit("unit")
                     );
         return $svea;
     }
@@ -180,10 +180,6 @@ class SveaHelper {
 
     public static function errorResponse($resultcode,$errormessage, $method) {
 
-        $order['customer_notified'] = 1;
-        $order['customer_notified'] = 0;
-        $order['order_status'] = $method->status_denied;
-        $order['comments'] = "Translate me Svea error: [". $resultcode . " ] ".$errormessage;
         $app = JFactory::getApplication ();
         $app->enqueueMessage ( "Translate me Svea error: [". $resultcode . " ] ".$errormessage);
         $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart'));
