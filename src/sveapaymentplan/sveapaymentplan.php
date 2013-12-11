@@ -163,8 +163,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
 		$this->storePSPluginInternalData($dbValues);
-                //from vm
-                $html = '<d class="vmorder-done">' . "\n";
+                  //Print html on thank you page. Will also say "thank you for your order!"
+                $html = '<div class="vmorder-done">' . "\n";
 		$html .= $this->getHtmlRow ('STANDARD_PAYMENT_INFO', $dbValues['payment_name'], 'class="vmorder-done-payinfo"');
 		if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
@@ -183,13 +183,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$html .= $this->getHtmlRow ('STANDARD_AMOUNT', $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
 		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
-		$html .= '</table>' . "\n";
+		$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
 		$order['order_status'] = SveaHelper::SVEA_STATUS_CONFIRMED;
 
 		$order['comments'] = ' Order created at Svea. ';
 
-                  if($method->autodeliver == TRUE){     
+                  if($method->autodeliver == TRUE){
                     try {
                         $deliverObj = WebPay::deliverOrder($sveaConfig)
                                             ->setCountryCode($countryCode)
@@ -213,6 +213,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
             }  else {
+                $order['customer_notified'] = 0;
+                $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+                $order['comments'] = "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage;
                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
 
             }
@@ -596,105 +599,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 */
 	function plgVmOnPaymentResponseReceived(&$virtuemart_order_id, &$html) {
 
-    //SVEA settings and include
-    require_once('svea_files/SveaConfig.php');
+            return NULL;
 
-    if (!class_exists ('VirtueMartModelOrders')) {
-		require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
-	}
-
-    $modelOrder = VmModel::getModel ('orders');
-
-    $order_number = JRequest::getString ('on', '');
-    $virtuemart_paymentmethod_id = JRequest::getString ('pm', '');
-    $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
-
-	$order = $modelOrder->getOrder ($virtuemart_order_id);
-
-    if (!($method = $this->getVmPluginMethod ($virtuemart_paymentmethod_id))) {
-		return NULL; // Another method was selected, do nothing
-	}
-
-
-
-    //GETs
-    $response = $_REQUEST['response'];
-    $mac = $_REQUEST['mac'];
-    $merchantid = $_REQUEST['merchantid'];
-    $secretWord = $method->secretword;
-    $resp = new SveaPaymentResponse($response);
-
-    if($resp->validateMac($mac,$secretWord) == true){
-        if ($resp->statuscode == '0'){
-            /**
-             * Bugfix 2013-02-25 for not adding invoicefee when using paypage
-             * By Anneli Halld'n
-             */
-            $xmlDecoded = base64_decode($resp->payment);
-            $simpleXml = new SimpleXMLElement($xmlDecoded);
-             //check if the paymentmethod begins with SVEAINVOICE
-            if(substr((string)$simpleXml->transaction->paymentmethod,0,11) == "SVEAINVOICE" && (((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total) != 0){
-                $priceExMoms = $order['details']['BT']->order_subtotal;
-
-                //assume the difference is the invoicefee
-                $invoiceFee = ((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total;
-                if($invoiceFee > 0){
-                    $priceExMoms = $invoiceFee / 1.25;
-                }
-                //update total
-                $order['details']['BT']->order_total = (int)$simpleXml->transaction->amount * 0.01;
-               // $order['details']['BT']->order_subtotal = ((int)$simpleXml->transaction->amount * 0.01) / 1.25;
-                $order['details']['BT']->order_tax =   $order['details']['BT']->order_total - $order['details']['BT']->order_subtotal;
-                //update the whole order
-                $db = JFactory::getDbo();
-                $prefix = $db->getPrefix();
-                $db->select($prefix.'virtuemart_orders');
-                $orderSql =
-                        'UPDATE '.$prefix.'virtuemart_orders
-                        SET `order_payment`= '. $priceExMoms.',
-                        `order_total`= '.$order['details']['BT']->order_total.',
-                        `order_payment_tax`= '. ($invoiceFee - $priceExMoms).',
-                        `order_billTaxAmount`= '. (($invoiceFee - $priceExMoms) +  $order['details']['BT']->order_billTaxAmount).'
-                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
-                $orderQuery = $db->setQuery($orderSql);
-                $db->execute($orderQuery);
-                $paymentSql =
-                        'UPDATE '.$prefix.'virtuemart_payment_plg_svea_invoice
-                        SET `payment_order_total`='.$order['details']['BT']->order_total.'
-                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
-
-               $paymentQuery = $db->setQuery($paymentSql);
-               $db->execute($paymentQuery);
-
-            }
-            /**
-             * bugfix end
-             */
-
-            $order['order_status'] = 'C';
-        	$order['customer_notified'] = 1;
-        	$order['comments'] = '';
-        	$modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-
-        }else{
-            $order['order_status'] = 'X';
-        	$order['customer_notified'] = 0;
-        	$order['comments'] = '';
-        	$modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-            return FALSE;
-        }
-    }else{
-        die('knas');
-       	return FALSE;
-    }
-
-     /* Load the cart helper */
-    if (!class_exists('VirtueMartCart'))
-	   require(JPATH_VM_SITE . DS . 'helpers' . DS . 'cart.php');
-
-    $cart = VirtueMartCart::getCart ();
-	$cart->emptyCart ();
-    return TRUE;
 	}
 
             /**
@@ -849,20 +755,20 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
       //start skript and set vars
         $html .= "<script type='text/javascript'>
                     var countrycode = '$countryCode';
-                    var url = '$sveaUrlAjax';
-                    var checked = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
-                    var sveacarttotal = jQuery('#carttotal').val();
-                    var sveaid = jQuery('#paymenttypesvea_pp').val();";
+                    var url_pp = '$sveaUrlAjax';
+                    var checked_pp = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
+                    var sveacarttotal_pp = jQuery('#carttotal').val();
+                    var sveaid_pp = jQuery('#paymenttypesvea_pp').val();";
         //do ajax to get params
         $html .= " jQuery.ajax({
                             type: 'GET',
                             data: {
-                                sveaid: sveaid,
-                                sveacarttotal: sveacarttotal,
+                                sveaid: sveaid_pp,
+                                sveacarttotal: sveacarttotal_pp,
                                 type: 'getParams',
                                 countrycode: countrycode
                             },
-                            url: url,
+                            url: url_pp,
                             success: function(data){
                                 var json = JSON.parse(data);
                                  if (json.svea_error ){
@@ -893,7 +799,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
          //hide show box
         $html .= "
-                        if(checked != sveaid){
+                        if(checked_pp != sveaid_pp){
                             jQuery('#svea_getaddress_pp').hide();
                         }else{
                             jQuery('#svea_getaddress_pp').show();
@@ -902,8 +808,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         //toggle display form
         $html .=        '
                         jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
-                            checked = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                            if(checked == sveaid){
+                            checked_pp = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
+                            if(checked_pp == sveaid_pp){
                                   jQuery("#svea_getaddress_pp").show();
                             }else{
                                 jQuery("#svea_getaddress_pp").hide();
@@ -921,12 +827,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                 jQuery.ajax({
                                     type: 'GET',
                                     data: {
-                                        sveaid: sveaid,
+                                        sveaid: sveaid_pp,
                                         type: 'getAddress',
                                         svea_ssn: svea_ssn,
                                         countrycode: countrycode
                                     },
-                                    url: url,
+                                    url: url_pp,
                                     success: function(data){
                                         var json = JSON.parse(data);
                                          jQuery('#svea_getaddress_error_pp').hide();

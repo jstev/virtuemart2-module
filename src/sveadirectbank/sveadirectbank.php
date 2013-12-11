@@ -71,11 +71,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)',
-			'cost_per_transaction'        => 'decimal(10,2)',
-			'tax_id'                      => 'smallint(1)',
-                        'svea_transaction_id'         => 'int(1) UNSIGNED',
-                        'svea_approved_amount'        => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
-                        'svea_currency'               => 'datetime',
+			'tax_id'                      => 'smallint(1)'
 		);
 
 		return $SQLfields;
@@ -109,9 +105,18 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		$totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
 		$cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
-  //Svea Create order
+
+            $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
+            $dbValues['order_number']                = $order['details']['BT']->order_number;
+            $dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
+            $dbValues['payment_currency']            = $currency_code_3;
+            $dbValues['payment_order_total']         = $totalInPaymentCurrency;
+            $dbValues['tax_id']                      = $method->tax_id;
+
+            $this->storePSPluginInternalData($dbValues);
+            //Svea Create order
             try {
-                $sveaConfig = $method->testmode_paymentplan_se == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
@@ -129,100 +134,82 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 return;
             }
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
+            $return_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' .$order['details']['BT']->order_number .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
+            $cancel_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->virtuemart_order_id);
+            //From Payson. For what?
+            //$ipn____url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginnotification&on=' .$order['details']['BT']->virtuemart_order_id .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id);
 
              //add customer
              $session = JFactory::getSession();
              $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
            try {
-                $svea = $svea
-                      ->setCountryCode($countryCode)
-                      ->setCurrency($currency_code_3)
-                      ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
-                      ->setOrderDate(date('c'))
-                      ->usePaymentPlanPayment($session->get('svea_campaigncode'))
-                        ->doRequest();
+                $form = $svea
+                        ->setCountryCode($countryCode)
+                        ->setCurrency($currency_code_3)
+                        ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
+                        ->setOrderDate(date('c'))
+                        ->usePaymentMethod($session->get('svea_bank'))
+                            ->setReturnUrl($return_url)
+                            //->setCancelUrl($cancel_url) does nothing for bank
+                            //->setCallbackUrl($cancel_url) does nothong for bank
+                                ->getPaymentForm();
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
 
-            if ($svea->accepted == 1) {
-                //override billing address
-                SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
+             $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;">Skickar till SveaWebPay...<br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
+            //form
+            $fields = $form->htmlFormFieldsAsArray;
+            $html .= $fields['form_start_tag'];
+            $html .= $fields['input_merchantId'];
+            $html .= $fields['input_message'];
+            $html .= $fields['input_mac'];
+            $html .= $fields['form_end_tag'];
 
-		$dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
-		$dbValues['order_number']                = $order['details']['BT']->order_number;
-		$dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
-		$dbValues['cost_per_transaction']        = $method->cost_per_transaction;
-		$dbValues['payment_currency']            = $currency_code_3;
-		$dbValues['payment_order_total']         = $totalInPaymentCurrency;
-		$dbValues['tax_id']                      = $method->tax_id;
-                $dbValues['svea_order_id']               = $svea->sveaOrderId;
-                $dbValues['svea_approved_amount']        = $svea->amount;
-                $dbValues['svea_expiration_date']        = $svea->expirationDate;
+            $html .= ' <script type="text/javascript">';
+                    $html .= ' document.paymentForm.submit();';
+                    $html .= ' </script></body></html>';
 
-		$this->storePSPluginInternalData($dbValues);
-                //from vm
-                $html = '<d class="vmorder-done">' . "\n";
-		$html .= $this->getHtmlRow ('STANDARD_PAYMENT_INFO', $dbValues['payment_name'], 'class="vmorder-done-payinfo"');
-		if (!empty($payment_info)) {
-			$lang = JFactory::getLanguage ();
-			if ($lang->hasKey ($method->payment_info)) {
-				$payment_info = JText::_ ($method->payment_info);
-			} else {
-				$payment_info = $method->payment_info;
-			}
-			$html .= $this->getHtmlRow ('STANDARD_PAYMENTINFO', $payment_info, 'class="vmorder-done-payinfo"');
-		}
-		if (!class_exists ('VirtueMartModelCurrency')) {
-			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
-		}
-		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
-		$html .= $this->getHtmlRow ('STANDARD_ORDER_NUMBER', $order['details']['BT']->order_number, "vmorder-done-nr");
-		$html .= $this->getHtmlRow ('STANDARD_AMOUNT', $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
-		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
-		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
-		$html .= '</table>' . "\n";
-                $modelOrder = VmModel::getModel ('orders');
-		$order['order_status'] = SveaHelper::SVEA_STATUS_CONFIRMED;
+            $cart->_confirmDone = FALSE;
+            $cart->_dataValidated = FALSE;
 
-		$order['comments'] = ' Order created at Svea. ';
+            $modelOrder = VmModel::getModel ('orders');
 
-                  if($method->autodeliver == TRUE){
-                    try {
-                        $deliverObj = WebPay::deliverOrder($sveaConfig)
-                                            ->setCountryCode($countryCode)
-                                            ->setOrderId($svea->sveaOrderId)
-                                            ->deliverPaymentPlanOrder()
-                                                ->doRequest();
-                    } catch (Exception $e) {
-                        $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
-                        vmError ($e->getMessage (), $e->getMessage ());
-                        return NULL;
-                    }
+            //TODO: check why its set to canceled?
+            $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+            $order['customer_notified'] = 0;
+            //$order['comments'] = '';
+            $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
-                    if($deliverObj->accepted == 1){
-                        $order['comments'] = 'Order delivered at Svea';
-                        $order['order_status'] = SveaHelper::SVEA_STATUS_SHIPPED;
-
-                    }
-
-                }
-
-                $order['customer_notified'] = 1;
-                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-            }  else {
-                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
-
-            }
-
-            //We delete the old stuff
-            $cart->emptyCart ();
             JRequest::setVar ('html', $html);
-            return TRUE;
 
 	}
+        /**
+         * Use on payPage cancel
+         */
+        function plgVmOnUserPaymentCancel () {
+                if (!class_exists ('VirtueMartModelOrders')) {
+                        require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
+                }
+                print_r("cancellerad");die;
+
+               // $this->myFile('plgVmOnUserPaymentCancel - PaysonInvoice');
+        }
+        /**
+         *  public function myFile($arg, $arg2 = NULL) {
+         $myFile = "testFile.txt";
+         if($myFile == NULL){
+                 $myFile = fopen($myFile, "w+");
+         }
+         $fh = fopen($myFile, 'a') or die("can't open file");
+         fwrite($fh, "\r\n".date("Y-m-d H:i:s")." **");
+         fwrite($fh, $arg.'**');
+         fwrite($fh, $arg2);
+         fclose($fh);
+        }
+         */
 
 	/**
          * TODO: CHECK WHAT IT DOES
@@ -596,106 +583,52 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 */
 	function plgVmOnPaymentResponseReceived(&$virtuemart_order_id, &$html) {
 
-    //SVEA settings and include
-    require_once('svea_files/SveaConfig.php');
-
-    if (!class_exists ('VirtueMartModelOrders')) {
-		require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
-	}
-
-    $modelOrder = VmModel::getModel ('orders');
-
-    $order_number = JRequest::getString ('on', '');
-    $virtuemart_paymentmethod_id = JRequest::getString ('pm', '');
-    $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
-
-	$order = $modelOrder->getOrder ($virtuemart_order_id);
-
-    if (!($method = $this->getVmPluginMethod ($virtuemart_paymentmethod_id))) {
+            $virtuemart_paymentmethod_id = JRequest::getString ('pm', '');
+            if (!($method =  $this->getVmPluginMethod ($virtuemart_paymentmethod_id))) {
 		return NULL; // Another method was selected, do nothing
-	}
-
-
-
-    //GETs
-    $response = $_REQUEST['response'];
-    $mac = $_REQUEST['mac'];
-    $merchantid = $_REQUEST['merchantid'];
-    $secretWord = $method->secretword;
-    $resp = new SveaPaymentResponse($response);
-
-    if($resp->validateMac($mac,$secretWord) == true){
-        if ($resp->statuscode == '0'){
-            /**
-             * Bugfix 2013-02-25 for not adding invoicefee when using paypage
-             * By Anneli Halld'n
-             */
-            $xmlDecoded = base64_decode($resp->payment);
-            $simpleXml = new SimpleXMLElement($xmlDecoded);
-             //check if the paymentmethod begins with SVEAINVOICE
-            if(substr((string)$simpleXml->transaction->paymentmethod,0,11) == "SVEAINVOICE" && (((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total) != 0){
-                $priceExMoms = $order['details']['BT']->order_subtotal;
-
-                //assume the difference is the invoicefee
-                $invoiceFee = ((int)$simpleXml->transaction->amount * 0.01) - $order['details']['BT']->order_total;
-                if($invoiceFee > 0){
-                    $priceExMoms = $invoiceFee / 1.25;
-                }
-                //update total
-                $order['details']['BT']->order_total = (int)$simpleXml->transaction->amount * 0.01;
-               // $order['details']['BT']->order_subtotal = ((int)$simpleXml->transaction->amount * 0.01) / 1.25;
-                $order['details']['BT']->order_tax =   $order['details']['BT']->order_total - $order['details']['BT']->order_subtotal;
-                //update the whole order
-                $db = JFactory::getDbo();
-                $prefix = $db->getPrefix();
-                $db->select($prefix.'virtuemart_orders');
-                $orderSql =
-                        'UPDATE '.$prefix.'virtuemart_orders
-                        SET `order_payment`= '. $priceExMoms.',
-                        `order_total`= '.$order['details']['BT']->order_total.',
-                        `order_payment_tax`= '. ($invoiceFee - $priceExMoms).',
-                        `order_billTaxAmount`= '. (($invoiceFee - $priceExMoms) +  $order['details']['BT']->order_billTaxAmount).'
-                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
-                $orderQuery = $db->setQuery($orderSql);
-                $db->execute($orderQuery);
-                $paymentSql =
-                        'UPDATE '.$prefix.'virtuemart_payment_plg_svea_invoice
-                        SET `payment_order_total`='.$order['details']['BT']->order_total.'
-                        WHERE `virtuemart_order_id` = '.$order['details']['BT']->virtuemart_order_id;
-
-               $paymentQuery = $db->setQuery($paymentSql);
-               $db->execute($paymentQuery);
-
             }
-            /**
-             * bugfix end
-             */
 
-            $order['order_status'] = 'C';
-        	$order['customer_notified'] = 1;
-        	$order['comments'] = '';
-        	$modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
+            if (!$this->selectedThisElement ($method->payment_element)) {
+			return FALSE;
+		}
+            if (!class_exists ('VirtueMartModelOrders')) {
+		require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
+            }
+            $modelOrder = VmModel::getModel ('orders');
+            $order_number = JRequest::getString ('on', '');
 
-        }else{
-            $order['order_status'] = 'X';
-        	$order['customer_notified'] = 0;
-        	$order['comments'] = '';
-        	$modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-            return FALSE;
+            $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
+            $order = $modelOrder->getOrder ($virtuemart_order_id);
+
+            $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+            $countryId = $order['details']['BT']->virtuemart_country_id;
+            $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
+
+            $resp = new SveaResponse($_REQUEST, $countryCode, $sveaConfig);
+            //orderstatusen sätts inte över
+            if($resp->response->accepted == 1){
+                $order['order_status'] = SveaHelper::SVEA_STATUS_CONFIRMED;
+                $order['customer_notified'] = 1;
+                $order['comments'] = 'Order complete at Svea';
+                $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
+                $html = "Svea complete";
+
+            }else{
+                $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+                $order['customer_notified'] = 0;
+                $order['comments'] = "Svea error: " . $resp->response->resultcode . " : " .$resp->response->errormessage;
+                $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
+                $html = SveaHelper::errorResponse( $resp->response->resultcode,$resp->response->errormessage,$method);
+                return NULL;
+            }
+
+
+              if (!class_exists('VirtueMartCart'))
+                   require(JPATH_VM_SITE . DS . 'helpers' . DS . 'cart.php');
+            $cart = VirtueMartCart::getCart ();
+            $cart->emptyCart ();
+            return TRUE;
         }
-    }else{
-        die('knas');
-       	return FALSE;
-    }
-
-     /* Load the cart helper */
-    if (!class_exists('VirtueMartCart'))
-	   require(JPATH_VM_SITE . DS . 'helpers' . DS . 'cart.php');
-
-    $cart = VirtueMartCart::getCart ();
-	$cart->emptyCart ();
-    return TRUE;
-	}
 
             /**
      * will catch ajaxcall
@@ -752,28 +685,28 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
         //box for form
         $html = '<fieldset id="svea_banks">
              <input type="hidden" id="paymenttypesvea_db" value="'. $paymentId . '" />
-             <input type="hidden" id="carttotal" value="'. $cartTotal . '" />
+             <input type="hidden" id="carttotal_db" value="'. $cartTotal . '" />
                  <div id="svea_banks_error" style="color: red; "></div>
                 <ul id="svea_banks_div" style="list-style-type: none;"></ul>
              </fieldset>';
       //start skript and set vars
         $html .= "<script type='text/javascript'>
                     var countrycode = '$countryCode';
-                    var url = '$sveaUrlAjax';
+                    var url_db = '$sveaUrlAjax';
                     var image_root = '$imageRoot';
-                    var checked = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
-                    var sveacarttotal = jQuery('#carttotal').val();
-                    var sveaid = jQuery('#paymenttypesvea_db').val();";
-        //do ajax to get params
+                    var checked_db = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
+                    var sveacarttotal_db = jQuery('#carttotal_db').val();
+                    var sveaid_db = jQuery('#paymenttypesvea_db').val();";
+        //do ajax to get bank methods
         $html .= " jQuery.ajax({
                             type: 'GET',
                             data: {
-                                sveaid: sveaid,
-                                sveacarttotal: sveacarttotal,
+                                sveaid: sveaid_db,
+                                sveacarttotal: sveacarttotal_db,
                                 type: 'getBanks',
                                 countrycode: countrycode
                             },
-                            url: url,
+                            url: url_db,
                             success: function(data){
                                 var json = JSON.parse(data);
                                  if (json.svea_error ){
@@ -796,37 +729,37 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
                             }
                         });";
+
        //Document ready start
-        $html .= " jQuery(document).ready(function ($){
-                         jQuery('#svea_ssn_pp').removeClass('invalid');";
+        $html .= " jQuery(document).ready(function ($){";
 
          //hide show box
         $html .= "
-                        if(checked != sveaid){
-                            jQuery('#svea_getaddress_pp').hide();
+                        if(checked_db != sveaid_db){
+                            jQuery('#svea_banks').hide();
                         }else{
-                            jQuery('#svea_getaddress_pp').show();
+                            jQuery('#svea_banks').show();
                         }
                     ";
         //toggle display form
         $html .=        '
                         jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
-                            checked = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                            if(checked == sveaid){
-                                  jQuery("#svea_getaddress_pp").show();
+                            checked_db = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
+                            if(checked_db == sveaid_db){
+                                  jQuery("#svea_banks").show();
                             }else{
-                                jQuery("#svea_getaddress_pp").hide();
+                                jQuery("#svea_banks").hide();
                             }
                             });';
 
 
         //append form to parent form in Vm
-        $html .=        "jQuery('#svea_form_pp').parents('form').submit( function(){
-                            var action = jQuery('#svea_form_pp').parents('form').attr('action');
-                            var form = jQuery('<form id=\"svea_form_pp\"></form>');
+        $html .=        "jQuery('#svea_banks_form').parents('form').submit( function(){
+                            var action = jQuery('#svea_banks_form').parents('form').attr('action');
+                            var form = jQuery('<form id=\"svea_banks_form\"></form>');
                             form.attr('method', 'post');
                             form.attr('action', action);
-                            var sveaform = jQuery(form).append('form#svea_form_pp');
+                            var sveaform = jQuery(form).append('form#svea_banks');
                             jQuery(document.body).append(sveaform);
                             sveaform.submit();
                             return false;

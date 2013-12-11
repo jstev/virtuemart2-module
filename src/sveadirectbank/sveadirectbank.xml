@@ -22,7 +22,7 @@
 		default="default" hide_default="1" hide_none="1"
 		stripext="0"   exclude="^_" />
 
-        <param name="testmode_directbank_se" type="radio" default="1" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
+        <param name="testmode_directbank" type="radio" default="1" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
              <option value="1">COM_VIRTUEMART_YES</option>
              <option value="0">COM_VIRTUEMART_NO</option>
         </param>

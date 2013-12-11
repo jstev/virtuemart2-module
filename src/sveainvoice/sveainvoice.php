@@ -165,8 +165,8 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
 		$this->storePSPluginInternalData($dbValues);
-                //from vm
-                $html = '<d class="vmorder-done">' . "\n";
+                //Print html on thank you page. Will also say "thank you for your order!"
+                $html = '<div class="vmorder-done">' . "\n";
 		$html .= $this->getHtmlRow ('STANDARD_PAYMENT_INFO', $dbValues['payment_name'], 'class="vmorder-done-payinfo"');
 		if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
@@ -185,7 +185,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$html .= $this->getHtmlRow ('STANDARD_AMOUNT', $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
 		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
-		$html .= '</table>' . "\n";
+		$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
 
 		$order['order_status'] = SveaHelper::SVEA_STATUS_CONFIRMED;
@@ -226,6 +226,9 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
             }  else {
+                $order['customer_notified'] = 0;
+                $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+                $order['comments'] = "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage;
                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
 
             }
@@ -612,10 +615,12 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 *
 	 * @author Valerie Isaksen
 	 *
-	 */
+
 	function plgVmOnPaymentResponseReceived(&$virtuemart_order_id, &$html) {
             return NULL;
 	}
+         *
+         */
 
     /**
      * will catch ajaxcall
