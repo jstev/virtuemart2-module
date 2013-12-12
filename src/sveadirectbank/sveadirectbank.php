@@ -695,14 +695,12 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                     var url_db = '$sveaUrlAjax';
                     var image_root = '$imageRoot';
                     var checked_db = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
-                    var sveacarttotal_db = jQuery('#carttotal_db').val();
                     var sveaid_db = jQuery('#paymenttypesvea_db').val();";
         //do ajax to get bank methods
         $html .= " jQuery.ajax({
                             type: 'GET',
                             data: {
                                 sveaid: sveaid_db,
-                                sveacarttotal: sveacarttotal_db,
                                 type: 'getBanks',
                                 countrycode: countrycode
                             },

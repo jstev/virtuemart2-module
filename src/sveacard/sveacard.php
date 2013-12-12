@@ -382,12 +382,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
                                 //include svea stuff on editpayment page
-                                $countryId = $cart->BT['virtuemart_country_id'];
-                                if(isset($countryId) == FALSE){
-                                    return ;
-                                }
-                                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                                $html[] = $this->getSveaDirectBankHtml($method->virtuemart_paymentmethod_id,$countryCode,$cart->pricesUnformatted['basePriceWithTax']);
+                                $html[] = $this->getSveaDirectBankHtml($method->virtuemart_paymentmethod_id,$cart->pricesUnformatted['basePriceWithTax']);
                                 //svea stuff end
 
 			}
@@ -637,40 +632,13 @@ class plgVmPaymentSveacard extends vmPSPlugin {
      * @param type $type
      * @param type $name
      * @param type $render
-     */
+
 
     public function plgVmOnSelfCallFE($type,$name,&$render) {
-        if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
-			return NULL; // Another method was selected, do nothing
-		}
-        $sveaconfig = new SveaVmConfigurationProviderTest($method);
-        $returnArray = array();
-        //Get address request
-        if(JRequest::getVar('type') == 'getBanks'){
-            try {
-                 $svea = WebPay::getPaymentMethods($sveaconfig)
-                   ->setContryCode(JRequest::getVar('countrycode'))
-                   ->doRequest();
-            } catch (Exception $e) {
-                 vmError ($e->getMessage (), $e->getMessage ());
-                    return NULL;
-            }
-           if (isset($svea->errormessage)) {
-                $returnArray = array("svea_error" => "Svea error: " .$svea->errormessage);
-            } else {
 
-                foreach ($svea as $bank){
-                    if(substr($bank,0,2) == "DB"){
-                        $returnArray[] = $bank;
-                    }
-                }
-            }
-
-
-        }
-        echo json_encode($returnArray);
-        jexit();
     }
+             *
+             */
 
     /**
      * TODO: check if company
@@ -678,88 +646,55 @@ class plgVmPaymentSveacard extends vmPSPlugin {
      * @param type $countryCode
      * @return string
      */
-    public function getSveaDirectBankHtml($paymentId,$countryCode,$cartTotal) {
-         $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveadirectbank';
+    public function getSveaDirectBankHtml($paymentId,$cartTotal) {
          $imageRoot = JURI::root(TRUE) . '/images/stories/virtuemart/payment/svea/';
 
         //box for form
-        $html = '<fieldset id="svea_banks">
-             <input type="hidden" id="paymenttypesvea_db" value="'. $paymentId . '" />
-             <input type="hidden" id="carttotal_db" value="'. $cartTotal . '" />
-                 <div id="svea_banks_error" style="color: red; "></div>
-                <ul id="svea_banks_div" style="list-style-type: none;"></ul>
-             </fieldset>';
+        $html = '<fieldset id="svea_card">
+                    <input type="hidden" id="paymenttypesvea_cc" value="'. $paymentId . '" />
+                    <input type="hidden" id="carttotal_cc" value="'. $cartTotal . '" />
+                   <fieldset>
+                      <img src="'.$imageRoot.'KORTCERT.png" />
+                       <img src="'.$imageRoot.'AMEX.png" />
+                       <img src="'.$imageRoot.'DINERS.png" />
+                  </fieldset>
+                </fieldset>';
       //start skript and set vars
         $html .= "<script type='text/javascript'>
-                    var countrycode = '$countryCode';
-                    var url_db = '$sveaUrlAjax';
-                    var image_root = '$imageRoot';
-                    var checked_db = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
-                    var sveacarttotal_db = jQuery('#carttotal_db').val();
-                    var sveaid_db = jQuery('#paymenttypesvea_db').val();";
-        //do ajax to get bank methods
-        $html .= " jQuery.ajax({
-                            type: 'GET',
-                            data: {
-                                sveaid: sveaid_db,
-                                sveacarttotal: sveacarttotal_db,
-                                type: 'getBanks',
-                                countrycode: countrycode
-                            },
-                            url: url_db,
-                            success: function(data){
-                                var json = JSON.parse(data);
-                                 if (json.svea_error ){
-                                    jQuery('#svea_banks_error').empty().append('<br>'+json.svea_error).show();
-                                }else{
-                                    jQuery('#svea_banks_div').hide();
-                                    var count = 0;
-                                    var checkedBank = '';
-                                     jQuery.each(json,function(key,value){
-                                        if(count == 0){
-                                            checkedBank = 'checked';
-                                        }
-                                       jQuery('#svea_banks_div').append('<li><input type=\"radio\" name=\"svea_bank\" value=\"'+value+'\" '+checkedBank+'>&nbsp <img src='+image_root+value+'.png /></li>');
-                                       count ++;
-                                       checkedBank = '';
-                                     });
-                                     jQuery('#svea_banks_div').show();
+                    var checked_cc = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
+                    var sveaid_cc = jQuery('#paymenttypesvea_cc').val();";
 
-                                }
-
-                            }
-                        });";
 
        //Document ready start
         $html .= " jQuery(document).ready(function ($){";
 
          //hide show box
         $html .= "
-                        if(checked_db != sveaid_db){
-                            jQuery('#svea_banks').hide();
+                        if(checked_cc != sveaid_cc){
+                            jQuery('#svea_card').hide();
                         }else{
-                            jQuery('#svea_banks').show();
+                            jQuery('#svea_card').show();
                         }
                     ";
         //toggle display form
         $html .=        '
                         jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
-                            checked_db = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                            if(checked_db == sveaid_db){
-                                  jQuery("#svea_banks").show();
+                            checked_cc = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
+                            if(checked_cc == sveaid_cc){
+                                  jQuery("#svea_card").show();
                             }else{
-                                jQuery("#svea_banks").hide();
+                                jQuery("#svea_card").hide();
                             }
                             });';
 
 
         //append form to parent form in Vm
-        $html .=        "jQuery('#svea_banks_form').parents('form').submit( function(){
-                            var action = jQuery('#svea_banks_form').parents('form').attr('action');
-                            var form = jQuery('<form id=\"svea_banks_form\"></form>');
+        $html .=        "jQuery('#svea_card_form').parents('form').submit( function(){
+                            var action = jQuery('#svea_card_form').parents('form').attr('action');
+                            var form = jQuery('<form id=\"svea_card_form\"></form>');
                             form.attr('method', 'post');
                             form.attr('action', action);
-                            var sveaform = jQuery(form).append('form#svea_banks');
+                            var sveaform = jQuery(form).append('form#svea_card');
                             jQuery(document.body).append(sveaform);
                             sveaform.submit();
                             return false;
