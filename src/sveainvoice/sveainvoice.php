@@ -633,37 +633,42 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
     public function plgVmOnSelfCallFE($type,$name,&$render) {
         if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
 			return NULL; // Another method was selected, do nothing
-		}
-        $sveaconfig = new SveaVmConfigurationProviderTest($method);
-        try {
-          $svea = WebPay::getAddresses($sveaconfig)
-                  ->setOrderTypeInvoice()
-                  ->setCountryCode(JRequest::getVar('countrycode'));
-            if(JRequest::getVar('customertype')== "svea_invoice_customertype_company"){
-              $svea = $svea->setCompany(JRequest::getVar('svea_ssn'));
-            }  else {
-              $svea = $svea->setIndividual(JRequest::getVar('svea_ssn'));
-            }
-           $svea = $svea->doRequest();
-        } catch (Exception $e) {
-            vmError ($e->getMessage (), $e->getMessage ());
-                return NULL;
         }
-        if($svea->accepted == 0){
-            $returnArray = array("svea_error" => $svea->errormessage);
-            vmError ('Svea Error: '.$svea->errormessage, 'Svea Error: '.$svea->errormessage);
-        }  else {
-             foreach ($svea->customerIdentity as $ci){
-                $name = ($ci->fullName) ? $ci->fullName : $ci->legalName;
+        if (!$this->selectedThisElement($method->payment_element)) {
+                return false;
+        }
+        $sveaconfig = new SveaVmConfigurationProviderTest($method);
+        if(JRequest::getVar('type') == 'getAddress'){
+            try {
+              $svea = WebPay::getAddresses($sveaconfig)
+                      ->setOrderTypeInvoice()
+                      ->setCountryCode(JRequest::getVar('countrycode'));
+                if(JRequest::getVar('customertype')== "svea_invoice_customertype_company"){
+                  $svea = $svea->setCompany(JRequest::getVar('svea_ssn'));
+                }  else {
+                  $svea = $svea->setIndividual(JRequest::getVar('svea_ssn'));
+                }
+               $svea = $svea->doRequest();
+            } catch (Exception $e) {
+                vmError ($e->getMessage (), $e->getMessage ());
+                    return NULL;
+            }
+            if($svea->accepted == 0){
+                $returnArray = array("svea_error" => $svea->errormessage);
+                vmError ('Svea Error: '.$svea->errormessage, 'Svea Error: '.$svea->errormessage);
+            }  else {
+                 foreach ($svea->customerIdentity as $ci){
+                    $name = ($ci->fullName) ? $ci->fullName : $ci->legalName;
 
-                $returnArray[] =  array("fullName"  => $name,
-                                "street"    => $ci->street,
-                                "address_2" => $ci->coAddress,
-                                "zipCode"  => $ci->zipCode,
-                                "locality"  => $ci->locality,
-                                "addressSelector" => $ci->addressSelector
-                        );
-             }
+                    $returnArray[] =  array("fullName"  => $name,
+                                    "street"    => $ci->street,
+                                    "address_2" => $ci->coAddress,
+                                    "zipCode"  => $ci->zipCode,
+                                    "locality"  => $ci->locality,
+                                    "addressSelector" => $ci->addressSelector
+                            );
+                 }
+            }
         }
         echo json_encode($returnArray);
         jexit();

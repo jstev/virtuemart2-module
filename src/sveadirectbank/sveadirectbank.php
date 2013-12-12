@@ -188,7 +188,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	}
         /**
          * Use on payPage cancel
-         */
+
         function plgVmOnUserPaymentCancel () {
                 if (!class_exists ('VirtueMartModelOrders')) {
                         require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
@@ -197,6 +197,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
                // $this->myFile('plgVmOnUserPaymentCancel - PaysonInvoice');
         }
+         * 
+         */
         /**
          *  public function myFile($arg, $arg2 = NULL) {
          $myFile = "testFile.txt";

@@ -116,7 +116,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $this->storePSPluginInternalData($dbValues);
             //Svea Create order
             try {
-                $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode_card == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
@@ -140,7 +140,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             //$ipn____url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginnotification&on=' .$order['details']['BT']->virtuemart_order_id .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id);
 
              //add customer
-             $session = JFactory::getSession();
              $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
            try {
                 $form = $svea
@@ -148,17 +147,17 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                         ->setCurrency($currency_code_3)
                         ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
                         ->setOrderDate(date('c'))
-                        ->usePaymentMethod($session->get('svea_bank'))
+                        ->usePaymentMethod(PaymentMethod::KORTCERT)
                             ->setReturnUrl($return_url)
-                            //->setCancelUrl($cancel_url) does nothing for bank
-                            //->setCallbackUrl($cancel_url) does nothong for bank
+                            //->setCancelUrl($cancel_url)//Not used by Certitrade cardpage
+                            //->setCallbackUrl($cancel_url)//Not used by Certitrade cardpage
                                 ->getPaymentForm();
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
-
+           //TODO: translate Skickar till SveaWebPay...
              $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;">Skickar till SveaWebPay...<br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
             //form
             $fields = $form->htmlFormFieldsAsArray;
@@ -177,7 +176,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 
             $modelOrder = VmModel::getModel ('orders');
 
-            //TODO: check why its set to canceled?
+            //TODO: check why its set to canceled? = Probably cause you don't know if it will go thru yet.
             $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
             $order['customer_notified'] = 0;
             //$order['comments'] = '';
@@ -188,15 +187,17 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	}
         /**
          * Use on payPage cancel
-         */
+
         function plgVmOnUserPaymentCancel () {
                 if (!class_exists ('VirtueMartModelOrders')) {
                         require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
                 }
-                print_r("cancellerad");die;
+                print_r("cancellerad");
 
                // $this->myFile('plgVmOnUserPaymentCancel - PaysonInvoice');
         }
+         * 
+         */
         /**
          *  public function myFile($arg, $arg2 = NULL) {
          $myFile = "testFile.txt";
@@ -321,15 +322,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	 *
 	 */
 	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) {
-            $request = JRequest::get();
-            $session = JFactory::getSession();
-            foreach ($request as $key => $value) {
-                $sveaName = substr($key, 0,4);
-                if($sveaName == "svea"){
-                    $session->set($key, $value);
-                }
-            }
-
             return $this->OnSelectCheck($cart);
 	}
 
@@ -382,7 +374,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
                                 //include svea stuff on editpayment page
-                                $html[] = $this->getSveaDirectBankHtml($method->virtuemart_paymentmethod_id,$cart->pricesUnformatted['basePriceWithTax']);
+                                $html[] = $this->getSveaCardHtml($method->virtuemart_paymentmethod_id,$cart->pricesUnformatted['basePriceWithTax']);
                                 //svea stuff end
 
 			}
@@ -595,7 +587,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
             $order = $modelOrder->getOrder ($virtuemart_order_id);
 
-            $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+            $sveaConfig = $method->testmode_card == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             $countryId = $order['details']['BT']->virtuemart_country_id;
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
 
@@ -646,7 +638,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
      * @param type $countryCode
      * @return string
      */
-    public function getSveaDirectBankHtml($paymentId,$cartTotal) {
+    public function getSveaCardHtml($paymentId,$cartTotal) {
          $imageRoot = JURI::root(TRUE) . '/images/stories/virtuemart/payment/svea/';
 
         //box for form

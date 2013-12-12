@@ -615,7 +615,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
     public function plgVmOnSelfCallFE($type,$name,&$render) {
         if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
 			return NULL; // Another method was selected, do nothing
-		}
+        }
+        if (!$this->selectedThisElement($method->payment_element)) {
+                return false;
+        }
         $sveaconfig = new SveaVmConfigurationProviderTest($method);
         $returnArray = array();
         //Get address request
@@ -694,7 +697,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         '
                         <fieldset id="svea_ssn_div_pp>
                             <label for="svea_ssn_pp">Social security number</label>
-                            <input type="text" id="svea_ssn_pp" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
+                            <input type="text" id="svea_ssn_pp" name="svea_ssn_pp" class="required" /><span style="color: red; "> * </span>
                         </fieldset>';
         //EU fields
         }elseif($countryCode == "NL" || $countryCode == "DE"){
@@ -754,7 +757,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
              </fieldset>';
       //start skript and set vars
         $html .= "<script type='text/javascript'>
-                    var countrycode = '$countryCode';
+                    var countrycode_pp = '$countryCode';
                     var url_pp = '$sveaUrlAjax';
                     var checked_pp = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
                     var sveacarttotal_pp = jQuery('#carttotal').val();
@@ -766,7 +769,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                 sveaid: sveaid_pp,
                                 sveacarttotal: sveacarttotal_pp,
                                 type: 'getParams',
-                                countrycode: countrycode
+                                countrycode: countrycode_pp
                             },
                             url: url_pp,
                             success: function(data){
@@ -819,8 +822,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         //ajax to getAddress
         $html .= "jQuery('#svea_getaddress_submit_pp').click(function (){
                          jQuery('#svea_ssn_pp').removeClass('invalid');
-                        var svea_ssn = jQuery('#svea_ssn_pp').val();
-                            if(svea_ssn == ''){
+                        var svea_ssn_pp = jQuery('#svea_ssn_pp').val();
+                            if(svea_ssn_pp == ''){
                                 jQuery('#svea_ssn_pp').addClass('invalid');
                                 jQuery('#svea_getaddress_error_pp').empty().append('Svea Error: * required').show();
                             }else{
@@ -829,8 +832,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                     data: {
                                         sveaid: sveaid_pp,
                                         type: 'getAddress',
-                                        svea_ssn: svea_ssn,
-                                        countrycode: countrycode
+                                        svea_ssn: svea_ssn_pp,
+                                        countrycode: countrycode_pp
                                     },
                                     url: url_pp,
                                     success: function(data){
