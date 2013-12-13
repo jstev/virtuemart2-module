@@ -114,7 +114,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $sveaConfig = $method->testmode_paymentplan_se == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -142,7 +142,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                       ->usePaymentPlanPayment($session->get('svea_campaigncode'))
                         ->doRequest();
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -197,7 +197,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                             ->deliverPaymentPlanOrder()
                                                 ->doRequest();
                     } catch (Exception $e) {
-                        $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                        $html = SveaHelper::errorResponse('',$e->getMessage ());
                         vmError ($e->getMessage (), $e->getMessage ());
                         return NULL;
                     }
@@ -216,7 +216,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
                 $order['comments'] = "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage;
-                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
+                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
 
             }
 

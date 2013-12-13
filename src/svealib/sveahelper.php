@@ -80,7 +80,7 @@ class SveaHelper {
         }elseif($session->get('svea_ssn_pp')){
             $ssn = $session->get('svea_ssn_pp');
         }
-       
+
          if ($customerType == "svea_invoice_customertype_company"){
 
             $item = Item::companyCustomer();
@@ -184,12 +184,15 @@ class SveaHelper {
     }
 
 
-    public static function errorResponse($resultcode,$errormessage, $method) {
-
+    public static function errorResponse($resultcode,$errormessage) {
+        $const = "VMPAYMENT_SVEA_ERROR_CODE_".(string)$resultcode;
+       $errortranslate = JText::sprintf ($const);
+       if(preg_match("/^VMPAYMENT_SVEA_ERROR_CODE/", $errortranslate))
+                $errortranslate = JText::sprintf ("VMPAYMENT_SVEA_ERROR_CODE_DEFAULT").$errormessage;;
         $app = JFactory::getApplication ();
-        $app->enqueueMessage ( "Translate me Svea error: [". $resultcode . " ] ".$errormessage);
+        $app->enqueueMessage ( $errortranslate);
         $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart'));
-        $html = '<div>' ."Translate me Svea error: [". $resultcode . " ] ".$errormessage. "\n";
+        $html = '<div>'.$errormessage. "\n";
 
         return $html;
     }

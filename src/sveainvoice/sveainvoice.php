@@ -144,7 +144,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                       ->useInvoicePayment()
                         ->doRequest();
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -210,7 +210,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                             ->deliverInvoiceOrder()
                                                 ->doRequest();
                     } catch (Exception $e) {
-                        $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                        $html = SveaHelper::errorResponse('',$e->getMessage ());
                         vmError ($e->getMessage (), $e->getMessage ());
                         return NULL;
                     }
@@ -229,7 +229,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
                 $order['comments'] = "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage;
-                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage,$method);
+                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
 
             }
 

@@ -119,7 +119,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -154,7 +154,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                             //->setCallbackUrl($cancel_url) does nothong for bank
                                 ->getPaymentForm();
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -197,7 +197,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
                // $this->myFile('plgVmOnUserPaymentCancel - PaysonInvoice');
         }
-         * 
+         *
          */
         /**
          *  public function myFile($arg, $arg2 = NULL) {
@@ -620,7 +620,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $order['customer_notified'] = 0;
                 $order['comments'] = "Svea error: " . $resp->response->resultcode . " : " .$resp->response->errormessage;
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-                $html = SveaHelper::errorResponse( $resp->response->resultcode,$resp->response->errormessage,$method);
+                $html = SveaHelper::errorResponse( $resp->response->resultcode,$resp->response->errormessage);
                 return NULL;
             }
 
