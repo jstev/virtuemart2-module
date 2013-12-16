@@ -228,8 +228,8 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
-                $order['comments'] = "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage;
                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
+                $order['comments'] = $html;
 
             }
 
@@ -688,11 +688,11 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
              $inputFields .=
                         '
                             <fieldset id="svea_customertype_div">
-                                <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype" checked>Private</option>
-                                <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype">Company</option>
+                                <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype" checked>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'</option>
+                                <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'</option>
                             </fieldset>
                             <fieldset id="svea_ssn_div>
-                                <label for="svea_ssn">Social security number</label>
+                                <label for="svea_ssn">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
                                 <input type="text" id="svea_ssn" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
                             </fieldset>
                        ';
@@ -730,9 +730,12 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
             }
             $birthYear = "<select name='svea_birth_year' id='birthYear'>$years</select>";
 
-            $inputFields = $birthDay . $birthMonth . $birthYear;
+                       $inputFields =  '<label for="svea_birthdate">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_BIRTHDATE").'</label>
+                            <fieldset id="svea_birthdate">'.
+                                $birthDay . $birthMonth . $birthYear
+                            .'</fieldset>';
               if($countryCode == "NL"){
-                $inputFields .= ' Initials: <input type="text" id="svea_initials" name="initials" class="required" /><span style="color: red; "> * </span>';
+                $inputFields .= JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials" name="initials" class="required" /><span style="color: red; "> * </span>';
             }
         }
         if($countryCode == "SE" || $countryCode == "DK") {

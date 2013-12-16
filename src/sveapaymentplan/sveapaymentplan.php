@@ -215,8 +215,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
-                $order['comments'] = "Translate me Svea error: [". $svea->resultcode . " ] ".$svea->errormessage;
-                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
+                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
+                $order['comments'] = $html;
+
 
             }
 
@@ -696,7 +697,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
              $inputFields .=
                         '
                         <fieldset id="svea_ssn_div_pp>
-                            <label for="svea_ssn_pp">Social security number</label>
+                            <label for="svea_ssn_pp">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
                             <input type="text" id="svea_ssn_pp" name="svea_ssn_pp" class="required" /><span style="color: red; "> * </span>
                         </fieldset>';
         //EU fields
@@ -733,15 +734,18 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
             $birthYear = "<select name='svea_birth_year' id='birthYear_pp'>$years</select>";
 
-            $inputFields = $birthDay . $birthMonth . $birthYear;
+            $inputFields =  '<label for="svea_birthdate_pp">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_BIRTHDATE").'</label>
+                            <fieldset id="svea_birthdate_pp">'.
+                                $birthDay . $birthMonth . $birthYear
+                            .'</fieldset>';
               if($countryCode == "NL"){
-                $inputFields .= ' Initials: <input type="text" id="svea_initials_pp" name="initials" class="required" /><span style="color: red; "> * </span>';
+                $inputFields .=  JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_pp" name="initials" class="required" /><span style="color: red; "> * </span>';
             }
         }
         if($countryCode == "SE" || $countryCode == "DK") {
             $getAddressButton =
                         ' <fieldset>
-                            <input type="button" id="svea_getaddress_submit_pp" value="Get Address" />
+                            <input type="button" id="svea_getaddress_submit_pp" value="'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_GET_ADDRESS").'" />
                         </fieldset>';
         }
         //box for form

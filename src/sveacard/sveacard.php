@@ -603,9 +603,10 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             }else{
                 $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
                 $order['customer_notified'] = 0;
-                $order['comments'] = "Svea error: " . $resp->response->resultcode . " : " .$resp->response->errormessage;
-                $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
                 $html = SveaHelper::errorResponse( $resp->response->resultcode,$resp->response->errormessage);
+                $order['comments'] = $html;
+                $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
+
                 return NULL;
             }
 
