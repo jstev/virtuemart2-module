@@ -235,12 +235,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	}
 
 	function getCosts(VirtueMartCart $cart, $method, $cart_prices) {
-		if (preg_match('/%$/', $method->cost_percent_total)) {
-			$cost_percent_total = substr($method->cost_percent_total, 0, -1);
-		} else {
-			$cost_percent_total = $method->cost_percent_total;
-		}
-		return ($method->cost_per_transaction + ($cart_prices['salesPrice'] * $cost_percent_total * 0.01));
+		return 0;
 	}
 
 	/**
