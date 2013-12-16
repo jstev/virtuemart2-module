@@ -741,7 +741,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         if($countryCode == "SE" || $countryCode == "DK") {
             $getAddressButton =
                         ' <fieldset>
-                            <input type="button" id="svea_getaddress_submit" value="Get Address" />
+                            <input type="button" id="svea_getaddress_submit" value="'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_GET_ADDRESS").'" />
                         </fieldset>';
         }
         $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice';
