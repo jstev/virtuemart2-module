@@ -10,7 +10,8 @@
     <description>SveaWebPay payment plugin</description>
     <languages>
 	<language tag="en-GB">en-GB.plg_vmpayment_svea.ini</language>
-    </languages>
+        <language tag="sv-SE">sv-SE.plg_vmpayment_svea.ini</language>
+   </languages>
     <files>
 	<filename plugin="sveadirectbank">sveadirectbank.php</filename>
     </files>
