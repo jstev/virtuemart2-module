@@ -119,7 +119,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 $sveaConfig = $method->testmode_card == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -153,7 +153,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                             //->setCallbackUrl($cancel_url)//Not used by Certitrade cardpage
                                 ->getPaymentForm();
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage (),$method);
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -196,7 +196,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 
                // $this->myFile('plgVmOnUserPaymentCancel - PaysonInvoice');
         }
-         * 
+         *
          */
         /**
          *  public function myFile($arg, $arg2 = NULL) {
@@ -603,9 +603,10 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             }else{
                 $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
                 $order['customer_notified'] = 0;
-                $order['comments'] = "Svea error: " . $resp->response->resultcode . " : " .$resp->response->errormessage;
+                $html = SveaHelper::errorResponse( $resp->response->resultcode,$resp->response->errormessage);
+                $order['comments'] = $html;
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-                $html = SveaHelper::errorResponse( $resp->response->resultcode,$resp->response->errormessage,$method);
+
                 return NULL;
             }
 

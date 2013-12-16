@@ -43,7 +43,6 @@ class SveaHelper {
      */
     static function formatOrderRows($svea,$order,$currency){
         $paymentCurrency = CurrencyDisplay::getInstance($currency);
-
         $taxPercent = 0;
         foreach ($order['items'] as $product) {
             //tax
@@ -52,14 +51,13 @@ class SveaHelper {
                     $taxPercent = $rule->calc_value;
                 }
             }
-
              $svea = $svea
                     ->addOrderRow(Item::orderRow()
                     ->setQuantity(floatval($product->product_quantity))
                     ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$product->product_item_price,FALSE)))
                     ->setVatPercent(intval($taxPercent))
                     ->setName($product->order_item_name)
-                    ->setUnit("unit")
+                    ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
                     ->setArticleNumber($product->virtuemart_product_id)
                     ->setDescription($product->product_attribute)
             );
@@ -67,7 +65,7 @@ class SveaHelper {
 
         return $svea;
     }
-//svea_ssn
+
     public static function formatCustomer($svea, $order,$countryCode) {
         $session = JFactory::getSession();
         $customerType = $session->get("svea_customertype");
@@ -80,7 +78,7 @@ class SveaHelper {
         }elseif($session->get('svea_ssn_pp')){
             $ssn = $session->get('svea_ssn_pp');
         }
-       
+
          if ($customerType == "svea_invoice_customertype_company"){
 
             $item = Item::companyCustomer();
@@ -157,9 +155,9 @@ class SveaHelper {
         $svea = $svea->addFee(
                         WebPayItem::shippingFee()
                             ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_shipment,FALSE)))
-                            ->setName("shipping translate me")
+                            ->setName(JText::sprintf("COM_VIRTUEMART_ORDER_PRINT_SHIPPING"))
                             ->setVatPercent(intval($shippingTaxPercent))
-                            ->setUnit("unit")
+                            ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
                        );
         return $svea;
     }
@@ -175,21 +173,24 @@ class SveaHelper {
         }
         $svea = $svea->addFee(
                     WebPayItem::invoiceFee()
-                        ->setName('Svea fee translate me')
+                        ->setName(JText::sprintf ("VMPAYMENT_SVEA_INVOICEFEE"))
                         ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_payment,FALSE)))
                         ->setVatPercent(intval($paymentCurrency))
-                        ->setUnit("unit")
+                        ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
                     );
         return $svea;
     }
 
 
-    public static function errorResponse($resultcode,$errormessage, $method) {
-
+    public static function errorResponse($resultcode,$errormessage) {
+        $const = "VMPAYMENT_SVEA_ERROR_CODE_".(string)$resultcode;
+       $errortranslate = JText::sprintf ($const);
+       if(preg_match("/^VMPAYMENT_SVEA_ERROR_CODE/", $errortranslate))
+                $errortranslate = JText::sprintf ("VMPAYMENT_SVEA_ERROR_CODE_DEFAULT").$errormessage;;
         $app = JFactory::getApplication ();
-        $app->enqueueMessage ( "Translate me Svea error: [". $resultcode . " ] ".$errormessage);
+        $app->enqueueMessage ( $errortranslate);
         $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart'));
-        $html = '<div>' ."Translate me Svea error: [". $resultcode . " ] ".$errormessage. "\n";
+        $html = '<div>'.$errormessage. "\n";
 
         return $html;
     }
