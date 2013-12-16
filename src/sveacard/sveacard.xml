@@ -36,6 +36,5 @@
         <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
         <param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
 	<param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
-
     </params>
 </install>
