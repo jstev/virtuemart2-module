@@ -152,6 +152,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                             //->setCancelUrl($cancel_url)//Not used by Certitrade cardpage
                             //->setCallbackUrl($cancel_url)//Not used by Certitrade cardpage
                                 ->getPaymentForm();
+                
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
@@ -179,7 +180,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             //TODO: check why its set to canceled? = Probably cause you don't know if it will go thru yet.
             $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
             $order['customer_notified'] = 0;
-            //$order['comments'] = '';
+            $order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
             JRequest::setVar ('html', $html);
@@ -235,12 +236,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	}
 
 	function getCosts(VirtueMartCart $cart, $method, $cart_prices) {
-		if (preg_match('/%$/', $method->cost_percent_total)) {
-			$cost_percent_total = substr($method->cost_percent_total, 0, -1);
-		} else {
-			$cost_percent_total = $method->cost_percent_total;
-		}
-		return ($method->cost_per_transaction + ($cart_prices['salesPrice'] * $cost_percent_total * 0.01));
+		return 0;
 	}
 
 	/**
