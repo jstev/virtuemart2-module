@@ -128,10 +128,11 @@ class SveaHelper {
      */
     public static function formatCoupon($svea, $order,$currency) {
         $paymentCurrency = CurrencyDisplay::getInstance($currency);
-        if (isset($order['details']['BT']->coupon_code)) {
+        if (isset($order['details']['BT']->coupon_code)) {       
+            
             $svea = $svea->addDiscount(
                             WebPayItem::fixedDiscount()
-                                ->setAmountIncVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->coupon_discount,FALSE)))
+                                ->setAmountIncVat( -1* floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->coupon_discount,FALSE)))
                                 ->setName($order['details']['BT']->coupon_code)
                             );
         }
