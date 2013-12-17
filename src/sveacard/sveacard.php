@@ -152,6 +152,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                             //->setCancelUrl($cancel_url)//Not used by Certitrade cardpage
                             //->setCallbackUrl($cancel_url)//Not used by Certitrade cardpage
                                 ->getPaymentForm();
+                
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
@@ -179,7 +180,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             //TODO: check why its set to canceled? = Probably cause you don't know if it will go thru yet.
             $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
             $order['customer_notified'] = 0;
-            //$order['comments'] = '';
+            $order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
             JRequest::setVar ('html', $html);

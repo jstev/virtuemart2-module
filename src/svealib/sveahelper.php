@@ -175,7 +175,7 @@ class SveaHelper {
                     WebPayItem::invoiceFee()
                         ->setName(JText::sprintf ("VMPAYMENT_SVEA_INVOICEFEE"))
                         ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_payment,FALSE)))
-                        ->setVatPercent(intval($paymentCurrency))
+                        ->setVatPercent(intval($fee_tax_percent))
                         ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
                     );
         return $svea;
