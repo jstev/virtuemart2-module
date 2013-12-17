@@ -25,6 +25,25 @@ VirtueMart 2.0+
 
 You can now use SveaWebPays pay page with your configured payment methods
 
+## Configuration
+
+### Svea Invoice payment
+On the payment method configuration tab:
+
+// TODO -- fix (hide?) sensible defaults for settings that are required but shouldn't need to be changed by user
+
+(...)
+SVEA_MIN_AMOUNT -- set to 0
+SVEA_MAX_AMOUNT -- set to 100000 (or other sufficiently large number)
+SVEA_INVOICEFEE -- set to amount ex. tax
+SVEA_COST_PERCENT_TOTAL -- set to 0 (or if fee is a percentage, use this?)
+SVEA_TAX -- the tax rate that should apply to the fee/cost percent total
+
+### Svea Part payment
+
+### Svea Card payment
+
+### Svea Direct bank payment
 
 ##Important info
 The request made from this module to SVEAs systems is made through a redirected form. 
