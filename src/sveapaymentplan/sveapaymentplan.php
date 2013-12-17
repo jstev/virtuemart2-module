@@ -250,13 +250,16 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		return $html;
 	}
 
+        /**
+         * getCosts() will return the invoice fee for Svea Part payment payment method
+         * 
+         * @param VirtueMartCart $cart
+         * @param type $method
+         * @param type $cart_prices
+         * @return type cost_per_transaction -- as defined by part payment config cost_per_transaction setting (should be given ex vat)
+         */
 	function getCosts(VirtueMartCart $cart, $method, $cart_prices) {
-		if (preg_match('/%$/', $method->cost_percent_total)) {
-			$cost_percent_total = substr($method->cost_percent_total, 0, -1);
-		} else {
-			$cost_percent_total = $method->cost_percent_total;
-		}
-		return ($method->cost_per_transaction + ($cart_prices['salesPrice'] * $cost_percent_total * 0.01));
+		return ($method->cost_per_transaction);
 	}
 
 	/**
