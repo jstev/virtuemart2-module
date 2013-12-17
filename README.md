@@ -1,5 +1,8 @@
 # Virtuemart 2 - Svea WebPay payment module installation guide
 
+##TODO:
+- Add info about settings for automatic selected payment.
+
 ##Index
 * [Requirements] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#requirements)
 * [Installation] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#installation)
