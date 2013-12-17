@@ -14,6 +14,7 @@
         <language tag="de-DE">de-DE.plg_vmpayment_svea.ini</language>
         <language tag="fi-FI">fi-FI.plg_vmpayment_svea.ini</language>
         <language tag="nl-NL">nl-NL.plg_vmpayment_svea.ini</language>
+        <language tag="no-NO">no-NO.plg_vmpayment_svea.ini</language>
     </languages>
     <files>
 	<filename plugin="sveacard">sveacard.php</filename>
