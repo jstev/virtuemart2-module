@@ -43,14 +43,10 @@
 	<param name="max_amount" type="text"  label="VMPAYMENT_SVEA_MAX_AMOUNT" description="VMPAYMENT_SVEA_MAX_AMOUNT_EXPLAIN" />
 
 	<param name="cost_per_transaction" type="text"  label="VMPAYMENT_SVEA_INVOICEFEE" description="VMPAYMENT_SVEA_INVOICEFEE_EXPLAIN" />
-<<<<<<< HEAD
-        <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
 
-=======
-        <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />  
->>>>>>> f432c91f099090d86e65e28c96c308b91e423bd3
+        <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
         <param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
-        
+
 	<param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
     </params>
 </install>
