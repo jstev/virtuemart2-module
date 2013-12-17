@@ -669,13 +669,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $formattedPrice = round(JRequest::getVar('sveacarttotal'), 2);//TODO: check if needs to format currency
                 $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params);
                 if(sizeof($campaigns->values) > 0){
-                    foreach ($campaigns->values as $cc){
+                    foreach ($campaigns->values as $cc){//todo:hämta valuta
                     $returnArray[] = array("campaignCode" => $cc['campaignCode'],
                         "description" => $cc['description'],
                         "price_per_month" => (string) $cc['pricePerMonth'] . " " . "get valuta" . "/" . "translateme month");
                     }
                 }else{
-                     $returnArray = array("svea_error" => "Svea error: Amount is to low-translate me");
+                     $returnArray = array("svea_error" => JText::sprintf("VMPAYMENT_SVEA_DD_NO_CAMPAIGN_ON_AMOUNT"));
                 }
 
             }
