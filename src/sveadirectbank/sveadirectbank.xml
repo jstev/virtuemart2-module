@@ -47,6 +47,10 @@
         <param name="cost_per_transaction" type="text"  label="VMPAYMENT_SVEA_INVOICEFEE" description="VMPAYMENT_SVEA_INVOICEFEE_EXPLAIN" />
         <param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
 
+        <param type="spacer" default="" level="level1"/>
+        <param name="status_accepted" type="vmorderstate" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_ACCEPTED" description="VMPAYMENT_SVEA_STATUS_ACCEPTED_EXPLAIN" />
+        <param type="spacer" default="" level="level1"/>
+
         <param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
 
     </params>
