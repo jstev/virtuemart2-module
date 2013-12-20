@@ -9,10 +9,11 @@
     <version>VMPAYMENT_SVEA_VERSION</version>
     <description>SveaWebPay payment plugin</description>
     <languages>
-	<language tag="en-GB">en-GB.plg_vmpayment_svea.ini</language>
-        <language tag="sv-SE">sv-SE.plg_vmpayment_svea.ini</language>
-        <language tag="de-DE">de-DE.plg_vmpayment_svea.ini</language>
-        <language tag="fi-FI">fi-FI.plg_vmpayment_svea.ini</language>
+        <!--all Svea payment methods use the translations from sveainvoice-->
+	<language tag="en-GB">en-GB.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="sv-SE">sv-SE.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="de-DE">de-DE.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="fi-FI">fi-FI.plg_vmpayment_sveainvoice.ini</language>
     </languages>
     <files>
 	<filename plugin="sveapaymentplan">sveapaymentplan.php</filename>

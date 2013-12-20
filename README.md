@@ -52,6 +52,10 @@ SVEA_TAX -- the tax rate that should apply to the fee/cost percent total
 The request made from this module to SVEAs systems is made through a redirected form. 
 The response of the payment is then sent back to the module via POST or GET (selectable in our admin).
 
+
+
+
+
 ###When using GET
 Have in mind that a long response string sent via GET could get cut off in some browsers and especially in some servers due to server limitations. 
 Our recommendation to solve this is to check the PHP configuration of the server and set it to accept at LEAST 512 characters.
@@ -64,3 +68,13 @@ Would the customer then click cancel, the process does not continue.  This does 
 We can recommend the following certificate providers:
 * InfraSec:  infrasec.se
 * VeriSign : verisign.com
+
+
+## Invoice payments: discount vat calculation error 
+There's a bug in how VirtueMart calculates the discount vat when Svea Invoicefee applies to an order. The bug involves the discount vat amount being scaled due to the invoice fee being included with the subtotal. The sums are correct, but the vat tax is wrong. To avoid this, use the below invoice vat workaround.
+
+Workaround: Create a separate tax rule to use for invoice fee. In VM2 Admin, go to Products/Taxes & Calculation rules. Add a new rule with the following:
+"Vat tax per product", "+%", <your vat rate>. Then go to Shop/Payment methods and under Svea Invoice set VMPAYMENT_SVEA_TAX to use this rule. Discount vat
+will now be correct on checkout.
+
+

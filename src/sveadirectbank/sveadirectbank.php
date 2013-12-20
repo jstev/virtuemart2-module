@@ -72,6 +72,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)',
 			'tax_id'                      => 'smallint(1)'
+                    
+                        // TODO check if removed/reinstated xml config fields are needed here as well? + other payment methods
 		);
 
 		return $SQLfields;

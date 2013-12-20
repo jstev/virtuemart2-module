@@ -23,6 +23,35 @@ JHtml::_('behavior.framework', true);
  *
  * http://virtuemart.net
  */
+
+/**
+ *  note on workaround for VM2 (2.0.24a) discount tax calculations
+
+    Invoicefee contributes to subTotal when weighting tax classes => discount tax is wrong.
+
+    Invoice fee: invoice fee is included in the cart subTotal when VM calculates the "percentage" attribute, by which the discount amount is weighted.
+
+    Example
+    cart includes
+    1* product priced at 100 @25%
+    Shipping is 4 @25%
+    Coupon for 12,5 off (10% or fixed 12,5 off)
+    Cart shows 117,5, tax given as 23,5 => all is well
+    Choose invoice payment
+    Invoice fee of 29 @25% is added.
+    Cart now shows 153,75 (ok), tax given as 30,17 (should be 30,75)
+
+    This is due to discountTaxAmount being -3,08 instead of -2,5 in the cart. discountTaxAmount is set in calculationh.php on row 873, where it is scaled by the "percentage" factor. Percentage is calculated as the taxClass subtotal / the cart salesprice which becomes 1,232 when the invoicefee of 29 is added to subTotal.
+
+    ## Invoice payments: discount vat calculation error 
+    There's a bug in how VirtueMart calculates the discount vat when Svea Invoicefee applies to an order. The bug involves the discount vat amount being scaled due to the invoice fee being included with the subtotal. The sums are correct, but the vat tax is wrong. To avoid this, use the below invoice vat workaround.
+
+    Workaround: Create a separate tax rule to use for invoice fee. In VM2 Admin, go to Products/Taxes & Calculation rules. Add a new rule with the following:
+    "Vat tax per product", "+%", <your vat rate>. Then go to Shop/Payment methods and under Svea Invoice set VMPAYMENT_SVEA_TAX to use this rule. Discount vat will now be correct on checkout.
+
+ 
+ */
+
 if (!class_exists('vmPSPlugin')) {
     require(JPATH_VM_PLUGINS . DS . 'vmpsplugin.php');
 }
@@ -87,7 +116,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 *
 	 * @author Val?rie Isaksen
 	 */
-	function plgVmConfirmedOrder($cart, $order) {
+	function plgVmConfirmedOrder($cart, $order) {           
                 //while processing set to pending
                 $order['order_status'] = SveaHelper::SVEA_STATUS_PENDING;
 		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
