@@ -165,7 +165,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$this->storePSPluginInternalData($dbValues);
                   //Print html on thank you page. Will also say "thank you for your order!"
                 $html = '<div class="vmorder-done">' . "\n";
-		$html .= $this->getHtmlRow ('STANDARD_PAYMENT_INFO', $dbValues['payment_name'], 'class="vmorder-done-payinfo"');
+		$html .= $this->getHtmlRow ('COM_VIRTUEMART_PAYMENTMETHOD', JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN'), 'class="vmorder-done-payinfo"');
 		if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
 			if ($lang->hasKey ($method->payment_info)) {
@@ -173,14 +173,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 			} else {
 				$payment_info = $method->payment_info;
 			}
-			$html .= $this->getHtmlRow ('STANDARD_PAYMENTINFO', $payment_info, 'class="vmorder-done-payinfo"');
+			$html .= $this->getHtmlRow ('VMPAYMENT_SVEA_PAYMENTINFO', $payment_info, 'class="vmorder-done-payinfo"');
 		}
 		if (!class_exists ('VirtueMartModelCurrency')) {
 			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
 		}
 		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
-		$html .= $this->getHtmlRow ('STANDARD_ORDER_NUMBER', $order['details']['BT']->order_number, "vmorder-done-nr");
-		$html .= $this->getHtmlRow ('STANDARD_AMOUNT', $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
+		$html .= $this->getHtmlRow ('COM_VIRTUEMART_ORDER_LIST_NUMBER', $order['details']['BT']->order_number, "vmorder-done-nr");
+		$html .= $this->getHtmlRow ('VMPAYMENT_SVEA_ORDER_TOTAL', $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
 		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
 		$html .= '</div>' . "\n";

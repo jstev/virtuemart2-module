@@ -156,7 +156,7 @@ class SveaHelper {
         $svea = $svea->addFee(
                         WebPayItem::shippingFee()
                             ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_shipment,FALSE)))
-                            ->setName(JText::sprintf("COM_VIRTUEMART_ORDER_PRINT_SHIPPING"))
+                            ->setName(JText::sprintf("VMPAYMENT_SVEA_SHIPMENT_FEE"))
                             ->setVatPercent(intval($shippingTaxPercent))
                             ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
                        );

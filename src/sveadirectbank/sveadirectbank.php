@@ -611,6 +611,34 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $order['comments'] = 'Order complete at Svea';
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
                 $html = "Svea complete";
+                
+                
+                //wip response
+                $html .= '<div class="vmorder-done">' . "\n";
+		$html .= "<div>".$this->getHtmlRow ('COM_VIRTUEMART_PAYMENTMETHOD', JText::sprintf('VMPAYMENT_SVEA_DIRECTBANK'), 'class="vmorder-done-payinfo"')."</div>";
+                if (!empty($payment_info)) {
+			$lang = JFactory::getLanguage ();
+			if ($lang->hasKey ($method->payment_info)) {
+				$payment_info = JText::_ ($method->payment_info);
+			} else {
+				$payment_info = $method->payment_info;
+			}
+			$html .= "<div>".$this->getHtmlRow ('VMPAYMENT_SVEA_PAYMENTINFO', $payment_info, 'class="vmorder-done-payinfo"')."</div>";
+		}
+		if (!class_exists ('VirtueMartModelCurrency')) {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
+		}
+		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
+		$html .= "<div>".$this->getHtmlRow ('COM_VIRTUEMART_ORDER_LIST_NUMBER', $order['details']['BT']->order_number, "vmorder-done-nr")."</div>";
+		$html .= "<div>".$this->getHtmlRow ('VMPAYMENT_SVEA_ORDER_TOTAL', $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount")."</div>";
+                //$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
+		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
+		$html .= '</div>' . "\n";
+                //wip response end
+                
+                
+                
+                
 
             }else{
                 $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
