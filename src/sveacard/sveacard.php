@@ -588,9 +588,9 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
 
             $resp = new SveaResponse($_REQUEST, $countryCode, $sveaConfig);
-            //orderstatusen sätts inte över
+
             if($resp->response->accepted == 1){
-                $order['order_status'] = SveaHelper::SVEA_STATUS_CONFIRMED;
+                $order['order_status'] = $method->status_accepted;
                 $order['customer_notified'] = 1;
                 $order['comments'] = 'Order complete at Svea';
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
