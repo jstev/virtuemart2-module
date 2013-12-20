@@ -165,7 +165,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$this->storePSPluginInternalData($dbValues);
                   //Print html on thank you page. Will also say "thank you for your order!"
                 $html = '<div class="vmorder-done">' . "\n";
-		$html .= $this->getHtmlRow ('COM_VIRTUEMART_PAYMENTMETHOD', JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN'), 'class="vmorder-done-payinfo"');
+		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD')), JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN'), 'class="vmorder-done-payinfo"');
 		if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
 			if ($lang->hasKey ($method->payment_info)) {
@@ -173,14 +173,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 			} else {
 				$payment_info = $method->payment_info;
 			}
-			$html .= $this->getHtmlRow ('VMPAYMENT_SVEA_PAYMENTINFO', $payment_info, 'class="vmorder-done-payinfo"');
+			$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_PAYMENTINFO'), $payment_info, 'class="vmorder-done-payinfo"');
 		}
 		if (!class_exists ('VirtueMartModelCurrency')) {
 			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
 		}
 		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
-		$html .= $this->getHtmlRow ('COM_VIRTUEMART_ORDER_LIST_NUMBER', $order['details']['BT']->order_number, "vmorder-done-nr");
-		$html .= $this->getHtmlRow ('VMPAYMENT_SVEA_ORDER_TOTAL', $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
+		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER'), $order['details']['BT']->order_number, "vmorder-done-nr");
+		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL'), $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
 		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
 		$html .= '</div>' . "\n";
@@ -244,8 +244,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
 		$html = '<table class="adminlist">' . "\n";
 		$html .= $this->getHtmlHeaderBE();
-		$html .= $this->getHtmlRowBE('STANDARD_PAYMENT_NAME', $paymentTable->payment_name);
-		$html .= $this->getHtmlRowBE('STANDARD_PAYMENT_TOTAL_CURRENCY', $paymentTable->payment_order_total . ' ' . $paymentTable->payment_currency);
+		$html .= $this->getHtmlRowBE(JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), $paymentTable->payment_name);
+		$html .= $this->getHtmlRowBE(JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL'), $paymentTable->payment_order_total . ' ' . $paymentTable->payment_currency);
 		$html .= '</table>' . "\n";
 		return $html;
 	}

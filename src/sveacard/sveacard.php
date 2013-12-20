@@ -229,8 +229,8 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 
 		$html = '<table class="adminlist">' . "\n";
 		$html .= $this->getHtmlHeaderBE();
-		$html .= $this->getHtmlRowBE(JText::sprintf('STANDARD_PAYMENT_NAME'), $paymentTable->payment_name);
-		$html .= $this->getHtmlRowBE(JText::sprintf('STANDARD_PAYMENT_TOTAL_CURRENCY'), $paymentTable->payment_order_total . ' ' . $paymentTable->payment_currency);
+		$html .= $this->getHtmlRowBE(JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), $paymentTable->payment_name);
+		$html .= $this->getHtmlRowBE(JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL'), $paymentTable->payment_order_total . ' ' . $paymentTable->payment_currency);
 		$html .= '</table>' . "\n";
 		return $html;
 	}
