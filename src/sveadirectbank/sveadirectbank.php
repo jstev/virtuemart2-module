@@ -580,7 +580,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 * @author Valerie Isaksen
 	 *
 	 */
-	function plgVmOnPaymentResponseReceived(&$virtuemart_order_id, &$html) {
+	function plgVmOnPaymentResponseReceived(&$html) {
 
             $virtuemart_paymentmethod_id = JRequest::getString ('pm', '');
             if (!($method =  $this->getVmPluginMethod ($virtuemart_paymentmethod_id))) {

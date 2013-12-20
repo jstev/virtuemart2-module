@@ -14,6 +14,8 @@
         <language tag="sv-SE">sv-SE.plg_vmpayment_sveainvoice.ini</language>
         <language tag="de-DE">de-DE.plg_vmpayment_sveainvoice.ini</language>
         <language tag="fi-FI">fi-FI.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="nl-NL">nl-NL.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="no-NO">no-NO.plg_vmpayment_sveainvoice.ini</language>
     </languages>
     <files>
 	<filename plugin="sveapaymentplan">sveapaymentplan.php</filename>
@@ -41,7 +43,7 @@
          <param name="max_amount" type="text"  label="VMPAYMENT_SVEA_MAX_AMOUNT" description="VMPAYMENT_SVEA_MAX_AMOUNT_EXPLAIN" />
 
          <param name="cost_per_transaction" type="text"  label="VMPAYMENT_SVEA_COST_PER_TRANSACTION" description="VMPAYMENT_SVEA_COST_PER_TRANSACTION_EXPLAIN" />
-         <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />   
+         <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
          <param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
 
          <param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />

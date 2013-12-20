@@ -14,7 +14,9 @@
         <language tag="sv-SE">sv-SE.plg_vmpayment_sveainvoice.ini</language>
         <language tag="de-DE">de-DE.plg_vmpayment_sveainvoice.ini</language>
         <language tag="fi-FI">fi-FI.plg_vmpayment_sveainvoice.ini</language>
-   </languages>
+        <language tag="nl-NL">nl-NL.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="no-NO">no-NO.plg_vmpayment_sveainvoice.ini</language>
+    </languages>
     <files>
 	<filename plugin="sveadirectbank">sveadirectbank.php</filename>
     </files>
@@ -36,13 +38,13 @@
         <param name="secret_directbank_prod" type="text"  label="VMPAYMENT_SVEA_SECRET_PROD" />
 
         <param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
-        <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />    
+        <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
 
         <param name="min_amount" type="text"  label="VMPAYMENT_SVEA_MIN_AMOUNT" description="VMPAYMENT_SVEA_MIN_AMOUNT_EXPLAIN" />
 	<param name="max_amount" type="text"  label="VMPAYMENT_SVEA_MAX_AMOUNT" description="VMPAYMENT_SVEA_MAX_AMOUNT_EXPLAIN" />
 
-        <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />   
-        <param name="cost_per_transaction" type="text"  label="VMPAYMENT_SVEA_INVOICEFEE" description="VMPAYMENT_SVEA_INVOICEFEE_EXPLAIN" />      
+        <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
+        <param name="cost_per_transaction" type="text"  label="VMPAYMENT_SVEA_INVOICEFEE" description="VMPAYMENT_SVEA_INVOICEFEE_EXPLAIN" />
         <param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
 
         <param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
