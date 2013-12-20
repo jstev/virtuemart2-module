@@ -188,7 +188,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
 
-		$order['order_status'] = SveaHelper::SVEA_STATUS_CONFIRMED;
+		$order['order_status'] = $method->status_create_order;
 
 		$order['comments'] = ' Order created at Svea. ';
 
@@ -217,7 +217,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
                     if($deliverObj->accepted == 1){
                         $order['comments'] = 'Order delivered at Svea';
-                        $order['order_status'] = SveaHelper::SVEA_STATUS_SHIPPED;
+                        $order['order_status'] = $method->status_deliver_order;
 
                     }
 
@@ -262,7 +262,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	}
         /**
          * getCosts() will return the invoice fee for Svea Invoice payment method
-         * 
+         *
          * @param VirtueMartCart $cart
          * @param type $method
          * @param type $cart_prices
