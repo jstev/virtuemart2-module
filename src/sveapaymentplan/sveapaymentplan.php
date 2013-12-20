@@ -165,7 +165,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$this->storePSPluginInternalData($dbValues);
                   //Print html on thank you page. Will also say "thank you for your order!"
                 $html = '<div class="vmorder-done">' . "\n";
-		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD')), JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN'), 'class="vmorder-done-payinfo"');
+		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN'), 'class="vmorder-done-payinfo"');
 		if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
 			if ($lang->hasKey ($method->payment_info)) {
