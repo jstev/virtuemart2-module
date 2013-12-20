@@ -46,11 +46,18 @@
 
         <param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
 
+        <param type="spacer" default="" level="level1"/>
+        <param name="status_create_order" type="vmorderstate" scope="com_virtuemart" default="C" label="VMPAYMENT_SVEA_STATUS_CREATED" description="VMPAYMENT_SVEA_STATUS_CREATED_EXPLAIN" />
+
+        <param type="spacer" default="" level="level1"/>
         <!--autodeliver-->
+        <param type="spacer" default="VMPAYMENT_SVEA_AUTODELIVER" level="level1"/>
         <param name="autodeliver" type="radio" default="0" label="VMPAYMENT_SVEA_AUTODELIVER" description="VMPAYMENT_SVEA_AUTODELIVER_DESC">
             <option value="0">COM_VIRTUEMART_NO</option>
             <option value="1">COM_VIRTUEMART_YES</option>
         </param>
+         <param name="status_deliver_order" type="vmorderstate" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
+
         <param name="distributiontype" type="radio" default="Post" label="VMPAYMENT_SVEA_DISTRIBUTIONTYPE" description="VMPAYMENT_SVEA_DISTRIBUTIONTYPE_DESC">
             <option value="Post">Post</option>
             <option value="Email">Email</option>
