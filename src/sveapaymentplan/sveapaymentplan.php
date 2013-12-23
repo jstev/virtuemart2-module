@@ -71,8 +71,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)',
-			'cost_per_transaction'        => 'decimal(10,2)',
-			'tax_id'                      => 'smallint(1)',
                         'svea_order_id'                 => 'int(1) UNSIGNED',
                         'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
                         'svea_expiration_date'          => 'datetime',
@@ -111,7 +109,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
   //Svea Create order
             try {
-                $sveaConfig = $method->testmode_paymentplan_se == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode_paymentplan == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
@@ -154,10 +152,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
 		$dbValues['order_number']                = $order['details']['BT']->order_number;
 		$dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
-		$dbValues['cost_per_transaction']        = $method->cost_per_transaction;
 		$dbValues['payment_currency']            = $currency_code_3;
 		$dbValues['payment_order_total']         = $totalInPaymentCurrency;
-		$dbValues['tax_id']                      = $method->tax_id;
                 $dbValues['svea_order_id']               = $svea->sveaOrderId;
                 $dbValues['svea_approved_amount']        = $svea->amount;
                 $dbValues['svea_expiration_date']        = $svea->expirationDate;
@@ -185,7 +181,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
 		$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
-		$order['order_status'] = $method->status_create_order;
+		$order['order_status'] = $method->status_success;
 
 		$order['comments'] = ' Order created at Svea. ';
 
@@ -204,7 +200,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                     if($deliverObj->accepted == 1){
                         $order['comments'] = 'Order delivered at Svea';
-                        $order['order_status'] = $method->status_deliver_order;
+                        $order['order_status'] = $method->status_shipped;
 
                     }
 

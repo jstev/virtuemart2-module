@@ -43,13 +43,13 @@ JHtml::_('behavior.framework', true);
 
     This is due to discountTaxAmount being -3,08 instead of -2,5 in the cart. discountTaxAmount is set in calculationh.php on row 873, where it is scaled by the "percentage" factor. Percentage is calculated as the taxClass subtotal / the cart salesprice which becomes 1,232 when the invoicefee of 29 is added to subTotal.
 
-    ## Invoice payments: discount vat calculation error 
+    ## Invoice payments: discount vat calculation error
     There's a bug in how VirtueMart calculates the discount vat when Svea Invoicefee applies to an order. The bug involves the discount vat amount being scaled due to the invoice fee being included with the subtotal. The sums are correct, but the vat tax is wrong. To avoid this, use the below invoice vat workaround.
 
     Workaround: Create a separate tax rule to use for invoice fee. In VM2 Admin, go to Products/Taxes & Calculation rules. Add a new rule with the following:
     "Vat tax per product", "+%", <your vat rate>. Then go to Shop/Payment methods and under Svea Invoice set VMPAYMENT_SVEA_TAX to use this rule. Discount vat will now be correct on checkout.
 
- 
+
  */
 
 if (!class_exists('vmPSPlugin')) {
@@ -116,7 +116,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 *
 	 * @author Val?rie Isaksen
 	 */
-	function plgVmConfirmedOrder($cart, $order) {           
+	function plgVmConfirmedOrder($cart, $order) {
                 //while processing set to pending
                 $order['order_status'] = SveaHelper::SVEA_STATUS_PENDING;
 		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
@@ -142,7 +142,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
             $sveaConfig = "";
             //Svea Create order
             try {
-                $sveaConfig = $method->testmode_invoice_se == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode_invoice == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 vmError ($e->getMessage (), $e->getMessage ());
@@ -217,7 +217,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
 
-		$order['order_status'] = $method->status_create_order;
+		$order['order_status'] = $method->status_success;
 
 		$order['comments'] = ' Order created at Svea. ';
 
@@ -246,7 +246,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
                     if($deliverObj->accepted == 1){
                         $order['comments'] = 'Order delivered at Svea';
-                        $order['order_status'] = $method->status_deliver_order;
+                        $order['order_status'] = $method->status_shipped;
 
                     }
 
@@ -311,6 +311,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 *
 	 */
 	protected function checkConditions($cart, $method, $cart_prices) {
+
 		$this->convert($method);
 		// 		$params = new JParameter($payment->payment_params);
 		$address = (($cart->ST == 0) ? $cart->BT : $cart->ST);
