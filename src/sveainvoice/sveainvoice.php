@@ -311,47 +311,51 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 *
 	 */
 	protected function checkConditions($cart, $method, $cart_prices) {
-		$this->convert($method);
-		// 		$params = new JParameter($payment->payment_params);
-		$address = (($cart->ST == 0) ? $cart->BT : $cart->ST);
-
-		$amount      = $cart_prices['salesPrice'];
-		$amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
-			OR
-			($method->min_amount <= $amount AND ($method->max_amount == 0)));
+                // check amount vs config values
+		$amount = $cart_prices['salesPrice'];
+		$amount_cond = ($amount >= (float)$method->min_amount AND $amount <= (float)$method->max_amount
+                                OR
+                                ((float)$method->min_amount <= $amount AND ((float)$method->max_amount == 0))
+                );
 		if (!$amount_cond) {
-			return false;
+                    return false;
 		}
-		$countries = array();
-		if (!empty($method->countries)) {
-			if (!is_array($method->countries)) {
-				$countries[0] = $method->countries;
-			} else {
-				$countries = $method->countries;
-			}
-		}
-
-		// probably did not gave his BT:ST address
-		if (!is_array($address)) {
-			$address                          = array();
-			$address['virtuemart_country_id'] = 0;
-		}
-
-		if (!isset($address['virtuemart_country_id'])) {
-			$address['virtuemart_country_id'] = 0;
-		}
-		if (count($countries) == 0 || in_array($address['virtuemart_country_id'], $countries) || count($countries) == 0) {
-			return true;
-		}
-
-		return false;
+                
+                // check valid country
+                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined        
+		return $this->addressInAcceptedCountry( $address, $method->countries );
 	}
+        
+        /**
+         * Returns true if address is in the list of accepted countries, or if the countries list is empty (i.e. we accept all countries)
+         * 
+         * @param array $address -- virtuemart address array
+         * @param array $countries -- virtuemart list of countries from payment method config
+         * @return boolean
+         */
+        function addressInAcceptedCountry( $address, $countries )
+        {
+            // sanity check on address
+            if (!is_array($address)) {
+                $address = array();
+                $address['virtuemart_country_id'] = 0;
+            }
+            if (!isset($address['virtuemart_country_id'])) {
+                $address['virtuemart_country_id'] = 0;
+            }
 
-	function convert($method) {
+            // sanity check on countries   
+            $countriesArray = array();
+            if( !empty($countries) ) {
+                if (!is_array($countries)) {
+                        $countriesArray[0] = $countries;
+                } else {
+                        $countriesArray = $countries;
+                }
+            }
 
-		$method->min_amount = (float)$method->min_amount;
-		$method->max_amount = (float)$method->max_amount;
-	}
+            return (count($countriesArray) == 0 || in_array($address['virtuemart_country_id'], $countriesArray)); // ==0 means all countries 
+        }
 
 	/*
 * We must reimplement this triggers for joomla 1.7
