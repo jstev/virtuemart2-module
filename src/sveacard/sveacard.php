@@ -176,7 +176,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $modelOrder = VmModel::getModel ('orders');
 
             //TODO: check why its set to canceled? = Probably cause you don't know if it will go thru yet.
-            $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+            $order['order_status'] = $method->status_denied;
             $order['customer_notified'] = 0;
             $order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);

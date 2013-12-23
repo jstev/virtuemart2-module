@@ -45,7 +45,7 @@
 
          <!-- hidden fields needs to exist in database -->
         <param name="cost_percent_total" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
-        <param name="status_pending" type="hidden" scope="com_virtuemart" default="C" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
+        <param name="status_pending" type="hidden" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
         <param name="status_denied" type="hidden" scope="com_virtuemart" default="X" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
 
         <param type="spacer" default="" level="level1"/>

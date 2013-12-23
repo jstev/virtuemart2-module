@@ -49,7 +49,7 @@
         <param name="cost_per_transaction" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PER_TRANSACTION" description="VMPAYMENT_SVEA_COST_PER_TRANSACTION_EXPLAIN" />
         <param name="cost_percent_total" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
         <param name="tax_id" type="hidden" default="" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
-        <param name="status_pending" type="hidden" scope="com_virtuemart" default="C" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
+        <param name="status_pending" type="hidden" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
         <param name="status_denied" type="hidden" scope="com_virtuemart" default="X" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
 
         <param type="spacer" default="" level="level1"/>

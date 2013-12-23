@@ -118,7 +118,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
                 //while processing set to pending
-                $order['order_status'] = SveaHelper::SVEA_STATUS_PENDING;
+                $order['order_status'] = $method->status_pending;
 		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
 			return NULL; // Another method was selected, do nothing
 		}
@@ -256,7 +256,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
             }  else {
                 $order['customer_notified'] = 0;
-                $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+                $order['order_status'] = $method->status_denied;
                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
                 $order['comments'] = $html;
 
