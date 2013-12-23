@@ -27,16 +27,7 @@ if (!class_exists('Includes.php')) {
 }
 class SveaHelper {
 
-    const SVEA_STATUS_PENDING = "P";
-    const SVEA_STATUS_CONFIRMED_BY_SHOPPER = "U";
-    const SVEA_STATUS_CONFIRMED = "C";
-    const SVEA_STATUS_CANCELLED = "X";
-    const SVEA_STATUS_REFUNDED = "R";
-    const SVEA_STATUS_SHIPPED = "S";
-
     /**
-     * TODO: språköversättning st
-     * TODO: testa amountExVat convert
      * @param type $svea
      * @param type $products
      * @return type
@@ -128,8 +119,8 @@ class SveaHelper {
      */
     public static function formatCoupon($svea, $order,$currency) {
         $paymentCurrency = CurrencyDisplay::getInstance($currency);
-        if (isset($order['details']['BT']->coupon_code)) {       
-            
+        if (isset($order['details']['BT']->coupon_code)) {
+
             $svea = $svea->addDiscount(
                             WebPayItem::fixedDiscount()
                                 ->setAmountIncVat( -1* floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->coupon_discount,FALSE)))
