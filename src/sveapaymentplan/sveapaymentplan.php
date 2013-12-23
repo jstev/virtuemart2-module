@@ -402,11 +402,11 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
                                 //include svea stuff on editpayment page
-                                $countryId = $cart->BT['virtuemart_country_id'];
-                                if(isset($countryId) == FALSE){
-                                    return ;
+                                $countryId = isset( $cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : FALSE;
+                                if( $countryId == FALSE){
+                                    return false; // need country id, or won't display payment method
                                 }
-                                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
+                                $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
                                 $html[] = $this->getSveaGetPaymentplanHtml($method->virtuemart_paymentmethod_id,$countryCode,$cart->pricesUnformatted['basePriceWithTax']);
                                 //svea stuff end
 
