@@ -9,7 +9,7 @@
     <version>VMPAYMENT_SVEA_VERSION</version>
     <description>SveaWebPay payment plugin</description>
     <languages>
-        <!--all Svea payment methods use the translations from sveainvoice-->        
+        <!--all Svea payment methods use the translations from sveainvoice-->
 	<language tag="en-GB">en-GB.plg_vmpayment_sveainvoice.ini</language>
         <language tag="sv-SE">sv-SE.plg_vmpayment_sveainvoice.ini</language>
         <language tag="de-DE">de-DE.plg_vmpayment_sveainvoice.ini</language>
@@ -37,19 +37,23 @@
         <param name="merchantid_card_prod" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_PROD" />
         <param name="secret_card_prod" type="text"  label="VMPAYMENT_SVEA_SECRET_PROD" />
 
-        <param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
         <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
+        <param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
 
         <param name="min_amount" type="text"  label="VMPAYMENT_SVEA_MIN_AMOUNT" description="VMPAYMENT_SVEA_MIN_AMOUNT_EXPLAIN" />
 	<param name="max_amount" type="text"  label="VMPAYMENT_SVEA_MAX_AMOUNT" description="VMPAYMENT_SVEA_MAX_AMOUNT_EXPLAIN" />
 
-	<param name="cost_per_transaction" type="text"  label="VMPAYMENT_SVEA_INVOICEFEE" description="VMPAYMENT_SVEA_INVOICEFEE_EXPLAIN" />
+        <param name="payment_info" type="textarea" cols="30" rows="3" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
+         <!-- hidden fields needs to exist in database -->
+        <param name="cost_per_transaction" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PER_TRANSACTION" description="VMPAYMENT_SVEA_COST_PER_TRANSACTION_EXPLAIN" />
+        <param name="cost_percent_total" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
+        <param name="tax_id" type="hidden" default="" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
+        <param name="status_pending" type="hidden" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
+        <param name="status_denied" type="hidden" scope="com_virtuemart" default="X" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
+        <param name="status_shipped" type="hidden" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
 
-        <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
-        <param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
         <param type="spacer" default="" level="level1"/>
-        <param name="status_accepted" type="vmorderstate" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_ACCEPTED" description="VMPAYMENT_SVEA_STATUS_ACCEPTED_EXPLAIN" />
+        <param name="status_success" type="vmorderstate" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_ACCEPTED" description="VMPAYMENT_SVEA_STATUS_ACCEPTED_EXPLAIN" />
         <param type="spacer" default="" level="level1"/>
-	<param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
     </params>
 </install>

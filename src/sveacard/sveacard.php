@@ -70,8 +70,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 			'virtuemart_paymentmethod_id' => 'mediumint(1) UNSIGNED',
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
-			'payment_currency'            => 'char(3)',
-			'tax_id'                      => 'smallint(1)'
+			'payment_currency'            => 'char(3)'
 		);
 
 		return $SQLfields;
@@ -111,7 +110,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
             $dbValues['payment_currency']            = $currency_code_3;
             $dbValues['payment_order_total']         = $totalInPaymentCurrency;
-            $dbValues['tax_id']                      = $method->tax_id;
 
             $this->storePSPluginInternalData($dbValues);
             //Svea Create order
@@ -178,7 +176,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $modelOrder = VmModel::getModel ('orders');
 
             //TODO: check why its set to canceled? = Probably cause you don't know if it will go thru yet.
-            $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+            $order['order_status'] = $method->status_denied;
             $order['customer_notified'] = 0;
             $order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
@@ -597,7 +595,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $resp = new SveaResponse($_REQUEST, $countryCode, $sveaConfig);
 
             if($resp->response->accepted == 1){
-                $order['order_status'] = $method->status_accepted;
+                $order['order_status'] = $method->status_success;
                 $order['customer_notified'] = 1;
                 $order['comments'] = 'Order complete at Svea';
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
@@ -625,7 +623,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 //wip response end
 
             }else{
-                $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+                $order['order_status'] = $method->status_denied;
                 $order['customer_notified'] = 0;
                 $html = SveaHelper::errorResponse( $resp->response->resultcode,$resp->response->errormessage);
                 $order['comments'] = $html;

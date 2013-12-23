@@ -15,51 +15,11 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider{
      * @return type
      */
     public function getClientNumber($type, $country) {
-        $country = strtolower($country);
         $lowertype = strtolower($type);
           if($lowertype == "paymentplan"){
-              switch ($country) {
-                  case "se":
-                      return $this->config->clientid_paymentplan_se;
-                      break;
-                  case "no":
-                      return $this->config->clientid_paymentplan_no;
-                      break;
-                  case "fi":
-                      return $this->config->clientid_paymentplan_fi;
-                      break;
-                  case "dk":
-                      return $this->config->clientid_paymentplan_dk;
-                      break;
-                  case "de":
-                      return $this->config->clientid_paymentplan_de;
-                      break;
-                  case "nl":
-                      return $this->config->clientid_paymentplan_nl;
-                      break;
-              }
-        }
-        switch ($country) {
-            case "se":
-                 return $this->config->clientid_invoice_se;
-                break;
-            case "no":
-                 return $this->config->clientid_invoice_no;
-                break;
-            case "fi":
-                 return $this->config->clientid_invoice_fi;
-                break;
-            case "dk":
-                 return $this->config->clientid_invoice_dk;
-                break;
-            case "de":
-                 return $this->config->clientid_invoice_de;
-                break;
-            case "nl":
-                 return $this->config->clientid_invoice_nl;
-                break;
-            default:
-                break;
+            return $this->config->clientid_paymentplan;
+        }  else {
+            return $this->config->clientid_invoice;
         }
     }
 
@@ -95,55 +55,13 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider{
  * @return type
  */
     public function getPassword($type, $country) {
-          $country = strtolower($country);
         $lowertype = strtolower($type);
         if($lowertype == "paymentplan"){
-             switch ($country) {
-                  case "se":
-                      return $this->config->password_paymentplan_se;
-                      break;
-                  case "no":
-                      return $this->config->password_paymentplan_no;
-                      break;
-                  case "fi":
-                      return $this->config->password_paymentplan_fi;
-                      break;
-                  case "dk":
-                      return $this->config->password_paymentplan_dk;
-                      break;
-                  case "de":
-                      return $this->config->password_paymentplan_de;
-                      break;
-                  case "nl":
-                      return $this->config->password_paymentplan_nl;
-                      break;
-                  default:
-                      break;
-              }
-
+            return $this->config->password_paymentplan;
+        }else{
+            return $this->config->password_invoice;
         }
-        switch ($country) {
-                  case "se":
-                      return $this->config->password_invoice_se;
-                      break;
-                  case "no":
-                      return $this->config->password_invoice_no;
-                      break;
-                  case "fi":
-                      return $this->config->password_invoice_fi;
-                      break;
-                  case "dk":
-                      return $this->config->password_invoice_dk;
-                      break;
-                  case "de":
-                      return $this->config->password_invoice_de;
-                      break;
-                  case "nl":
-                      return $this->config->password_invoice_nl;
-                      break;
-                  default:
-                      break;
-              }
+
     }
     /**
      *
@@ -166,54 +84,11 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider{
      * @return type
      */
     public function getUsername($type, $country) {
-         $country = strtolower($country);
         $lowertype = strtolower($type);
-          if($lowertype == "paymentplan"){
-              switch ($country) {
-                  case "se":
-                      return $this->config->username_paymentplan_se;
-                      break;
-                  case "no":
-                      return $this->config->username_paymentplan_no;
-                      break;
-                  case "fi":
-                      return $this->config->username_paymentplan_fi;
-                      break;
-                  case "dk":
-                      return $this->config->username_paymentplan_dk;
-                      break;
-                  case "de":
-                      return $this->config->username_paymentplan_de;
-                      break;
-                  case "nl":
-                      return $this->config->username_paymentplan_nl;
-                      break;
-                  default:
-                      break;
-              }
-
+        if($lowertype == "paymentplan"){
+            return $this->config->username_paymentplan;
+        }  else {
+             return $this->config->username_invoice;
         }
-        switch ($country) {
-                  case "se":
-                      return $this->config->username_invoice_se;
-                      break;
-                  case "no":
-                      return $this->config->username_invoice_no;
-                      break;
-                  case "fi":
-                      return $this->config->username_invoice_fi;
-                      break;
-                  case "dk":
-                      return $this->config->username_invoice_dk;
-                      break;
-                  case "de":
-                      return $this->config->username_invoice_de;
-                      break;
-                  case "nl":
-                      return $this->config->username_invoice_nl;
-                      break;
-                  default:
-                      break;
-              }
     }
 }

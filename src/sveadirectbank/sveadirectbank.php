@@ -70,9 +70,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 			'virtuemart_paymentmethod_id' => 'mediumint(1) UNSIGNED',
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
-			'payment_currency'            => 'char(3)',
-			'tax_id'                      => 'smallint(1)'
-                    
+			'payment_currency'            => 'char(3)'
+
                         // TODO check if removed/reinstated xml config fields are needed here as well? + other payment methods
 		);
 
@@ -113,7 +112,6 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
             $dbValues['payment_currency']            = $currency_code_3;
             $dbValues['payment_order_total']         = $totalInPaymentCurrency;
-            $dbValues['tax_id']                      = $method->tax_id;
 
             $this->storePSPluginInternalData($dbValues);
             //Svea Create order
@@ -180,7 +178,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $modelOrder = VmModel::getModel ('orders');
 
             //TODO: check why its set to canceled?
-            $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+            $order['order_status'] = $method->status_denied;
             $order['customer_notified'] = 0;
             //$order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
@@ -611,13 +609,13 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $resp = new SveaResponse($_REQUEST, $countryCode, $sveaConfig);
             //orderstatusen sätts inte över
             if($resp->response->accepted == 1){
-                $order['order_status'] = $method->status_accepted;
+                $order['order_status'] = $method->status_success;
                 $order['customer_notified'] = 1;
                 $order['comments'] = 'Order complete at Svea';
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
                 $html = "Svea complete";
-                
-                
+
+
                 //wip response
                 $html .= '<div class="vmorder-done">' . "\n";
 		$html .= "<div>".$this->getHtmlRow(JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), JText::sprintf('VMPAYMENT_SVEA_DIRECTBANK'), 'class="vmorder-done-payinfo"')."</div>";
@@ -640,13 +638,13 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
 		$html .= '</div>' . "\n";
                 //wip response end
-                
-                
-                
-                
+
+
+
+
 
             }else{
-                $order['order_status'] = SveaHelper::SVEA_STATUS_CANCELLED;
+                $order['order_status'] = $method->status_denied;
                 $order['customer_notified'] = 0;
                 $html = SveaHelper::errorResponse( $resp->response->resultcode,$resp->response->errormessage);
                 $order['comments'] = $html;
