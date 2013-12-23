@@ -27,28 +27,33 @@
 		directory="/images/stories/virtuemart/payment/"
 		default="default" hide_default="1" hide_none="1"
 		stripext="0"   exclude="^_" />
-
-        <param name="testmode_paymentplan_se" type="radio" default="1" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
+         <!-- testmode -->
+        <param name="testmode_paymentplan" type="radio" default="1" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
              <option value="1">COM_VIRTUEMART_YES</option>
              <option value="0">COM_VIRTUEMART_NO</option>
-         </param>
-         <param name="clientid_paymentplan_se" type="text"  label="VMPAYMENT_SVEA_CLIENTID" description="VMPAYMENT_SVEA_CLIENTID_EXPLAIN" />
-         <param name="username_paymentplan_se" type="text"  label="VMPAYMENT_SVEA_USERNAME" description="VMPAYMENT_SVEA_USERNAME_EXPLAIN" />
-         <param name="password_paymentplan_se" type="text"  label="VMPAYMENT_SVEA_PASSWORD" description="VMPAYMENT_SVEA_PASSWORD_EXPLAIN" />
+        </param>
+          <!-- credentials -->
+        <param name="clientid_paymentplan" type="text"  label="VMPAYMENT_SVEA_CLIENTID" description="VMPAYMENT_SVEA_CLIENTID_EXPLAIN" />
+        <param name="username_paymentplan" type="text"  label="VMPAYMENT_SVEA_USERNAME" description="VMPAYMENT_SVEA_USERNAME_EXPLAIN" />
+        <param name="password_paymentplan" type="text"  label="VMPAYMENT_SVEA_PASSWORD" description="VMPAYMENT_SVEA_PASSWORD_EXPLAIN" />
 
-         <param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
-         <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
+        <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
+        <param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
 
-         <param name="min_amount" type="text"  label="VMPAYMENT_SVEA_MIN_AMOUNT" description="VMPAYMENT_SVEA_MIN_AMOUNT_EXPLAIN" />
-         <param name="max_amount" type="text"  label="VMPAYMENT_SVEA_MAX_AMOUNT" description="VMPAYMENT_SVEA_MAX_AMOUNT_EXPLAIN" />
+        <param name="min_amount" type="text"  label="VMPAYMENT_SVEA_MIN_AMOUNT" description="VMPAYMENT_SVEA_MIN_AMOUNT_EXPLAIN" />
+        <param name="max_amount" type="text"  label="VMPAYMENT_SVEA_MAX_AMOUNT" description="VMPAYMENT_SVEA_MAX_AMOUNT_EXPLAIN" />
 
-         <param name="cost_per_transaction" type="text"  label="VMPAYMENT_SVEA_COST_PER_TRANSACTION" description="VMPAYMENT_SVEA_COST_PER_TRANSACTION_EXPLAIN" />
-         <param name="cost_percent_total" type="text"  label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
-         <param name="tax_id" type="vmtaxes" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
+        <param name="payment_info" type="textarea" cols="30" rows="3" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
 
-        <param name="payment_info" type="textarea" cols="60" rows="30" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
+        <!-- hidden fields needs to exist in database -->
+        <param name="cost_per_transaction" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PER_TRANSACTION" description="VMPAYMENT_SVEA_COST_PER_TRANSACTION_EXPLAIN" />
+        <param name="cost_percent_total" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />
+        <param name="tax_id" type="hidden" default="" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
+        <param name="status_pending" type="hidden" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
+        <param name="status_denied" type="hidden" scope="com_virtuemart" default="X" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
+
         <param type="spacer" default="" level="level1"/>
-        <param name="status_create_order" type="vmorderstate" scope="com_virtuemart" default="C" label="VMPAYMENT_SVEA_STATUS_CREATED" description="VMPAYMENT_SVEA_STATUS_CREATED_EXPLAIN" />
+        <param name="status_success" type="vmorderstate" scope="com_virtuemart" default="C" label="VMPAYMENT_SVEA_STATUS_CREATED" description="VMPAYMENT_SVEA_STATUS_CREATED_EXPLAIN" />
 
         <param type="spacer" default="" level="level1"/>
          <!--autodeliver-->
@@ -56,7 +61,7 @@
              <option value="0">COM_VIRTUEMART_NO</option>
              <option value="1">COM_VIRTUEMART_YES</option>
          </param>
-          <param name="status_deliver_order" type="vmorderstate" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
+          <param name="status_shipped" type="vmorderstate" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
 
           <param name="distributiontype" type="radio" default="Post" label="VMPAYMENT_SVEA_DISTRIBUTIONTYPE" description="VMPAYMENT_SVEA_DISTRIBUTIONTYPE_DESC">
              <option value="Post">Post</option>
