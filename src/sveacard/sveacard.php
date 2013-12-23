@@ -261,9 +261,12 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 
                 // check valid country
                 $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined        
+                
+                // card payment may be ok if not logged in (in case of non-physical products)
+                if( empty($address) ) return !VmConfig::get('oncheckout_only_registered',0);  // if not logged in, return true iff we allow non-registered users to checkout
+                
 		return $this->addressInAcceptedCountry( $address, $method->countries );
-	}
-        
+        }
         /**
          * Returns true if address is in the list of accepted countries, or if the countries list is empty (i.e. we accept all countries)
          * 
