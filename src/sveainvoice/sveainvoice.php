@@ -802,7 +802,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
         //ajax to getAddress
         $html .= "jQuery('#svea_getaddress_submit').click(function (){
-                        jQuery('#svea_ssn_pp').removeClass('invalid');
+                        jQuery('#svea_ssn').removeClass('invalid');
                         var svea_ssn = jQuery('#svea_ssn').val();
                         var customertype = jQuery('#svea_customertype_div :input:checked').val();
                             if(svea_ssn == ''){

@@ -776,14 +776,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             },
                             url: url_pp,
                             success: function(data){
-                                var json = JSON.parse(data);
-                                 if (json.svea_error ){
-                                    jQuery('#svea_getaddress_error_pp').empty().append('<br>'+json.svea_error).show();
+                                var json_pp = JSON.parse(data);
+                                 if (json_pp.svea_error ){
+                                    jQuery('#svea_getaddress_error_pp').empty().append('<br>'+json_pp.svea_error).show();
                                 }else{
                                     jQuery('#svea_params_div').hide();
                                     var count = 0;
                                     var checkedCampaign = '';
-                                     jQuery.each(json,function(key,value){
+                                     jQuery.each(json_pp,function(key,value){
 
                                         if(count == 0){
                                             checkedCampaign = 'checked';
@@ -840,14 +840,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                     },
                                     url: url_pp,
                                     success: function(data){
-                                        var json = JSON.parse(data);
+                                        var json_pp = JSON.parse(data);
                                          jQuery('#svea_getaddress_error_pp').hide();
-                                         if (json.svea_error){
-                                             jQuery('#svea_getaddress_error_pp').empty().append(' Svea Error: <br>'+json.svea_error).show();
+                                         if (json_pp.svea_error){
+                                             jQuery('#svea_getaddress_error_pp').empty().append(' Svea Error: <br>'+json_pp.svea_error).show();
                                         }else{
                                             jQuery('#svea_address_div_pp').hide();
                                             jQuery('#sveaAddressDiv_pp').remove();
-                                            jQuery('#svea_address_div_pp').append('<div id=\"sveaAddressDiv\"><strong>'+json.fullName+'</strong><br> '+json.street+' <br>'+json.zipCode+' '+json.locality+'</div>');
+                                            jQuery('#svea_address_div_pp').append('<div id=\"sveaAddressDiv\"><strong>'+json_pp.fullName+'</strong><br> '+json_pp.street+' <br>'+json_pp.zipCode+' '+json_pp.locality+'</div>');
 
 
                                         }
@@ -860,13 +860,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         });";
         //append form to parent form in Vm
         $html .=        "jQuery('#svea_form_pp').parents('form').submit( function(){
-                            var action = jQuery('#svea_form_pp').parents('form').attr('action');
-                            var form = jQuery('<form id=\"svea_form_pp\"></form>');
+                            var action_pp = jQuery('#svea_form_pp').parents('form').attr('action');
+                            var form_pp = jQuery('<form id=\"svea_form_pp\"></form>');
                             form.attr('method', 'post');
-                            form.attr('action', action);
-                            var sveaform = jQuery(form).append('form#svea_form_pp');
-                            jQuery(document.body).append(sveaform);
-                            sveaform.submit();
+                            form.attr('action', action_pp);
+                            var sveaform_pp = jQuery(form_pp).append('form_pp#svea_form_pp');
+                            jQuery(document.body).append(sveaform_pp);
+                            sveaform_pp.submit();
                             return false;
 
                         });";
