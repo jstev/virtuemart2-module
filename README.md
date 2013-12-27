@@ -33,6 +33,8 @@ You can now use SveaWebPays pay page with your configured payment methods
 ## Configuration
 
 ### Svea Invoice payment
+Invoice payment may only be used by registered users (and the user must be logged in during checkout).
+
 On the payment method configuration tab:
 
 // TODO -- fix (hide?) sensible defaults for settings that are required but shouldn't need to be changed by user
@@ -45,10 +47,18 @@ SVEA_COST_PERCENT_TOTAL -- set to 0 (or if fee is a percentage, use this?)
 SVEA_TAX -- the tax rate that should apply to the fee/cost percent total
 
 ### Svea Part payment
+Part payment may only be used by registered users (and the user must be logged in during checkout).
 
 ### Svea Card payment
+Card payment may be used by un-registered users (i.e. no user is logged in during checkout). See also "Additional VirtueMart configuration requirements" below
 
 ### Svea Direct bank payment
+Direct bank payment may only be used by registered users (and the user must be logged in during checkout).
+
+### Additional VirtueMart configuration requirements
+For un-registerd users to be able to checkout using Card payment, the setting "Only registred users can checkout" must be unchecked.
+To set this, log in as administrator, select Components/VirtueMart. In the left-hand menu, select Configuration/Configuration and go to the "Checkout" tab and uncheck the "Only registed users can checkout" box.
+
 
 ##Important info
 The request made from this module to SVEAs systems is made through a redirected form. 

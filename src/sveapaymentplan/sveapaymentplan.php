@@ -268,19 +268,18 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 *
 	 */
 	protected function checkConditions($cart, $method, $cart_prices) {
-                // check amount vs config values
-		$amount = $cart_prices['salesPrice'];
-		$amount_cond = ($amount >= (float)$method->min_amount AND $amount <= (float)$method->max_amount
-                                OR
-                                ((float)$method->min_amount <= $amount AND ((float)$method->max_amount == 0))
-                );
-		if (!$amount_cond) {
-                    return false;
-		}
                 
-                // check valid country
-                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined        
-		return $this->addressInAcceptedCountry( $address, $method->countries );
+                // check valid country          
+                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined    
+                
+                if( empty($address) )   // i.e. user not logged in -- 
+                {
+                    return false;       // need billto address for this payment method 
+                }
+                else    // we show payment method if registered customer billto address is in configured list of payment method countries
+                {
+                    return $this->addressInAcceptedCountry( $address, $method->countries );
+                }
 	}
         
         /**
