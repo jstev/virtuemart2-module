@@ -160,8 +160,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
 		$this->storePSPluginInternalData($dbValues);
                   //Print html on thank you page. Will also say "thank you for your order!"
-                $html = '<div class="vmorder-done">' . "\n";
-		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN'), 'class="vmorder-done-payinfo"');
+                 $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
+                $html =  '<img src="'.$logoImg.'" /><br /><br />';
+                $html .= '<div class="vmorder-done">' . "\n";
+                $html .= '<div class="vmorder-done-payinfo">'.JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN').'</div>';
 		if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
 			if ($lang->hasKey ($method->payment_info)) {
@@ -175,11 +177,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
 		}
 		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
-		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER'), $order['details']['BT']->order_number, "vmorder-done-nr");
-		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL'), $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
-		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
-		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
-		$html .= '</div>' . "\n";
+		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
+		$html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>';
+           	$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
 		$order['order_status'] = $method->status_success;
 
