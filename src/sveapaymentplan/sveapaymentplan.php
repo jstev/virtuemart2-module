@@ -160,8 +160,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
 		$this->storePSPluginInternalData($dbValues);
                   //Print html on thank you page. Will also say "thank you for your order!"
-                $html = '<div class="vmorder-done">' . "\n";
-		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN'), 'class="vmorder-done-payinfo"');
+                 $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
+                $html =  '<img src="'.$logoImg.'" /><br /><br />';
+                $html .= '<div class="vmorder-done">' . "\n";
+                $html .= '<div class="vmorder-done-payinfo">'.JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN').'</div>';
 		if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
 			if ($lang->hasKey ($method->payment_info)) {
@@ -175,11 +177,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
 		}
 		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
-		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER'), $order['details']['BT']->order_number, "vmorder-done-nr");
-		$html .= $this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL'), $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount");
-		//$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
-		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
-		$html .= '</div>' . "\n";
+		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
+		$html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>';
+           	$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
 		$order['order_status'] = $method->status_success;
 
@@ -634,6 +634,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         if (!$this->selectedThisElement($method->payment_element)) {
                 return false;
         }
+
         $sveaconfig = new SveaVmConfigurationProviderTest($method);
         $returnArray = array();
         //Get address request
@@ -677,13 +678,21 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             if (isset($svea_params->errormessage)) {
                 $returnArray = array("svea_error" => "Svea error: " .$svea_params->errormessage);
             } else {
-                $formattedPrice = round(JRequest::getVar('sveacarttotal'), 2);//TODO: check if needs to format currency
+                $formattedPrice = JRequest::getVar('sveacarttotal');//TODO: check if needs to format currency
                 $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params);
+                 if (!class_exists ('CurrencyDisplay')) {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
+		}
+                $CurrencyCode = SveaHelper::getCurrencyCodeByCountry(JRequest::getVar('countrycode'));
+                $currencyId = ShopFunctions::getCurrencyIDByName($CurrencyCode);
+                $currency = CurrencyDisplay::getInstance ();
                 if(sizeof($campaigns->values) > 0){
-                    foreach ($campaigns->values as $cc){//todo:hämta valuta
+                    foreach ($campaigns->values as $cc){
                     $returnArray[] = array("campaignCode" => $cc['campaignCode'],
-                        "description" => $cc['description'],
-                        "price_per_month" => (string) roun($cc['pricePerMonth'],2) . " " . "get valuta" . "/" . "translateme month");
+                                            "description" => $cc['description'],
+                                            "price_per_month" => $currency->priceDisplay($cc['pricePerMonth'], $currencyId,1.0) . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
+                                        );
+
                     }
                 }else{
                      $returnArray = array("svea_error" => JText::sprintf("VMPAYMENT_SVEA_DD_NO_CAMPAIGN_ON_AMOUNT"));
@@ -692,6 +701,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
 
         }
+
         echo json_encode($returnArray);
         jexit();
     }
@@ -791,7 +801,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             },
                             url: url_pp,
                             success: function(data){
+                             alert(data);
                                 var json_pp = JSON.parse(data);
+
                                  if (json_pp.svea_error ){
                                     jQuery('#svea_getaddress_error_pp').empty().append('<br>'+json_pp.svea_error).show();
                                 }else{

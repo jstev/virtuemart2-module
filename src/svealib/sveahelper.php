@@ -180,7 +180,7 @@ class SveaHelper {
        if(preg_match("/^VMPAYMENT_SVEA_ERROR_CODE/", $errortranslate))
                 $errortranslate = JText::sprintf ("VMPAYMENT_SVEA_ERROR_CODE_DEFAULT").$errormessage;;
         $app = JFactory::getApplication ();
-        $app->enqueueMessage ( $errortranslate);
+        $app->enqueueMessage ( $errortranslate,'error');
         $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart'));
         $html = '<div>'.$errormessage. "\n";
 
@@ -243,6 +243,33 @@ class SveaHelper {
 
         }
         return $sveaAddresses;
+    }
+
+    public static function getCurrencyCodeByCountry($countryCode) {
+        switch ($countryCode) {
+            case "SE":
+                return "SEK";
+                break;
+            case "NO":
+                return "NOK";
+                break;
+            case "FI":
+                return "EUR";
+                break;
+            case "DK":
+                return "DKK";
+                break;
+            case "NL":
+                return "EUR";
+                break;
+            case "DE":
+                return "EUR";
+                break;
+
+            default:
+                return "SEK";
+                break;
+        }
     }
 
 

@@ -157,7 +157,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 return NULL;
            }
            //TODO: translate Skickar till SveaWebPay...
-             $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;">Skickar till SveaWebPay...<br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
+             $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
             //form
             $fields = $form->htmlFormFieldsAsArray;
             $html .= $fields['form_start_tag'];
@@ -603,11 +603,13 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             if($resp->response->accepted == 1){
                 $order['order_status'] = $method->status_success;
                 $order['customer_notified'] = 1;
-                $order['comments'] = 'Order complete at Svea';
+                $order['comments'] = '';
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-                //wip response
+
+                $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
+                $html =  '<img src="'.$logoImg.'" /><br /><br />';
                 $html .= '<div class="vmorder-done">' . "\n";
-		$html .= "<div>".$this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), JText::sprintf('VMPAYMENT_SVEA_CARD'), 'class="vmorder-done-payinfo"')."</div>";
+                $html .= '<div class="vmorder-done-payinfo">'.JText::sprintf('VMPAYMENT_SVEA_CARD').'</div>';
                 if (!empty($payment_info)) {
 			$lang = JFactory::getLanguage ();
 			if ($lang->hasKey ($method->payment_info)) {
@@ -621,12 +623,10 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 			require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'currency.php');
 		}
 		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
-		$html .= "<div>".$this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER'), $order['details']['BT']->order_number, "vmorder-done-nr")."</div>";
-		$html .= "<div>".$this->getHtmlRow (JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL'), $currency->priceDisplay ($order['details']['BT']->order_total), "vmorder-done-amount")."</div>";
-                //$html .= $this->getHtmlRow('STANDARD_INFO', $method->payment_info);
-		//$html .= $this->getHtmlRow('STANDARD_AMOUNT', $totalInPaymentCurrency.' '.$currency_code_3);
-		$html .= '</div>' . "\n";
-                //wip response end
+		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
+		$html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>';
+           	$html .= '</div>' . "\n";
+
 
             }else{
                 $order['order_status'] = $method->status_denied;
