@@ -245,5 +245,32 @@ class SveaHelper {
         return $sveaAddresses;
     }
 
+    public static function getCurrencyCodeByCountry($countryCode) {
+        switch ($countryCode) {
+            case "SE":
+                return "SEK";
+                break;
+            case "NO":
+                return "NOK";
+                break;
+            case "FI":
+                return "EUR";
+                break;
+            case "DK":
+                return "DKK";
+                break;
+            case "NL":
+                return "EUR";
+                break;
+            case "DE":
+                return "EUR";
+                break;
+
+            default:
+                return "SEK";
+                break;
+        }
+    }
+
 
 }
