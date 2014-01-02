@@ -249,23 +249,34 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 *
 	 */
 	protected function checkConditions($cart, $method, $cart_prices) {
+                 $returnValue = FALSE;
+                // check valid country
+                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
-                // check valid country          
-                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined    
-                
-                if( empty($address) )   // i.e. user not logged in -- 
+                if( empty($address) )   // i.e. user not logged in --
                 {
-                    return false;       // need billto address for this payment method 
+                    $returnValue = false;       // need billto address for this payment method
                 }
                 else    // we show payment method if registered customer billto address is in configured list of payment method countries
                 {
-                    return $this->addressInAcceptedCountry( $address, $method->countries );
+                    $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
                 }
+                 //Check min and max amount. Copied from standard payment
+                // We come from the calculator, the $cart->pricesUnformatted does not exist yet
+		//$amount = $cart->pricesUnformatted['billTotal'];
+		$amount = $cart_prices['salesPrice'];
+		$amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
+			OR
+			($method->min_amount <= $amount AND ($method->max_amount == 0)));
+		if (!$amount_cond) {
+			$returnValue = FALSE;
+		}
+                return $returnValue;
 	}
 
         /**
          * Returns true if address is in the list of accepted countries, or if the countries list is empty (i.e. we accept all countries)
-         * 
+         *
          * @param array $address -- virtuemart address array
          * @param array $countries -- virtuemart list of countries from payment method config
          * @return boolean
@@ -281,7 +292,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $address['virtuemart_country_id'] = 0;
             }
 
-            // sanity check on countries   
+            // sanity check on countries
             $countriesArray = array();
             if( !empty($countries) ) {
                 if (!is_array($countries)) {
@@ -291,7 +302,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 }
             }
 
-            return (count($countriesArray) == 0 || in_array($address['virtuemart_country_id'], $countriesArray)); // ==0 means all countries 
+            return (count($countriesArray) == 0 || in_array($address['virtuemart_country_id'], $countriesArray)); // ==0 means all countries
         }
 
 	/*
@@ -376,12 +387,12 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 //keep end
 		$html = array();
 		$method_name = $this->_psType . '_name';
-		foreach ($this->methods as $method) {   // always one?                   
+		foreach ($this->methods as $method) {   // always one?
 			if ($this->checkConditions ($cart, $method, $cart->pricesUnformatted)) {
 				$methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
-                                
+
                                 //include svea stuff on editpayment page
                                 $countryId = isset( $cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : FALSE;
                                 if( $countryId == FALSE){
