@@ -212,7 +212,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
          */
 
 	/**
-         * TODO: CHECK WHAT IT DOES
 	 * Display stored payment data for an order
 	 *
 	 */
@@ -225,10 +224,11 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 			return NULL;
 		}
 
-		$html = '<table class="adminlist">' . "\n";
+                $html = '<table class="adminlist">' . "\n";
 		$html .= $this->getHtmlHeaderBE();
-		$html .= $this->getHtmlRowBE(JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), $paymentTable->payment_name);
-		$html .= $this->getHtmlRowBE(JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL'), $paymentTable->payment_order_total . ' ' . $paymentTable->payment_currency);
+                $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
+                $html .= '<tr class="row2"><td>Amount</td><td align="left">'. $paymentTable->payment_order_total.'</td></tr>';
+
 		$html .= '</table>' . "\n";
 		return $html;
 	}

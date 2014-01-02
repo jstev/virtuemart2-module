@@ -183,7 +183,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $modelOrder = VmModel::getModel ('orders');
 		$order['order_status'] = $method->status_success;
 
-		$order['comments'] = ' Order created at Svea. ';
+		$order['comments'] = 'Order created at Svea. Svea orderId: '.$svea->sveaOrderId;
 
                   if($method->autodeliver == TRUE){
                     try {
@@ -199,7 +199,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     }
 
                     if($deliverObj->accepted == 1){
-                        $order['comments'] = 'Order delivered at Svea';
+                        $order['comments'] = 'Order delivered at Svea. Svea orderId: '.$svea->sveaOrderId;
                         $order['order_status'] = $method->status_shipped;
 
                     }
@@ -225,7 +225,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	}
 
 	/**
-         * TODO: CHECK WHAT IT DOES
 	 * Display stored payment data for an order
 	 *
 	 */
@@ -237,11 +236,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		if (!($paymentTable = $this->getDataByOrderId($virtuemart_order_id))) {
 			return NULL;
 		}
-
-		$html = '<table class="adminlist">' . "\n";
+                $html = '<table class="adminlist">' . "\n";
 		$html .= $this->getHtmlHeaderBE();
-		$html .= $this->getHtmlRowBE(JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD'), $paymentTable->payment_name);
-		$html .= $this->getHtmlRowBE(JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL'), $paymentTable->payment_order_total . ' ' . $paymentTable->payment_currency);
+                $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
+                $html .= '<tr class="row2"><td>' . JText::sprintf('VMPAYMENT_SVEA_INVOICEFEE').'</td><td align="left">'. $paymentTable->cost_per_transaction.'</td></tr>';
+                $html .= '<tr class="row2"><td>Approved amount</td><td align="left">'. $paymentTable->svea_approved_amount.'</td></tr>';
+                $html .= '<tr class="row2"><td>Expiration date</td><td align="left">'. $paymentTable->svea_expiration_date.'</td></tr>';
+                $html .= '<tr class="row3"><td>Svea orderId</td><td align="left">'. $paymentTable->svea_order_id.'</td></tr>';
+
 		$html .= '</table>' . "\n";
 		return $html;
 	}
