@@ -4,6 +4,7 @@
 - Add info about settings for automatic selected payment.
 - min version of joomla 2.5, because of hidden fields in configuration xml
 - For multiple countries, config one instance per country.
+- If multiple countries confiugured, customer needs to be logged in so we know what fields to show.
 
 ##Index
 * [Requirements] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#requirements)

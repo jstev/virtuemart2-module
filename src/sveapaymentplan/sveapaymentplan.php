@@ -85,14 +85,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 * @author Val?rie Isaksen
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
-                $order['order_status'] = $method->status_pending;
 		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
 			return NULL; // Another method was selected, do nothing
 		}
 		if (!$this->selectedThisElement($method->payment_element)) {
 			return false;
 		}
-
+                $order['order_status'] = $method->status_pending;
 		$lang     = JFactory::getLanguage();
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
@@ -208,6 +207,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
+                $session->destroy();
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
@@ -275,8 +275,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
                 if( empty($address) ) {  // i.e. user not logged in --
-
-                    $returnValue = false;       // need billto address for this payment method
+                    $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
+                    //$returnValue = false;       // need billto address for this payment method
                 }
                 else    // we show payment method if registered customer billto address is in configured list of payment method countries
                 {
@@ -415,9 +415,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
                                 //include svea stuff on editpayment page
-                                $countryId = isset( $cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : FALSE;
-                                if( $countryId == FALSE){
-                                    return false; // need country id, or won't display payment method
+                                if(isset( $cart->BT['virtuemart_country_id'])){
+                                      $countryId =  $cart->BT['virtuemart_country_id'];
+                                }elseif (sizeof($method->countries)== 1) {
+                                   $countryId = $method->countries[0];
+                                }  else {//empty or several countries configured
+                                    return FALSE;//do not know what country, there for don´t know what fields to show.
                                 }
                                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
                                 $html[] = $this->getSveaGetPaymentplanHtml($method->virtuemart_paymentmethod_id,$countryCode,$cart->pricesUnformatted['basePriceWithTax']);
@@ -715,6 +718,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
      * @return string
      */
     public function getSveaGetPaymentplanHtml($paymentId,$countryCode,$cartTotal) {
+        $session = JFactory::getSession();
          $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveapaymentplan';
          $inputFields = '';
         $getAddressButton = '';
@@ -724,7 +728,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         '
                         <fieldset id="svea_ssn_div_pp>
                             <label for="svea_ssn_pp">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
-                            <input type="text" id="svea_ssn_pp" name="svea_ssn_pp" class="required" /><span style="color: red; "> * </span>
+                            <input type="text" id="svea_ssn_pp" name="svea_ssn_pp" value="'.$session->get('svea_ssn_pp').'" class="required" /><span style="color: red; "> * </span>
                         </fieldset>';
         //EU fields
         }elseif($countryCode == "NL" || $countryCode == "DE"){
@@ -733,30 +737,41 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $days = "";
             $zero = "";
             for($d = 1; $d <= 31; $d++){
-
+                $selected = "";
                 $val = $d;
                 if($d < 10)
                     $val = "$d";
 
-                $days .= "<option value='$val'>$d</option>";
+                if($session->get('svea_birthday') == $val)
+                  $selected = "selected";
+
+                      $days .= "<option value='$val' $selected>$d</option>";
             }
             $birthDay = "<select name='svea_birthday' id='birthDay_pp'>$days</select>";
 
             //Months to 12
             $months = "";
             for($m = 1; $m <= 12; $m++){
+                $selected = "";
                 $val = $m;
                 if($m < 10)
                     $val = "$m";
 
-                $months .= "<option value='$val'>$m</option>";
+                if($session->get('svea_birthmonth') == $val)
+                    $selected = "selected";
+
+                $months .= "<option value='$val' $selected>$m</option>";
             }
             $birthMonth = "<select name='svea_birthmonth' id='birthMonth_pp'>$months</select>";
 
             //Years from 1913 to 1996
             $years = '';
             for($y = 1913; $y <= 1996; $y++){
-                $years .= "<option value='$y'>$y</option>";
+                 $selected = "";
+                 if($session->get('svea_birth_year') == $y)
+                    $selected = "selected";
+
+                $years .= "<option value='$y' $selected>$y</option>";
             }
             $birthYear = "<select name='svea_birth_year' id='birthYear_pp'>$years</select>";
 
@@ -765,7 +780,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                 $birthDay . $birthMonth . $birthYear
                             .'</fieldset>';
               if($countryCode == "NL"){
-                $inputFields .=  JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_pp" name="initials" class="required" /><span style="color: red; "> * </span>';
+                $inputFields .=  JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_pp" value="'.$session->get('svea_initials').'" name="svea_initials" class="required" /><span style="color: red; "> * </span>';
             }
         }
         if($countryCode == "SE" || $countryCode == "DK") {
@@ -793,6 +808,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     var sveacarttotal_pp = jQuery('#carttotal').val();
                     var sveaid_pp = jQuery('#paymenttypesvea_pp').val();";
         //do ajax to get params
+        $campaignSaved = $session->get('svea_campaigncode');
         $html .= " jQuery.ajax({
                             type: 'GET',
                             data: {
@@ -803,7 +819,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             },
                             url: url_pp,
                             success: function(data){
-                             alert(data);
                                 var json_pp = JSON.parse(data);
 
                                  if (json_pp.svea_error ){
@@ -813,11 +828,11 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                     var count = 0;
                                     var checkedCampaign = '';
                                      jQuery.each(json_pp,function(key,value){
-
-                                        if(count == 0){
+                                        if('$campaignSaved' == value.campaignCode){
+                                            checkedCampaign = 'checked'
+                                        }else if(count == 0){
                                             checkedCampaign = 'checked';
                                         }
-
                                        jQuery('#svea_params_div').append('<li><input type=\"radio\" name=\"svea_campaigncode\" value=\"'+value.campaignCode+'\" '+checkedCampaign+'>&nbsp<strong>'+value.description+'</strong> ('+value.price_per_month+')</li>');
                                        count ++;
                                        checkedCampaign = '';

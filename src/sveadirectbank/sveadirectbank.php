@@ -248,29 +248,31 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 *
 	 */
 	protected function checkConditions($cart, $method, $cart_prices) {
-                 $returnValue = FALSE;
+            $returnValue = FALSE;
                 // check valid country
-                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
+            $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
-                if( empty($address) )   // i.e. user not logged in --
-                {
-                    $returnValue = false;       // need billto address for this payment method
-                }
-                else    // we show payment method if registered customer billto address is in configured list of payment method countries
-                {
-                    $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
-                }
-                 //Check min and max amount. Copied from standard payment
-                // We come from the calculator, the $cart->pricesUnformatted does not exist yet
-		//$amount = $cart->pricesUnformatted['billTotal'];
-		$amount = $cart_prices['salesPrice'];
-		$amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
-			OR
-			($method->min_amount <= $amount AND ($method->max_amount == 0)));
-		if (!$amount_cond) {
-			$returnValue = FALSE;
-		}
-                return $returnValue;
+            if( empty($address) )   // i.e. user not logged in --
+            {
+                $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
+                //$returnValue = false;       // need billto address for this payment method
+
+              }
+            else    // we show payment method if registered customer billto address is in configured list of payment method countries
+            {
+                $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
+            }
+             //Check min and max amount. Copied from standard payment
+            // We come from the calculator, the $cart->pricesUnformatted does not exist yet
+            //$amount = $cart->pricesUnformatted['billTotal'];
+            $amount = $cart_prices['salesPrice'];
+            $amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
+                    OR
+                    ($method->min_amount <= $amount AND ($method->max_amount == 0)));
+            if (!$amount_cond) {
+                    $returnValue = FALSE;
+            }
+            return $returnValue;
 	}
 
         /**
@@ -391,14 +393,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 				$methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
-
-                                //include svea stuff on editpayment page
-                                $countryId = isset( $cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : FALSE;
-                                if( $countryId == FALSE){
-                                    return false; // need country id, or won't display payment method
-                                }
-                                $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                                $html[] = $this->getSveaDirectBankHtml($method->virtuemart_paymentmethod_id,$countryCode,$cart->pricesUnformatted['basePriceWithTax']);
+                                $html [] = $this->getSveaDirectBankHtml($method->virtuemart_paymentmethod_id,$cart->pricesUnformatted['basePriceWithTax']);
                                 //svea stuff end
 
 			}
@@ -685,7 +680,6 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
         if(JRequest::getVar('type') == 'getBanks'){
             try {
                  $svea = WebPay::getPaymentMethods($sveaconfig)
-                   ->setContryCode(JRequest::getVar('countrycode'))
                    ->doRequest();
             } catch (Exception $e) {
                  vmError ($e->getMessage (), $e->getMessage ());
@@ -714,7 +708,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
      * @param type $countryCode
      * @return string
      */
-    public function getSveaDirectBankHtml($paymentId,$countryCode,$cartTotal) {
+    public function getSveaDirectBankHtml($paymentId,$cartTotal) {
          $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveadirectbank';
          $imageRoot = JURI::root(TRUE) . '/images/stories/virtuemart/payment/svea/';
 
@@ -727,7 +721,6 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
              </fieldset>';
       //start skript and set vars
         $html .= "<script type='text/javascript'>
-                    var countrycode = '$countryCode';
                     var url_db = '$sveaUrlAjax';
                     var image_root = '$imageRoot';
                     var checked_db = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
@@ -737,8 +730,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                             type: 'GET',
                             data: {
                                 sveaid: sveaid_db,
-                                type: 'getBanks',
-                                countrycode: countrycode
+                                type: 'getBanks'
                             },
                             url: url_db,
                             success: function(data){

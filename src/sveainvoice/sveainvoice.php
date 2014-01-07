@@ -118,13 +118,13 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
                 //while processing set to pending
-                $order['order_status'] = $method->status_pending;
 		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
 			return NULL; // Another method was selected, do nothing
 		}
 		if (!$this->selectedThisElement($method->payment_element)) {
 			return false;
 		}
+                $order['order_status'] = $method->status_pending;
 		$lang     = JFactory::getLanguage();
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
@@ -253,7 +253,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 }
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-
+                $session->destroy();
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
@@ -319,12 +319,11 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
                 if( empty($address) ) {  // i.e. user not logged in --
-
-                    $returnValue = false;       // need billto address for this payment method
+                    $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
+                    //$returnValue = false;       // need billto address for this payment method
                 }
                 else    // we show payment method if registered customer billto address is in configured list of payment method countries
                 {
-
                     $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
                 }
                 //Check min and max amount. Copied from standard payment
@@ -460,9 +459,12 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 				$method->$method_name = $this->renderPluginName ($method);
 				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
                                 //include svea stuff on editpayment page
-                                $countryId = isset( $cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : FALSE;
-                                if( $countryId == FALSE){
-                                    return false; // need country id, or won't display payment method
+                                if(isset( $cart->BT['virtuemart_country_id'])){
+                                      $countryId =  $cart->BT['virtuemart_country_id'];
+                                }elseif (sizeof($method->countries)== 1) {
+                                   $countryId = $method->countries[0];
+                                }  else {//empty or several countries configured
+                                    return FALSE;//do not know what country, there for don´t know what fields to show.
                                 }
                                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
                                 $html[] = $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id,$countryCode);
@@ -724,19 +726,27 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
      * @return string
      */
     public function getSveaGetAddressHtml($paymentId,$countryCode) {
+        $session = JFactory::getSession();
         $inputFields = '';
         $getAddressButton = '';
+        $checkedCompany = "";
+        $checkedPrivate = "checked";
+        if($session->get('svea_customertype')== "svea_invoice_customertype_company"){
+            $checkedCompany = "checked";
+            $checkedPrivate = "";
+        }
+
         //NORDIC fields
         if($countryCode == "SE" || $countryCode == "DK" || $countryCode == "NO" || $countryCode == "FI"){
              $inputFields .=
                         '
                             <fieldset id="svea_customertype_div">
-                                <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype" checked>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'</option>
-                                <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'</option>
+                                <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype"'. $checkedPrivate.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'</option>
+                                <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype"'. $checkedCompany.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'</option>
                             </fieldset>
                             <fieldset id="svea_ssn_div>
                                 <label for="svea_ssn">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
-                                <input type="text" id="svea_ssn" name="svea_ssn" class="required" /><span style="color: red; "> * </span>
+                                <input type="text" id="svea_ssn" name="svea_ssn" value="'.$session->get('svea_ssn').'" class="required" /><span style="color: red; "> * </span>
                             </fieldset>
                        ';
         //EU fields
@@ -746,30 +756,40 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
             $days = "";
             $zero = "";
             for($d = 1; $d <= 31; $d++){
-
+                $selected = "";
                 $val = $d;
                 if($d < 10)
                     $val = "$d";
+                if($session->get('svea_birthday') == $val)
+                    $selected = "selected";
 
-                $days .= "<option value='$val'>$d</option>";
+                $days .= "<option value='$val' $selected>$d</option>";
             }
             $birthDay = "<select name='svea_birthday' id='birthDay'>$days</select>";
 
             //Months to 12
             $months = "";
             for($m = 1; $m <= 12; $m++){
+                $selected = "";
                 $val = $m;
                 if($m < 10)
                     $val = "$m";
 
-                $months .= "<option value='$val'>$m</option>";
+                if($session->get('svea_birthmonth') == $val)
+                  $selected = "selected";
+
+                $months .= "<option value='$val' $selected>$m</option>";
             }
             $birthMonth = "<select name='svea_birthmonth' id='birthMonth'>$months</select>";
 
             //Years from 1913 to 1996
             $years = '';
             for($y = 1913; $y <= 1996; $y++){
-                $years .= "<option value='$y'>$y</option>";
+                $selected = "";
+                 if($session->get('svea_birth_year') == $y)
+                    $selected = "selected";
+
+                $years .= "<option value='$y' $selected>$y</option>";
             }
             $birthYear = "<select name='svea_birth_year' id='birthYear'>$years</select>";
 
@@ -778,7 +798,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                 $birthDay . $birthMonth . $birthYear
                             .'</fieldset>';
               if($countryCode == "NL"){
-                $inputFields .= JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials" name="initials" class="required" /><span style="color: red; "> * </span>';
+                $inputFields .= JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials" value="'.$session->get('svea_initials').'" name="initials" class="required" /><span style="color: red; "> * </span>';
             }
         }
         if($countryCode == "SE" || $countryCode == "DK") {

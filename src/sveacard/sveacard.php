@@ -127,9 +127,13 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
              //add coupons TODO: kolla checkbetween to rates i opencart
             $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
-            $countryId = $order['details']['BT']->virtuemart_country_id;
-            if(isset($countryId) == FALSE){
-                return;
+
+            if(isset( $order['details']['BT']->virtuemart_country_id)){
+                $countryId =  $order['details']['BT']->virtuemart_country_id;
+            }elseif (sizeof($method->countries)== 1) {
+               $countryId = $method->countries[0];
+            }  else {//empty or several countries configured
+                return FALSE;//do not know what country, there for don´t know what fields to show.
             }
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
             $return_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' .$order['details']['BT']->order_number .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
@@ -141,7 +145,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
              $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
            try {
                 $form = $svea
-                        ->setCountryCode($countryCode)
+                        ->setCountryCode("")
                         ->setCurrency($currency_code_3)
                         ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
                         ->setOrderDate(date('c'))
@@ -648,13 +652,9 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 
             /**
      * will catch ajaxcall
-     * Svea getAddress->doRequest()
-    * Svea getParams->doRequest()
      * @param type $type
      * @param type $name
      * @param type $render
-
-
     public function plgVmOnSelfCallFE($type,$name,&$render) {
 
     }
