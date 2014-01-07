@@ -525,6 +525,31 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		return $this->onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter);
 	}
 
+        /**
+         * OnCheckAutomaticSelectedPayment
+         * @override
+         * Invoice needs to collect credentials for credit check. This is done in checkout step 3, payment method selection.
+         * By returning 0 even if we're the sole payment method, the vm cart will show the link to checkout step 3, see plgVmOnCheckAutomaticSelectedPayment.
+         * @return int
+         */
+	function onCheckAutomaticSelected (VirtueMartCart $cart, array $cart_prices = array(), &$methodCounter = 0) {
+
+		$virtuemart_pluginmethod_id = 0;
+
+		$nbMethod = $this->getSelectable ($cart, $virtuemart_pluginmethod_id, $cart_prices);
+		$methodCounter += $nbMethod;
+
+		if ($nbMethod == NULL) {
+			return NULL;
+		} else {
+			if ($nbMethod == 1) {
+				return 0; //parent: $virtuemart_pluginmethod_id;
+			} else {
+				return 0;
+			}
+		}
+	}
+               
 	/**
 	 * This method is fired when showing the order details in the frontend.
 	 * It displays the method-specific data.
