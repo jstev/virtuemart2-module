@@ -671,9 +671,9 @@ class plgVmPaymentSveacard extends vmPSPlugin {
          $imageRoot = JURI::root(TRUE) . '/images/stories/virtuemart/payment/svea/';
 
         //box for form
-        $html = '<fieldset id="svea_card">
-                    <input type="hidden" id="paymenttypesvea_cc" value="'. $paymentId . '" />
-                    <input type="hidden" id="carttotal_cc" value="'. $cartTotal . '" />
+        $html = '<fieldset id="svea_card_'.$paymentId.'">
+                    <input type="hidden" id="paymenttypesvea_'.$paymentId.'" value="'. $paymentId . '" />
+                    <input type="hidden" id="carttotal_'.$paymentId.'" value="'. $cartTotal . '" />
                    <fieldset>
                       <img src="'.$imageRoot.'KORTCERT.png" />
                        <img src="'.$imageRoot.'AMEX.png" />
@@ -692,9 +692,9 @@ class plgVmPaymentSveacard extends vmPSPlugin {
          //hide show box
         $html .= "
                         if(checked_cc != sveaid_cc){
-                            jQuery('#svea_card').hide();
+                            jQuery('#svea_card_".$paymentId."').hide();
                         }else{
-                            jQuery('#svea_card').show();
+                            jQuery('#svea_card_".$paymentId."').show();
                         }
                     ";
         //toggle display form
@@ -702,20 +702,20 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                         jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
                             checked_cc = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
                             if(checked_cc == sveaid_cc){
-                                  jQuery("#svea_card").show();
+                                  jQuery("#svea_card_'.$paymentId.'").show();
                             }else{
-                                jQuery("#svea_card").hide();
+                                jQuery("#svea_card_'.$paymentId.'").hide();
                             }
                             });';
 
 
         //append form to parent form in Vm
-        $html .=        "jQuery('#svea_card_form').parents('form').submit( function(){
-                            var action = jQuery('#svea_card_form').parents('form').attr('action');
-                            var form = jQuery('<form id=\"svea_card_form\"></form>');
+        $html .=        "jQuery('#svea_card_form_$paymentId').parents('form').submit( function(){
+                            var action = jQuery('#svea_card_form_$paymentId').parents('form').attr('action');
+                            var form = jQuery('<form id=\"svea_card_form_$paymentId\"></form>');
                             form.attr('method', 'post');
                             form.attr('action', action);
-                            var sveaform = jQuery(form).append('form#svea_card');
+                            var sveaform = jQuery(form).append('form#svea_card_$paymentId');
                             jQuery(document.body).append(sveaform);
                             sveaform.submit();
                             return false;
