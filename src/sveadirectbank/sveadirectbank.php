@@ -457,6 +457,16 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		return $this->onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter);
 	}
 
+        /**
+         * OnCheckAutomaticSelectedPayment
+         * Card needs no extra so we return our payment method id.
+         * @return int
+         */
+        function onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter) {
+            return parent::onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter);
+        }     
+        
+        
 	/**
 	 * This method is fired when showing the order details in the frontend.
 	 * It displays the method-specific data.
