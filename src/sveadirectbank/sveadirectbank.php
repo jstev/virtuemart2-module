@@ -638,12 +638,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
 		$html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>';
                 $html .= '</div>' . "\n";
-
-
-
-
-
-
+                $session = JFactory::getSession();
+                $session->destroy();
             }else{
                 $order['order_status'] = $method->status_denied;
                 $order['customer_notified'] = 0;
@@ -709,8 +705,9 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
      * @return string
      */
     public function getSveaDirectBankHtml($paymentId,$cartTotal) {
-         $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveadirectbank';
-         $imageRoot = JURI::root(TRUE) . '/images/stories/virtuemart/payment/svea/';
+        $session = JFactory::getSession();
+        $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveadirectbank';
+        $imageRoot = JURI::root(TRUE) . '/images/stories/virtuemart/payment/svea/';
 
         //box for form
         $html = '<fieldset id="svea_banks">
@@ -720,11 +717,13 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 <ul id="svea_banks_div" style="list-style-type: none;"></ul>
              </fieldset>';
       //start skript and set vars
+        $saved_bank = $session->get('svea_bank');
         $html .= "<script type='text/javascript'>
                     var url_db = '$sveaUrlAjax';
                     var image_root = '$imageRoot';
                     var checked_db = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
                     var sveaid_db = jQuery('#paymenttypesvea_db').val();";
+
         //do ajax to get bank methods
         $html .= " jQuery.ajax({
                             type: 'GET',
@@ -742,7 +741,9 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                                     var count = 0;
                                     var checkedBank = '';
                                      jQuery.each(json,function(key,value){
-                                        if(count == 0){
+                                      if('$saved_bank' == value){
+                                            checkedBank = 'checked'
+                                        }else if(count == 0){
                                             checkedBank = 'checked';
                                         }
                                        jQuery('#svea_banks_div').append('<li><input type=\"radio\" name=\"svea_bank\" value=\"'+value+'\" '+checkedBank+'>&nbsp <img src='+image_root+value+'.png /></li>');
