@@ -862,7 +862,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                         customertype: customertype_$paymentId,
                                         countrycode: countrycode_$paymentId
                                     },
-                                    url: url,
+                                    url: url_$paymentId,
                                     success: function(data){
                                         var json_$paymentId = JSON.parse(data);
                                          if (json_$paymentId.svea_error){
