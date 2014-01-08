@@ -504,8 +504,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 				return 0;
 			}
 		}
-	}    
-        
+	}
+
 	/**
 	 * This method is fired when showing the order details in the frontend.
 	 * It displays the method-specific data.
@@ -791,9 +791,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
             $birthMonth = "<select name='svea_birthmonth_".$paymentId."' id='birthMonth_".$paymentId."'>$months</select>";
 
-            //Years from 1913 to 1996
+            //Years from 1913 to date('Y')
             $years = '';
-            for($y = 1913; $y <= 1996; $y++){
+            for($y = 1913; $y <= date('Y'); $y++){
                  $selected = "";
                  if($session->get("svea_birthyear_$paymentId") == $y)
                     $selected = "selected";
