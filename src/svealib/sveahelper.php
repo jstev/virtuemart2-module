@@ -57,18 +57,12 @@ class SveaHelper {
         return $svea;
     }
 
-    public static function formatCustomer($svea, $order,$countryCode) {
+    public static function formatCustomer($svea, $order,$countryCode,$paymentId) {
         $session = JFactory::getSession();
-        $customerType = $session->get("svea_customertype");
+        $customerType = $session->get("svea_customertype_$paymentId");
         $pattern = "/^(?:\s)*([0-9]*[A-ZÄÅÆÖØÜßäåæöøüa-z]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]+)(?:\s*)([0-9]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]*[^\s])?(?:\s)*$/";
         preg_match($pattern, $order['details']['BT']->address_1, $addressArr);
         if( !array_key_exists( 2, $addressArr ) ) { $addressArr[2] = ""; } //fix for addresses w/o housenumber
-        $ssn = "";
-        if($session->get('svea_ssn')){
-            $ssn = $session->get('svea_ssn');
-        }elseif($session->get('svea_ssn_pp')){
-            $ssn = $session->get('svea_ssn_pp');
-        }
 
          if ($customerType == "svea_invoice_customertype_company"){
 
@@ -82,16 +76,16 @@ class SveaHelper {
                          ->setIpAddress($order['details']['BT']->ip_address)
                          ->setPhoneNumber(isset($order['details']['BT']->phone_1) ? $order['details']['BT']->phone_1 : $order['details']['BT']->phone_2);
             if($countryCode == "DE" || $countryCode == "NL"){
-                $item = $item->setVatNumber($ssn );
+                $item = $item->setVatNumber( $session->get("svea_ssn_$paymentId") );
             }else{
-                $item = $item->setNationalIdNumber($ssn);
-                $item = $item->setAddressSelector($session->get('svea_addresselector'));
+                $item = $item->setNationalIdNumber( $session->get("svea_ssn_$paymentId"));
+                $item = $item->setAddressSelector($session->get("svea_addresselector_$paymentId"));
             }
             $svea = $svea->addCustomerDetails($item);
         }else{
             $item = Item::individualCustomer();
             //send customer filled address to svea. Svea will use address from getAddress for the invoice.
-            $item = $item->setNationalIdNumber($ssn)
+            $item = $item->setNationalIdNumber( $session->get("svea_ssn_$paymentId"))
                          ->setEmail($order['details']['BT']->email)
                          ->setName($order['details']['BT']->first_name,$order['details']['BT']->last_name)
                          ->setStreetAddress($addressArr[1],$addressArr[2])
@@ -101,10 +95,10 @@ class SveaHelper {
                          ->setPhoneNumber(isset($order['details']['BT']->phone_1) ? $order['details']['BT']->phone_1 : $order['details']['BT']->phone_2);
 
             if($countryCode == "DE" || $countryCode == "NL"){
-                $item = $item->setBirthDate($session->get('svea_birthyear'), $session->get('svea_birthmonth'), $session->get('svea_birthday'));
+                $item = $item->setBirthDate($session->get("svea_birthyear_$paymentId"), $session->get("svea_birthmonth_$paymentId"), $session->get("svea_birthday_$paymentId"));
             }
             if($countryCode == "NL"){
-                $item = $item->setInitials($session->get('svea_initials'));
+                $item = $item->setInitials($session->get("svea_initials_$paymentId"));
             }
             $svea = $svea->addCustomerDetails($item);
         }
