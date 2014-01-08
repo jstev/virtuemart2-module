@@ -163,7 +163,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
              $session = JFactory::getSession();
              //add customer
-             $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
+             $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
            try {
                 $svea = $svea
                       ->setCountryCode($countryCode)
