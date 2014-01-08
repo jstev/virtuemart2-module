@@ -426,59 +426,62 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 		return $this->displayListFE($cart, $selected, $htmlIn);
 	}
         /**
-         * loads Svea getAddress html
+         * @override -- adds our Svea getAddress customer credentials form fiels to html
 	 * This event is fired to display the pluginmethods in the cart (edit shipment/payment) for example
 	 *
 	 * @param object  $cart Cart object
 	 * @param integer $selected ID of the method selected
 	 * @return boolean True on success, false on failures, null when this plugin was not selected.
 	 * On errors, JError::raiseWarning (or JError::raiseError) must be used to set a message.
-	 *
-	 * @author Valerie Isaksen
-	 * @author Max Milbers
 	 */
         public function displayListFE (VirtueMartCart $cart, $selected = 0, &$htmlIn) {
             //from parent. keep
-            	if ($this->getPluginMethods ($cart->vendorId) === 0) {
-			if (empty($this->_name)) {
-				vmAdminInfo ('displayListFE cartVendorId=' . $cart->vendorId);
-				$app = JFactory::getApplication ();
-				$app->enqueueMessage (JText::_ ('COM_VIRTUEMART_CART_NO_' . strtoupper ($this->_psType)));
-				return FALSE;
-			} else {
-				return FALSE;
-			}
-		}
-                //keep end
-		$html = array();
-		$method_name = $this->_psType . '_name';
-		foreach ($this->methods as $method) {
-			if ($this->checkConditions ($cart, $method, $cart->pricesUnformatted)) {
-
-				$methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
-				$method->$method_name = $this->renderPluginName ($method);
-				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
-                                //include svea stuff on editpayment page
-                                if(isset( $cart->BT['virtuemart_country_id'])){
-                                      $countryId =  $cart->BT['virtuemart_country_id'];
-                                }elseif (sizeof($method->countries)== 1) {
-                                   $countryId = $method->countries[0];
-                                }  else {//empty or several countries configured
-                                    return FALSE;//do not know what country, there for don´t know what fields to show.
-                                }
-                                $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                                $html[] = $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id,$countryCode);
-                                //svea stuff end
-
-			}
-		}
-		if (!empty($html)) {
-			$htmlIn[] = $html;
-			return TRUE;
-		}
-
-		return FALSE;
-
+            if ($this->getPluginMethods ($cart->vendorId) === 0) {
+                if (empty($this->_name)) {
+                    vmAdminInfo ('displayListFE cartVendorId=' . $cart->vendorId);
+                    $app = JFactory::getApplication ();
+                    $app->enqueueMessage (JText::_ ('COM_VIRTUEMART_CART_NO_' . strtoupper ($this->_psType)));
+                    return FALSE;
+                } else {
+                    return FALSE;
+                }
+            }
+            //keep end      
+            
+            $html = array();
+            $method_name = $this->_psType . '_name';
+            foreach ($this->methods as $method) 
+            {
+                if ($this->checkConditions ($cart, $method, $cart->pricesUnformatted)) 
+                {
+                    $methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
+                    $method->$method_name = $this->renderPluginName ($method);
+                    $html[] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
+                    
+                    //include svea stuff on editpayment page
+                    if(isset( $cart->BT['virtuemart_country_id']))  // BillTo is set, so use country (i.e registered user)
+                    {
+                        $countryId =  $cart->BT['virtuemart_country_id'];
+                    }
+                    elseif( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
+                    {
+                        $countryId = $method->countries[0];
+                    } 
+                    else //empty or several countries configured in payment method
+                    {
+                        return FALSE; //do not know what country, therefore don´t know what fields to show.
+                    }
+                    $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
+                    $html[] = $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id,$countryCode);
+                    //svea stuff end
+                }
+            }
+            if(!empty($html)) 
+            {
+                $htmlIn[] = $html;
+                return TRUE;
+            }
+            return FALSE;
         }
 
 	/**
