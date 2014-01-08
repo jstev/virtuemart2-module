@@ -4,8 +4,12 @@ require_once "$root/../Includes.php";
 
 /**
  * @implements ConfigurationProvider interface
+ * 
  * This class returns virtuemart payment metod configuration data in a manner 
  * the Svea integration package (i.e. the included svealib) can use
+ * 
+ * As each payment method is an instance with its own ConfigurationProvider 
+ * implementation, methods often just return the configuration setting.
  */
 class SveaVmConfigurationProviderTest implements ConfigurationProvider
 {
@@ -15,17 +19,23 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider
          $this->config = $config;
     }
     /**
-     * @param type $type
-     * @param type $country
-     * @return type
+     * getter for this payment method instance (test) ClientId (ClientNumber)
      */
     public function getClientNumber($type, $country) {
-        $lowertype = strtolower($type);
-        if($lowertype == "paymentplan"){
-            return $this->config->clientid_paymentplan;
-        }  else {
-            return $this->config->clientid_invoice;
-        }
+        return property_exists( $this->config, "clientid" ) ? $this->config->clientid : false;  // same for test and prod
+    }
+    /**
+     * getter for this payment method instance (test) password
+     */
+    public function getPassword($type, $country) {
+        return $this->config->password;     // same for test and prod
+    }
+
+    /**
+     * getter for this payment method instance (test) username
+     */
+    public function getUsername($type, $country) {
+        return $this->config->username;     // same for test and prod
     }
 
     public function getEndPoint($type) {
@@ -48,7 +58,7 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider
      * @return returns this payment method instance (test) merchantid
      */
     public function getMerchantId($type, $country) {
-        return $this->config->merchantid_test;  // same for card and directbank     
+        return $this->config->merchantid_test;
     }
     /**
      * getter for this payment method instance (test) secret
@@ -58,34 +68,6 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider
      * @return returns this payment method instance (test) secret
      */
     public function getSecret($type, $country) {
-        return $this->config->secret_test;  // same for card and directbank
-    }
-    /**
-     * @param type $type
-     * @param type $country
-     * @return type
-     */
-    public function getPassword($type, $country) {
-        $lowertype = strtolower($type);
-        if($lowertype == "paymentplan"){
-            return $this->config->password_paymentplan;
-        }else{
-            return $this->config->password_invoice;
-        }
-
-    }
-
-    /**
-     * @param type $type
-     * @param type $country
-     * @return type
-     */
-    public function getUsername($type, $country) {
-        $lowertype = strtolower($type);
-        if($lowertype == "paymentplan"){
-            return $this->config->username_paymentplan;
-        }  else {
-             return $this->config->username_invoice;
-        }
+        return $this->config->secret_test;
     }
 }
