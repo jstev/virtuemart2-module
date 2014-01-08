@@ -1,10 +1,8 @@
 # Virtuemart 2 - Svea WebPay payment module installation guide
 
 ##TODO:
-- Add info about settings for automatic selected payment.
 - min version of joomla 2.5, because of hidden fields in configuration xml
-- For multiple countries, config one instance per country.
-- If multiple countries confiugured, customer needs to be logged in so we know what fields to show.
+
 
 ##Index
 * [Requirements] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#requirements)
@@ -31,24 +29,36 @@ VirtueMart 2.0+
 
 You can now use SveaWebPays pay page with your configured payment methods
 
-## Configuration
+## Payment method Configuration
 
 ### Svea Invoice payment
-Invoice payment may only be used by registered users (and the user must be logged in during checkout).
+If you plan on accepting Invoice payments from customers in several countries, you will need to configure multiple instances of the Invoice payment method. Each instance should accept payments from one country only, see further under client id and country settings below.
 
-On the payment method configuration tab:
+The Invoice payment method may be used by unregistered users -- we present all instances, and it is up to the user to select the correct instance corresponding to the customer country. The provided Get Addresses functionality will avoid the customer needing to enter address data manually.
 
-// TODO -- fix (hide?) sensible defaults for settings that are required but shouldn't need to be changed by user
+#### Payment Method Information tab
+* Payment Name -- set to "Svea faktura" or the equivalent in your language. 
+* Payment Description -- "Sverige"
+* Payment Method -- select Svea Invoice.
+// TODO -- what happens if different languages -- recommend enter in local language/corresponding to country setting? -- See locale files for translations!
 
+#### Configuration tab
+* Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
+* Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. 
+* Accepted Currency -- TODO
+* Country -- select the country corresponding to this client id.
+* ... 
+// TODO other settings -- fix (hide?) sensible defaults for settings that are required but shouldn't need to be changed by user 
+-- check what the VMConfig::get(name,default) defaults to?
 (...)
 SVEA_MIN_AMOUNT -- set to 0
-SVEA_MAX_AMOUNT -- set to 100000 (or other sufficiently large number)
+SVEA_MAX_AMOUNT -- set to 100000 (or other sufficiently large number)?
 SVEA_INVOICEFEE -- set to amount ex. tax
 SVEA_COST_PERCENT_TOTAL -- set to 0 (or if fee is a percentage, use this?)
 SVEA_TAX -- the tax rate that should apply to the fee/cost percent total
 
 ### Svea Part payment
-Part payment may only be used by registered users (and the user must be logged in during checkout).
+Part payment may be used by unregistered users. We present the all methods, and it is up to the user to select the correct country invoice method. 
 
 ### Svea Card payment
 Card payment may be used by un-registered users (i.e. no user is logged in during checkout). See also "Additional VirtueMart configuration requirements" below
@@ -56,12 +66,21 @@ Card payment may be used by un-registered users (i.e. no user is logged in durin
 ### Svea Direct bank payment
 Direct bank payment may only be used by registered users (and the user must be logged in during checkout).
 
-### Additional VirtueMart configuration requirements
-For un-registerd users to be able to checkout using Card payment, the setting "Only registred users can checkout" must be unchecked.
-To set this, log in as administrator, select Components/VirtueMart. In the left-hand menu, select Configuration/Configuration and go to the "Checkout" tab and uncheck the "Only registed users can checkout" box.
+## Additional VirtueMart configuration
+
+To configure additional VirtueMart settings, log in to your Joomla installation as administrator, and select Components/VirtueMart in the menu. 
+In the lefthand VirtueMart menu, the following settings are relevant to Svea payment methods:
+
+### Configuration
+#### Checkout tab
+* Only registred users can checkout -- this must be unchecked for unregisterd users to be able to checkout.
+* One Page Checkout enabled -- TODO
+* Enable Automatic Selected Payment -- for Svea Invoice and Part payment only, the "Select payment" link will show up even when this option is checked. This is due to these methods needing additional customer credentials collected in the "Select payment" step.
+* On checkout, ask for registration -- TODO
+* Only registered users can checkout -- for Svea Invoice and Part payment only, we populate the cart Bill to-address for unregistered users with the result of the GetAddress request. This avoids unregistered customers needing to enter their address manually upon checkout.
 
 
-##Important info
+## Important info
 The request made from this module to SVEAs systems is made through a redirected form. 
 The response of the payment is then sent back to the module via POST or GET (selectable in our admin).
 
