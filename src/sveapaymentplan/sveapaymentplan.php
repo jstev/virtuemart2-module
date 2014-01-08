@@ -826,13 +826,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                                 var jsonP_$paymentId = JSON.parse(data);
 
-                                 if (jsonP_".$paymentId.".svea_error ){
-                                    jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>'+jsonP_".$paymentId.".svea_error).show();
+                                 if (jsonP_$paymentId.svea_error ){
+                                    jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>'+jsonP_$paymentId.svea_error).show();
                                 }else{
                                     jQuery('#svea_params_div_$paymentId').hide();
                                     var count = 0;
                                     var checkedCampaign = '';
-                                     jQuery.each(jsonP_".$paymentId.",function(key,value){
+                                     jQuery.each(jsonP_$paymentId,function(key,value){
                                         if('$campaignSaved' == value.campaignCode){
                                             checkedCampaign = 'checked'
                                         }else if(count == 0){
@@ -912,7 +912,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         //append form to parent form in Vm
         $html .=        "jQuery('#svea_form_$paymentId').parents('form').submit( function(){
 
-                            var svea_action_".$paymentId." = jQuery('#svea_form_$paymentId').parents('form').attr('action');
+                            var svea_action_$paymentId = jQuery('#svea_form_$paymentId').parents('form').attr('action');
 
                             var form_$paymentId = jQuery('<form id=\"svea_form_$paymentId\"></form>');
 

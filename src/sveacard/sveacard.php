@@ -682,8 +682,8 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 </fieldset>';
       //start skript and set vars
         $html .= "<script type='text/javascript'>
-                    var checked_cc = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
-                    var sveaid_cc = jQuery('#paymenttypesvea_cc').val();";
+                    var checked_$paymentId = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
+                    var sveaid_$paymentId = jQuery('#paymenttypesvea_$paymentId').val();";
 
 
        //Document ready start
@@ -691,17 +691,17 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 
          //hide show box
         $html .= "
-                        if(checked_cc != sveaid_cc){
-                            jQuery('#svea_card_".$paymentId."').hide();
+                        if(checked_$paymentId != sveaid_$paymentId){
+                            jQuery('#svea_card_$paymentId').hide();
                         }else{
-                            jQuery('#svea_card_".$paymentId."').show();
+                            jQuery('#svea_card_$paymentId').show();
                         }
                     ";
         //toggle display form
         $html .=        '
                         jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
-                            checked_cc = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                            if(checked_cc == sveaid_cc){
+                            checked_'.$paymentId.' = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
+                            if(checked_'.$paymentId.' == sveaid_'.$paymentId.'){
                                   jQuery("#svea_card_'.$paymentId.'").show();
                             }else{
                                 jQuery("#svea_card_'.$paymentId.'").hide();
@@ -710,14 +710,14 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 
 
         //append form to parent form in Vm
-        $html .=        "jQuery('#svea_card_form_$paymentId').parents('form').submit( function(){
-                            var action = jQuery('#svea_card_form_$paymentId').parents('form').attr('action');
-                            var form = jQuery('<form id=\"svea_card_form_$paymentId\"></form>');
+        $html .=        "jQuery('#svea_form_$paymentId').parents('form').submit( function(){
+                            var svea_action_$paymentId = jQuery('#svea_form_$paymentId').parents('form').attr('action');
+                            var form_$paymentId = jQuery('<form id=\"svea_form_$paymentId\"></form>');
                             form.attr('method', 'post');
-                            form.attr('action', action);
-                            var sveaform = jQuery(form).append('form#svea_card_$paymentId');
-                            jQuery(document.body).append(sveaform);
-                            sveaform.submit();
+                            form.attr('action', svea_action_$paymentId);
+                            var sveaform_$paymentId = jQuery(form_$paymentId).append('form#svea_form_$paymentId');
+                            jQuery(document.body).append(sveaform_$paymentId);
+                            sveaform_$paymentId.submit();
                             return false;
 
                         });";
