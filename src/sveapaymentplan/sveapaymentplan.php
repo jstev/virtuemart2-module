@@ -914,14 +914,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                             var svea_action_".$paymentId." = jQuery('#svea_form_$paymentId').parents('form').attr('action');
 
-                            var form_".$paymentId." = jQuery('<form id=\"svea_form_$paymentId\"></form>');
+                            var form_$paymentId = jQuery('<form id=\"svea_form_$paymentId\"></form>');
 
                             form.attr('method', 'post');
-                            form.attr('action', svea_action_".$paymentId.");
+                            form.attr('action', svea_action_$paymentId);
 
-                            var sveaform_".$paymentId." = jQuery(form_".$paymentId.").append('form#svea_form_$paymentId');
-                            jQuery(document.body).append(sveaform_".$paymentId.");
-                            sveaform_".$paymentId.".submit();
+                            var sveaform_$paymentId = jQuery(form_$paymentId).append('form#svea_form_$paymentId');
+                            jQuery(document.body).append(sveaform_$paymentId);
+                            sveaform_$paymentId.submit();
                             return false;
 
                         });";

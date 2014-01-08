@@ -717,36 +717,36 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 <ul id="svea_banks_div_'.$paymentId.'" style="list-style-type: none;"></ul>
              </fieldset>';
       //start skript and set vars
-        $saved_bank = $session->get('svea_bank');
+        $saved_bank = $session->get("svea_bank_$paymentId");
         $html .= "<script type='text/javascript'>
-                    var url_db = '$sveaUrlAjax';
-                    var image_root = '$imageRoot';
-                    var checked_db = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
-                    var sveaid_db = jQuery('#paymenttypesvea_".$paymentId."').val();";
+                    var url_$paymentId = '$sveaUrlAjax';
+                    var image_root_$paymentId = '$imageRoot';
+                    var checked_$paymentId = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
+                    var sveaid_$paymentId = jQuery('#paymenttypesvea_".$paymentId."').val();";
 
         //do ajax to get bank methods
         $html .= " jQuery.ajax({
                             type: 'GET',
                             data: {
-                                sveaid: sveaid_db,
+                                sveaid: sveaid_$paymentId,
                                 type: 'getBanks'
                             },
-                            url: url_db,
+                            url: url_$paymentId,
                             success: function(data){
-                                var json = JSON.parse(data);
-                                 if (json.svea_error ){
-                                    jQuery('#svea_banks_error_".$paymentId."').empty().append('<br>'+json.svea_error).show();
+                                var json_$paymentId = JSON.parse(data);
+                                 if (json_$paymentId.svea_error ){
+                                    jQuery('#svea_banks_error_".$paymentId."').empty().append('<br>'+json_$paymentId.svea_error).show();
                                 }else{
                                     jQuery('#svea_banks_div_".$paymentId."').hide();
                                     var count = 0;
                                     var checkedBank = '';
-                                     jQuery.each(json,function(key,value){
+                                     jQuery.each(json_$paymentId,function(key,value){
                                       if('$saved_bank' == value){
                                             checkedBank = 'checked'
                                         }else if(count == 0){
                                             checkedBank = 'checked';
                                         }
-                                       jQuery('#svea_banks_div_".$paymentId."').append('<li><input type=\"radio\" name=\"svea_bank\" value=\"'+value+'\" '+checkedBank+'>&nbsp <img src='+image_root+value+'.png /></li>');
+                                       jQuery('#svea_banks_div_".$paymentId."').append('<li><input type=\"radio\" name=\"svea_bank_$paymentId\" value=\"'+value+'\" '+checkedBank+'>&nbsp <img src='+image_root_$paymentId+value+'.png /></li>');
                                        count ++;
                                        checkedBank = '';
                                      });
@@ -762,7 +762,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
          //hide show box
         $html .= "
-                        if(checked_db != sveaid_db){
+                        if(checked_$paymentId != sveaid_$paymentId){
                             jQuery('#svea_banks_".$paymentId."').hide();
                         }else{
                             jQuery('#svea_banks_".$paymentId."').show();
@@ -771,8 +771,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
         //toggle display form
         $html .=        '
                         jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
-                            checked_db = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                            if(checked_db == sveaid_db){
+                            checked_'.$paymentId.' = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
+                            if(checked_'.$paymentId.' == sveaid_'.$paymentId.'){
                                   jQuery("#svea_banks_'.$paymentId.'").show();
                             }else{
                                 jQuery("#svea_banks_'.$paymentId.'").hide();
@@ -782,13 +782,13 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
         //append form to parent form in Vm
         $html .=        "jQuery('#svea_banks_form_$paymentId').parents('form').submit( function(){
-                            var action = jQuery('#svea_banks_form_$paymentId').parents('form').attr('action');
-                            var form = jQuery('<form id=\"svea_banks_form_$paymentId\"></form>');
+                            var svea_action_$paymentId = jQuery('#svea_banks_form_$paymentId').parents('form').attr('action');
+                            var form_$paymentId = jQuery('<form id=\"svea_banks_form_$paymentId\"></form>');
                             form.attr('method', 'post');
-                            form.attr('action', action);
-                            var sveaform = jQuery(form).append('form#svea_banks_$paymentId');
-                            jQuery(document.body).append(sveaform);
-                            sveaform.submit();
+                            form.attr('action', svea_action_$paymentId);
+                            var sveaform_$paymentId = jQuery(form_$paymentId).append('form#svea_banks_$paymentId');
+                            jQuery(document.body).append(sveaform_$paymentId);
+                            sveaform_$paymentId.submit();
                             return false;
 
                         });";
