@@ -731,7 +731,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         $getAddressButton = '';
         $checkedCompany = "";
         $checkedPrivate = "checked";
-        if($session->get('svea_customertype')== "svea_invoice_customertype_company"){
+        if($session->get("svea_customertype_$paymentId")== "svea_invoice_customertype_company"){
             $checkedCompany = "checked";
             $checkedPrivate = "";
         }
@@ -741,12 +741,12 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
              $inputFields .=
                         '
                             <fieldset id="svea_customertype_div'.$paymentId.'">
-                                <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype"'. $checkedPrivate.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'</option>
-                                <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype"'. $checkedCompany.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'</option>
+                                <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype_'.$paymentId.'"'. $checkedPrivate.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'</option>
+                                <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype_'.$paymentId.'"'. $checkedCompany.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'</option>
                             </fieldset>
                             <fieldset id="svea_ssn_div_'.$paymentId.'">
-                                <label for="svea_ssn">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
-                                <input type="text" id="svea_ssn_'.$paymentId.'" name="svea_ssn" value="'.$session->get('svea_ssn').'" class="required" /><span style="color: red; "> * </span>
+                                <label for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
+                                <input type="text" id="svea_ssn_'.$paymentId.'" name="svea_ssn_'.$paymentId.'" value="'.$session->get("svea_ssn_$paymentId").'" class="required" /><span style="color: red; "> * </span>
                             </fieldset>
                        ';
         //EU fields
@@ -760,12 +760,12 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 $val = $d;
                 if($d < 10)
                     $val = "$d";
-                if($session->get('svea_birthday') == $val)
+                if($session->get("svea_birthday_$paymentId") == $val)
                     $selected = "selected";
 
                 $days .= "<option value='$val' $selected>$d</option>";
             }
-            $birthDay = "<select name='svea_birthday' id='birthDay_".$paymentId."'>$days</select>";
+            $birthDay = "<select name='svea_birthday_".$paymentId."' id='birthDay_".$paymentId."'>$days</select>";
 
             //Months to 12
             $months = "";
@@ -775,30 +775,30 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 if($m < 10)
                     $val = "$m";
 
-                if($session->get('svea_birthmonth') == $val)
+                if($session->get("svea_birthmonth_$paymentId") == $val)
                   $selected = "selected";
 
                 $months .= "<option value='$val' $selected>$m</option>";
             }
-            $birthMonth = "<select name='svea_birthmonth' id='birthMonth_".$paymentId."'>$months</select>";
+            $birthMonth = "<select name='svea_birthmonth_".$paymentId."' id='birthMonth_".$paymentId."'>$months</select>";
 
             //Years from 1913 to 1996
             $years = '';
             for($y = 1913; $y <= 1996; $y++){
                 $selected = "";
-                 if($session->get('svea_birth_year') == $y)
+                 if($session->get("svea_birthyear_$paymentId") == $y)
                     $selected = "selected";
 
                 $years .= "<option value='$y' $selected>$y</option>";
             }
-            $birthYear = "<select name='svea_birth_year' id='birthYear_".$paymentId."'>$years</select>";
+            $birthYear = "<select name='svea_birthyear_".$paymentId."' id='birthYear_".$paymentId."'>$years</select>";
 
-                       $inputFields =  '<label for="svea_birthdate">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_BIRTHDATE").'</label>
+                       $inputFields =  '<label for="svea_birthdate_'.$paymentId.'">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_BIRTHDATE").'</label>
                             <fieldset id="svea_birthdate_'.$paymentId.'">'.
                                 $birthDay . $birthMonth . $birthYear
                             .'</fieldset>';
               if($countryCode == "NL"){
-                $inputFields .= JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.$session->get('svea_initials').'" name="initials" class="required" /><span style="color: red; "> * </span>';
+                $inputFields .= JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.$session->get("svea_initials_$paymentId").'" name="initials" class="required" /><span style="color: red; "> * </span>';
             }
         }
         if($countryCode == "SE" || $countryCode == "DK") {
@@ -821,16 +821,16 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         //hide show get address div
         $html .= '<script type="text/javascript">
                     jQuery(document).ready(function ($){
-                        var checked = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                        var sveaid = jQuery("#paymenttypesvea_'.$paymentId.'").val();
-                        if(checked != sveaid){
+                        var checked_'.$paymentId.' = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
+                        var sveaid_'.$paymentId.' = jQuery("#paymenttypesvea_'.$paymentId.'").val();
+                        if(checked_'.$paymentId.' != sveaid_'.$paymentId.'){
                             jQuery("#svea_getaddress_'.$paymentId.'").hide();
                         }else{
                              jQuery("#svea_getaddress_'.$paymentId.'").show();
                         }
                         jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
-                            checked = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                            if(checked == sveaid){
+                            checked_'.$paymentId.' = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
+                            if(checked_'.$paymentId.' == sveaid_'.$paymentId.'){
                                   jQuery("#svea_getaddress_'.$paymentId.'").show();
                             }else{
                                 jQuery("#svea_getaddress_'.$paymentId.'").hide();
@@ -840,31 +840,31 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         //ajax to getAddress
         $html .= "jQuery('#svea_getaddress_submit_$paymentId').click(function (){
                         jQuery('#svea_ssn_$paymentId').removeClass('invalid');
-                        var svea_ssn = jQuery('#svea_ssn_$paymentId').val();
-                        var customertype = jQuery('#svea_customertype_div_$paymentId :input:checked').val();
-                            if(svea_ssn == ''){
+                        var svea_ssn_$paymentId = jQuery('#svea_ssn_$paymentId').val();
+                        var customertype_$paymentId = jQuery('#svea_customertype_div_$paymentId :input:checked').val();
+                            if(svea_ssn_$paymentId == ''){
                                 jQuery('#svea_ssn_$paymentId').addClass('invalid');
                                 jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * required');
                             }else{
-                                var countrycode = '$countryCode';
-                                var url = '$sveaUrlAjax';
+                                var countrycode_$paymentId = '$countryCode';
+                                var url_$paymentId = '$sveaUrlAjax';
 
                                 jQuery.ajax({
                                     type: 'GET',
                                     data: {
-                                        sveaid: sveaid,
+                                        sveaid: sveaid_$paymentId,
                                         type: 'getAddress',
-                                        svea_ssn: svea_ssn,
-                                        customertype: customertype,
-                                        countrycode: countrycode
+                                        svea_ssn: svea_ssn_$paymentId,
+                                        customertype: customertype_$paymentId,
+                                        countrycode: countrycode_$paymentId
                                     },
                                     url: url,
                                     success: function(data){
-                                        var json = JSON.parse(data);
-                                         if (json.svea_error){
-                                            jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>'+json.svea_error).show();
+                                        var json_$paymentId = JSON.parse(data);
+                                         if (json_$paymentId.svea_error){
+                                            jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>'+json_$paymentId.svea_error).show();
                                         }else{
-                                            if(customertype == 'svea_invoice_customertype_company'){
+                                            if(customertype_$paymentId == 'svea_invoice_customertype_company'){
                                               jQuery('#svea_address_div_$paymentId').empty().append('<select id=\"sveaAddressDiv\" name=\"svea_addressselector\"></select>');
                                                 jQuery.each(json,function(key,value){
                                                     jQuery('#sveaAddressDiv_$paymentId').append('<option value=\"'+value.addressSelector+'\">'+value.fullName+' '+value.street+' '+value.zipCode+' '+value.locality+'</option>');
@@ -874,7 +874,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                             }else{
                                                 jQuery('#svea_address_div_$paymentId').hide();
                                                 jQuery('#sveaAddressDiv_$paymentId').remove();
-                                                jQuery('#svea_address_div_$paymentId').append('<div id=\"sveaAddressDiv\"><strong>'+json[0].fullName+'</strong><br> '+json[0].street+' <br>'+json[0].zipCode+' '+json[0].locality+'</div>');
+                                                jQuery('#svea_address_div_$paymentId').append('<div id=\"sveaAddressDiv_$paymentId\"><strong>'+json_$paymentId[0].fullName+'</strong><br> '+json_$paymentId[0].street+' <br>'+json_$paymentId[0].zipCode+' '+json_$paymentId[0].locality+'</div>');
 
                                             }
                                              jQuery('#svea_address_div_$paymentId').show();
@@ -888,13 +888,13 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
                         });";
         $html .=        "jQuery('#svea_form_$paymentId').parents('form').submit( function(){
-                            var action = jQuery('#svea_form_$paymentId').parents('form').attr('action');
-                            var form = jQuery('<form id=\"svea_form_$paymentId\"></form>');
+                            var svea_action_$paymentId = jQuery('#svea_form_$paymentId').parents('form').attr('action');
+                            var form_$paymentId = jQuery('<form id=\"svea_form_$paymentId\"></form>');
                             form.attr('method', 'post');
-                            form.attr('action', action);
-                            var sveaform = jQuery(form).append('form#svea_form_$paymentId');
-                            jQuery(document.body).append(sveaform);
-                            sveaform.submit();
+                            form.attr('action', svea_action_$paymentId);
+                            var sveaform_$paymentId = jQuery(form_$paymentId).append('form#svea_form_$paymentId');
+                            jQuery(document.body).append(sveaform_$paymentId);
+                            sveaform_$paymentId.submit();
                             return false;
 
                         });
