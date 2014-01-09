@@ -129,7 +129,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
              //add customer
              $session = JFactory::getSession();
-             $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
+             $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
            try {
                 $svea = $svea
                       ->setCountryCode($countryCode)
