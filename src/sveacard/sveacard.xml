@@ -5,17 +5,23 @@
     <author>Shaho Ghobadi</author>
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
-    <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
+    <license> http://www.apache.org/licenses/LICENSE-2.0</license>
     <version>VMPAYMENT_SVEA_VERSION</version>
     <description>SveaWebPay payment plugin</description>
     <languages>
         <!--all Svea payment methods use the translations from sveainvoice-->
 	<language tag="en-GB">en-GB.plg_vmpayment_sveainvoice.ini</language>
-        <language tag="sv-SE">sv-SE.plg_vmpayment_sveainvoice.ini</language>
-        <language tag="de-DE">de-DE.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="en-GB">en-GB.plg_vmpayment_sveainvoice.sys.ini</language>
+	<language tag="sv-SE">sv-SE.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="sv-SE">en-GB.plg_vmpayment_sveainvoice.sys.ini</language>
+	<language tag="de-DE">de-DE.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="de-DE">en-GB.plg_vmpayment_sveainvoice.sys.ini</language>
         <language tag="fi-FI">fi-FI.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="fi-FI">en-GB.plg_vmpayment_sveainvoice.sys.ini</language>
         <language tag="nl-NL">nl-NL.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="nl-NL">en-GB.plg_vmpayment_sveainvoice.sys.ini</language>
         <language tag="no-NO">no-NO.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="no-NO">en-GB.plg_vmpayment_sveainvoice.sys.ini</language>
     </languages>
     <files>
 	<filename plugin="sveacard">sveacard.php</filename>
