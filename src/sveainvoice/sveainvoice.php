@@ -400,6 +400,9 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) {
             $request = JRequest::get();
             $session = JFactory::getSession();
+            
+            //skicka med adressdata i html/i sessionen & skriv till cart här om ej inloggad
+            
             foreach ($request as $key => $value) {
                 $sveaName = substr($key, 0,4);
                 if($sveaName == "svea"){
@@ -682,7 +685,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         if (!$this->selectedThisElement($method->payment_element)) {
                 return false;
         }
-        $sveaconfig = new SveaVmConfigurationProviderTest($method);
+        $sveaconfig = new SveaVmConfigurationProviderTest($method);     
         if(JRequest::getVar('type') == 'getAddress'){
             try {
               $svea = WebPay::getAddresses($sveaconfig)
@@ -740,7 +743,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         if($countryCode == "SE" || $countryCode == "DK" || $countryCode == "NO" || $countryCode == "FI"){
              $inputFields .=
                         '
-                            <fieldset id="svea_customertype_div'.$paymentId.'">
+                            <fieldset id="svea_customertype_div_'.$paymentId.'">
                                 <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype_'.$paymentId.'"'. $checkedPrivate.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'</option>
                                 <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype_'.$paymentId.'"'. $checkedCompany.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'</option>
                             </fieldset>
@@ -842,7 +845,8 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         $html .= "jQuery('#svea_getaddress_submit_$paymentId').click(function (){
                         jQuery('#svea_ssn_$paymentId').removeClass('invalid');
                         var svea_ssn_$paymentId = jQuery('#svea_ssn_$paymentId').val();
-                        var customertype_$paymentId = jQuery('#svea_customertype_div_$paymentId :input:checked').val();
+                        var customertype_$paymentId = jQuery('#svea_customertype_div_".$paymentId." input:checked').val();
+
                             if(svea_ssn_$paymentId == ''){
                                 jQuery('#svea_ssn_$paymentId').addClass('invalid');
                                 jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * required');
@@ -859,15 +863,17 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                         customertype: customertype_$paymentId,
                                         countrycode: countrycode_$paymentId
                                     },
-                                    url: url_$paymentId,
-                                    success: function(data){
+                                    url: url_$paymentId,".
+                
+                                    // callback for getaddress return                
+                                    "success: function(data){
                                         var json_$paymentId = JSON.parse(data);
                                          if (json_$paymentId.svea_error){
                                             jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>'+json_$paymentId.svea_error).show();
                                         }else{
                                             if(customertype_$paymentId == 'svea_invoice_customertype_company'){
-                                              jQuery('#svea_address_div_$paymentId').empty().append('<select id=\"sveaAddressDiv\" name=\"svea_addressselector\"></select>');
-                                                jQuery.each(json,function(key,value){
+                                              jQuery('#svea_address_div_$paymentId').empty().append('<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressselector\"></select>');
+                                                jQuery.each(json_$paymentId,function(key,value){
                                                     jQuery('#sveaAddressDiv_$paymentId').append('<option value=\"'+value.addressSelector+'\">'+value.fullName+' '+value.street+' '+value.zipCode+' '+value.locality+'</option>');
 
                                                 });
