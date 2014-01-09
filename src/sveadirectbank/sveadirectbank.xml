@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <install version="1.5" type="plugin" group="vmpayment" >
     <name>VMPAYMENT_SVEA_DIRECTBANK</name>
-    <creationDate>July 30 2012</creationDate>
+    <creationDate>January 2014</creationDate>
     <author>Shaho Ghobadi</author>
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
