@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<install version="1.5" type="plugin" group="vmpayment" >
+    <name>VM - Payment, Svealib</name>
+    <creationDate>January 2014</creationDate>
+    <author>Shaho Ghobadi</author>
+    <authorUrl>http://www.sveawebpay.se</authorUrl>
+    <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
+    <license> http://www.apache.org/licenses/LICENSE-2.0</license>
+    <version>VMPAYMENT_SVEA_VERSION</version>
+    <description>SveaWebPay payment plugin</description>
+    <files>
+	<filename plugin="svealib">sveahelper.php</filename>
+        <folder>integrationlib</folder>
+    </files>
+</install>
