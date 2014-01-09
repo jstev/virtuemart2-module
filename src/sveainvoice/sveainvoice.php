@@ -105,7 +105,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                         'svea_order_id'                 => 'int(1) UNSIGNED',
                         'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
                         'svea_expiration_date'          => 'datetime',
-                        //add: customerinfo, sveaorderid,
+                        //TODO add: customerinfo, sveaorderid,
 		);
 
 		return $SQLfields;
