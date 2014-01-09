@@ -848,7 +848,8 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         $html .= "jQuery('#svea_getaddress_submit_$paymentId').click(function (){
                         jQuery('#svea_ssn_$paymentId').removeClass('invalid');
                         var svea_ssn_$paymentId = jQuery('#svea_ssn_$paymentId').val();
-                        var customertype_$paymentId = jQuery('#svea_customertype_div_13 input:checked').val();
+
+                        var customertype_$paymentId = jQuery('#svea_customertype_div_".$paymentId." input:checked').val();
 
                             if(svea_ssn_$paymentId == ''){
                                 jQuery('#svea_ssn_$paymentId').addClass('invalid');
@@ -875,8 +876,8 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                             jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>'+json_$paymentId.svea_error).show();
                                         }else{
                                             if(customertype_$paymentId == 'svea_invoice_customertype_company'){
-                                              jQuery('#svea_address_div_$paymentId').empty().append('<select id=\"sveaAddressDiv\" name=\"svea_addressselector\"></select>');
-                                                jQuery.each(json,function(key,value){
+                                              jQuery('#svea_address_div_$paymentId').empty().append('<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressselector\"></select>');
+                                                jQuery.each(json_$paymentId,function(key,value){
                                                     jQuery('#sveaAddressDiv_$paymentId').append('<option value=\"'+value.addressSelector+'\">'+value.fullName+' '+value.street+' '+value.zipCode+' '+value.locality+'</option>');
 
                                                 });
