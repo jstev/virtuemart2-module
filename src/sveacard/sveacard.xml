@@ -2,7 +2,7 @@
 <install version="1.5" type="plugin" group="vmpayment" >
     <name>VMPAYMENT_SVEA_CARD</name>
     <creationDate>July 30 2012</creationDate>
-    <author>Shaho Ghobadi</author>
+    <author>Shaho Ghobadi, Anneli Halld'n, Kristian Grossman-Madsen</author>
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license>http://www.gnu.org/licenses/gpl-2.0.html GNU/GPL</license>
@@ -32,11 +32,11 @@
              <option value="1">COM_VIRTUEMART_YES</option>
              <option value="0">COM_VIRTUEMART_NO</option>
         </param>
-        <param name="merchantid_card_test" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_TEST" />
-        <param name="secret_card_test" type="text"  label="VMPAYMENT_SVEA_SECRET_TEST" />
-        <param name="merchantid_card_prod" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_PROD" />
-        <param name="secret_card_prod" type="text"  label="VMPAYMENT_SVEA_SECRET_PROD" />
-
+        <param name="merchantid_test" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_TEST" />
+        <param name="secret_test" type="text"  label="VMPAYMENT_SVEA_SECRET_TEST" />
+        <param name="merchantid_prod" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_TEST" />
+        <param name="secret_prod" type="text"  label="VMPAYMENT_SVEA_SECRET_TEST" />
+              
         <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
         <param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
 

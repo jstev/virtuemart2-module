@@ -32,10 +32,10 @@
              <option value="1">COM_VIRTUEMART_YES</option>
              <option value="0">COM_VIRTUEMART_NO</option>
         </param>
-        <param name="merchantid_directbank_test" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_TEST" />
-        <param name="secret_directbank_test" type="text"  label="VMPAYMENT_SVEA_SECRET_TEST" />
-        <param name="merchantid_directbank_prod" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_PROD" />
-        <param name="secret_directbank_prod" type="text"  label="VMPAYMENT_SVEA_SECRET_PROD" />
+        <param name="merchantid_test" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_TEST" />
+        <param name="secret_test" type="text"  label="VMPAYMENT_SVEA_SECRET_TEST" />
+        <param name="merchantid_prod" type="text"  label="VMPAYMENT_SVEA_MERCHANTID_TEST" />
+        <param name="secret_prod" type="text"  label="VMPAYMENT_SVEA_SECRET_TEST" />
 
         <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
         <param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
