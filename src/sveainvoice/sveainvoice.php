@@ -252,8 +252,8 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 
                 }
                 $order['customer_notified'] = 1;
-                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                $session->destroy();
+                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);          
+                //$session->destroy();
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
