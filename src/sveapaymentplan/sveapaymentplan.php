@@ -136,14 +136,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                       ->setCurrency($currency_code_3)
                       ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
                       ->setOrderDate(date('c'))
-                      ->usePaymentPlanPayment($session->get('svea_campaigncode'))
+                      ->usePaymentPlanPayment($session->get("svea_campaigncode_$method->virtuemart_paymentmethod_id"))
                         ->doRequest();
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
-
             if ($svea->accepted == 1) {
                 //override billing address
                 SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
@@ -207,7 +206,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                $session->destroy();
+                $paramsFromSession = $session->get("svea_campaigncode_$method->virtuemart_paymentmethod_id");
+                print_r($paramsFromSession);die;
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
