@@ -220,6 +220,13 @@ class SveaHelper {
            return TRUE;
     }
 
+    /**
+     * Extracts an associative array of address fields from the svea response object.
+     * Array keys match virtuemart order_userinfo address fields.
+     * 
+     * @param type $svea
+     * @return array 
+     */
     public static function buildAddressArray($svea) {
         $sveaAddresses = array();
         if ($svea->customerIdentity->customerType == 'Company') // Company customer
@@ -257,7 +264,6 @@ class SveaHelper {
             isset($svea->customerIdentity->coAddress) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
             isset($svea->customerIdentity->locality) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
             isset($svea->customerIdentity->zipCode) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
-
         }
         return $sveaAddresses;
     }
