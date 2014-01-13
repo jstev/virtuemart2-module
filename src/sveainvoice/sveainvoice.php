@@ -181,6 +181,8 @@
                 if ($svea->accepted == 1) {
                     //override billing address
                     SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
+                    //override shipping address                    
+                    SveaHelper::updateSTAddress($svea,$order['details']['BT']->virtuemart_order_id);
 
                     $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
                     $dbValues['order_number']                = $order['details']['BT']->order_number;
