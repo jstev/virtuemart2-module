@@ -2,7 +2,7 @@
 <install version="1.5" type="plugin" group="vmpayment" >
     <name>VMPAYMENT_SVEA_PAYMENTPLAN</name>
     <creationDate>January 2014</creationDate>
-    <author>Shaho Ghobadi</author>
+    <author>Anneli Halld'n, Kristian Grossman-Madsen</author>
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
@@ -40,9 +40,9 @@
              <option value="0">COM_VIRTUEMART_NO</option>
         </param>
           <!-- credentials -->
-        <param name="clientid_paymentplan" type="text"  label="VMPAYMENT_SVEA_CLIENTID" description="VMPAYMENT_SVEA_CLIENTID_EXPLAIN" />
-        <param name="username_paymentplan" type="text"  label="VMPAYMENT_SVEA_USERNAME" description="VMPAYMENT_SVEA_USERNAME_EXPLAIN" />
-        <param name="password_paymentplan" type="text"  label="VMPAYMENT_SVEA_PASSWORD" description="VMPAYMENT_SVEA_PASSWORD_EXPLAIN" />
+        <param name="clientid" type="text"  label="VMPAYMENT_SVEA_CLIENTID" description="VMPAYMENT_SVEA_CLIENTID_EXPLAIN" />
+        <param name="username" type="text"  label="VMPAYMENT_SVEA_USERNAME" description="VMPAYMENT_SVEA_USERNAME_EXPLAIN" />
+        <param name="password" type="text"  label="VMPAYMENT_SVEA_PASSWORD" description="VMPAYMENT_SVEA_PASSWORD_EXPLAIN" />
 
         <param name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_SVEA_CURRENCY" description="VMPAYMENT_SVEA_CURRENCY_DESC" />
         <param name="countries" type="vmcountries"  scope="com_virtuemart" default="" label="VMPAYMENT_SVEA_COUNTRIES" description="VMPAYMENT_SVEA_COUNTRIES_DESC"/>
