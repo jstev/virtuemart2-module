@@ -252,8 +252,7 @@
 
                     }
                     $order['customer_notified'] = 1;
-                    $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);          
-                    //$session->destroy();
+                    $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
                 }  else {
                     $order['customer_notified'] = 0;
                     $order['order_status'] = $method->status_denied;
@@ -261,7 +260,6 @@
                     $order['comments'] = $html;
 
                 }
-
                 //We delete the old stuff
                 $cart->emptyCart ();
                 JRequest::setVar ('html', $html);
@@ -352,6 +350,7 @@
                 if (!is_array($address)) {
                     $address = array();
                     $address['virtuemart_country_id'] = 0;
+
                 }
                 if (!isset($address['virtuemart_country_id'])) {
                     $address['virtuemart_country_id'] = 0;
@@ -408,6 +407,7 @@
                     if($sveaName == "svea"){
                         $session->set($key, $value);
                     }
+
                 }
 
                 return $this->OnSelectCheck($cart);
@@ -449,13 +449,13 @@
                         return FALSE;
                     }
                 }
-                //keep end      
+                //keep end
 
                 $html = array();
                 $method_name = $this->_psType . '_name';
-                foreach ($this->methods as $method) 
+                foreach ($this->methods as $method)
                 {
-                    if ($this->checkConditions ($cart, $method, $cart->pricesUnformatted)) 
+                    if ($this->checkConditions ($cart, $method, $cart->pricesUnformatted))
                     {
                         $methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
                         $method->$method_name = $this->renderPluginName ($method);
@@ -469,7 +469,7 @@
                         elseif( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
                         {
                             $countryId = $method->countries[0];
-                        } 
+                        }
                         else //empty or several countries configured in payment method
                         {
                             return FALSE; //do not know what country, therefore don´t know what fields to show.
@@ -479,7 +479,7 @@
                         //svea stuff end
                     }
                 }
-                if(!empty($html)) 
+                if(!empty($html))
                 {
                     $htmlIn[] = $html;
                     return TRUE;
@@ -688,7 +688,7 @@
             if (!$this->selectedThisElement($method->payment_element)) {
                     return false;
             }
-            $sveaconfig = new SveaVmConfigurationProviderTest($method);     
+            $sveaconfig = new SveaVmConfigurationProviderTest($method);
             if(JRequest::getVar('type') == 'getAddress'){
                 try {
                   $svea = WebPay::getAddresses($sveaconfig)
@@ -707,6 +707,7 @@
                 if($svea->accepted == 0){
                     $returnArray = array("svea_error" => $svea->errormessage);
                     vmError ('Svea Error: '.$svea->errormessage, 'Svea Error: '.$svea->errormessage);
+
                 }  else {
                      foreach ($svea->customerIdentity as $ci){
                         $name = ($ci->fullName) ? $ci->fullName : $ci->legalName;
@@ -743,10 +744,10 @@
             }
 
             // NORDIC credentials form fields
-            // get ssn & selects private/company for SE, NO, DK, FI      
-            if(     $countryCode == "SE" || 
-                    $countryCode == "DK" || 
-                    $countryCode == "NO" || 
+            // get ssn & selects private/company for SE, NO, DK, FI
+            if(     $countryCode == "SE" ||
+                    $countryCode == "DK" ||
+                    $countryCode == "NO" ||
                     $countryCode == "FI")
             {
                 $inputFields .=
@@ -763,12 +764,12 @@
                             '" value="'.$session->get("svea_ssn_$paymentId").'" class="required" />
                         <span style="color: red; "> * </span>
                     </fieldset>
-               '; 
-            }   
+               ';
+            }
 
-            // EU credentials form fields        
+            // EU credentials form fields
             // if customer is located in Netherlands or DE, get birth date
-            elseif( $countryCode == "NL" || 
+            elseif( $countryCode == "NL" ||
                     $countryCode == "DE")
             {
                 //Days, to 31
@@ -813,16 +814,16 @@
                 }
                 $birthYear = "<select name='svea_birthyear_".$paymentId."' id='birthYear_".$paymentId."'>$years</select>";
 
-                $inputFields =  
-                '   
+                $inputFields =
+                '
                     <label for="svea_birthdate_'.$paymentId.'">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_BIRTHDATE").'</label>
                     <fieldset id="svea_birthdate_'.$paymentId.'">'. $birthDay . $birthMonth . $birthYear .'</fieldset>
                 ';
 
-                // if customer is located in Netherlands, get initials        
+                // if customer is located in Netherlands, get initials
                 if($countryCode == "NL")
                 {
-                    $inputFields .= 
+                    $inputFields .=
                         JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.$session->get
                             ("svea_initials_$paymentId").'" name="initials" class="required" /><span style="color: red; "> * </span>
                     ';
@@ -841,8 +842,8 @@
             }
 
             //box for form
-            $html = 
-            '   
+            $html =
+            '
                 <fieldset id="svea_getaddress_'.$paymentId.'">
                     <input type="hidden" id="paymenttypesvea_'.$paymentId.'" value="'. $paymentId . '" />'
                     .$inputFields.
@@ -853,7 +854,7 @@
             ';
 
             //hide show get address div
-            $javascript = 
+            $javascript =
             '   <script type="text/javascript">
 
                 jQuery(document).ready(function($) {
@@ -878,6 +879,7 @@
                 );
             ';
 
+
             //ajax for getAddress
             $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice';
 
@@ -891,7 +893,7 @@
 
                     if(svea_ssn_$paymentId == '')
                     {
-                        jQuery('#svea_ssn_$paymentId').addClass('invalid');".  // TODO translation for below required error?                    
+                        jQuery('#svea_ssn_$paymentId').addClass('invalid');".  // TODO translation for below required error?
                         "jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * fields required');
                     }
                     else
@@ -910,7 +912,7 @@
                             },
                             url: url_$paymentId,".
 
-                            // callback for getaddress return                
+                            // callback for getaddress return
                             "success: function(data){
                                 var json_$paymentId = JSON.parse(data);
                                 if (json_$paymentId.svea_error)
@@ -953,7 +955,7 @@
                 });
             ";
 
-            $javascript .=        
+            $javascript .=
             "
                 jQuery('#svea_form_$paymentId').parents('form').submit( function(){
                     var svea_action_$paymentId = jQuery('#svea_form_$paymentId').parents('form').attr('action');
@@ -975,14 +977,14 @@
             // add javascript that hides Norway getAddress field unless company is selected
 
             if( $countryCode == "NO" ) {
-                $javascript .=  
+                $javascript .=
                 "
-                    jQuery(document).ready(function() { 
-                    
+                    jQuery(document).ready(function() {
+
                         jQuery(\"input[type=radio][name='svea_customertype_".$paymentId."']\").click( function() {
 
                             var checked_payment = jQuery(\"input:radio[name='svea_customertype_".$paymentId."']:checked\").val();
-                            switch( checked_payment ) 
+                            switch( checked_payment )
                             {
 
                                 // if private selected, hide getAddress button
@@ -994,7 +996,7 @@
                                 case 'svea_invoice_customertype_company':
 
                                     jQuery('#svea_getaddress_submit_".$paymentId."').show();
-                                break;  
+                                break;
                             }
                         });
                         jQuery('#svea_getaddress_submit_".$paymentId."').hide();    // hidden to start with

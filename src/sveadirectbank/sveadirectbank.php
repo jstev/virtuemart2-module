@@ -458,9 +458,9 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
          */
         function onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter) {
             return parent::onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter);
-        }     
-        
-        
+        }
+
+
 	/**
 	 * This method is fired when showing the order details in the frontend.
 	 * It displays the method-specific data.
@@ -648,8 +648,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
 		$html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>';
                 $html .= '</div>' . "\n";
-                $session = JFactory::getSession();
-                $session->destroy();
+               
+
             }else{
                 $order['order_status'] = $method->status_denied;
                 $order['customer_notified'] = 0;
