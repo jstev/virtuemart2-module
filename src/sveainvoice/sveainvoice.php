@@ -253,21 +253,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 }
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                 //clear all svea keys from session
-                $sessionKeys = array(
-                                    "svea_addressselector_$method->virtuemart_paymentmethod_id",
-                                    "svea_customertype_$method->virtuemart_paymentmethod_id",
-                                    "svea_ssn_$method->virtuemart_paymentmethod_id",
-                                    "svea_birthday_$method->virtuemart_paymentmethod_id",
-                                    "svea_birthmonth_$method->virtuemart_paymentmethod_id",
-                                    "svea_birthyear_$method->virtuemart_paymentmethod_id",
-                                    "svea_initials_$method->virtuemart_paymentmethod_id"
-                                    );
-                foreach ($sessionKeys as $key) {
-                    if($session->has("$key")){
-                        $session->clear("$key");
-                    }
-                }
+
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
