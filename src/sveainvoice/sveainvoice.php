@@ -104,8 +104,7 @@
                             'tax_id'                        => 'smallint(1)',
                             'svea_order_id'                 => 'int(1) UNSIGNED',
                             'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
-                            'svea_expiration_date'          => 'datetime',
-                            //TODO add: customerinfo, sveaorderid,
+                            'svea_expiration_date'          => 'datetime'
                     );
 
                     return $SQLfields;
@@ -154,7 +153,7 @@
                 $svea = SveaHelper::formatInvoiceFee($svea,$order,$method->payment_currency);
                  //add shipping
                 $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-                 //add coupons TODO: kolla checkbetween to rates i opencart
+                 //add coupons
                 $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
                 $countryId = $order['details']['BT']->virtuemart_country_id;
                 if(isset($countryId) == FALSE){
@@ -229,7 +228,7 @@
                         $deliverObj = SveaHelper::formatInvoiceFee($deliverObj,$order,$method->payment_currency);
                          //add shipping
                         $deliverObj = SveaHelper::formatShippingRows($deliverObj,$order,$method->payment_currency);
-                         //add coupons TODO: kolla checkbetween to rates i opencart
+                         //add coupons
                         $deliverObj = SveaHelper::formatCoupon($deliverObj,$order,$method->payment_currency);
 
                         try {
@@ -727,7 +726,6 @@
             }
 
         /**
-         * TODO: översättningar, hämta från språkfil
          * TODO: img-loader
          * Svea GetAddress view for html and jQuery
          * @return string
@@ -893,7 +891,7 @@
 
                     if(svea_ssn_$paymentId == '')
                     {
-                        jQuery('#svea_ssn_$paymentId').addClass('invalid');".  // TODO translation for below required error?
+                        jQuery('#svea_ssn_$paymentId').addClass('invalid');".
                         "jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * fields required');
                     }
                     else

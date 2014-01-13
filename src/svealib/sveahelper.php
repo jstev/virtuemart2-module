@@ -124,7 +124,6 @@ class SveaHelper {
         return $svea;
     }
     /**
-     * TODO: translate shipping
      * @param type $svea
      * @param type $order
      * @return type
