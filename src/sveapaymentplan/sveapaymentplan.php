@@ -108,7 +108,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
   //Svea Create order
             try {
-                $sveaConfig = $method->testmode_paymentplan == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
@@ -664,12 +664,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 return false;
         }
 
-        $sveaconfig = new SveaVmConfigurationProviderTest($method);
+        $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
         $returnArray = array();
         //Get address request
         if(JRequest::getVar('type') == 'getAddress'){
             try {
-              $svea = WebPay::getAddresses($sveaconfig);
+              $svea = WebPay::getAddresses($sveaConfig);
               $svea = $svea->setOrderTypePaymentPlan()
                         ->setCountryCode(JRequest::getVar('countrycode'))
                         ->setIndividual(JRequest::getVar('svea_ssn'))
@@ -696,7 +696,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
 
         }elseif(JRequest::getVar('type') == 'getParams'){
-            $svea_params = WebPay::getPaymentPlanParams($sveaconfig);
+            $svea_params = WebPay::getPaymentPlanParams($sveaConfig);
             try {
                  $svea_params = $svea_params->setCountryCode(JRequest::getVar('countrycode'))
                     ->doRequest();

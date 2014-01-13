@@ -115,7 +115,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $this->storePSPluginInternalData($dbValues);
             //Svea Create order
             try {
-                $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 $html .= SveaHelper::errorResponse('',$e->getMessage ());
@@ -611,7 +611,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
             $order = $modelOrder->getOrder ($virtuemart_order_id);
 
-            $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+            $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             $countryId = $order['details']['BT']->virtuemart_country_id;
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
 
@@ -673,14 +673,17 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
     public function plgVmOnSelfCallFE($type,$name,&$render) {
         if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
-			return NULL; // Another method was selected, do nothing
-		}
-        $sveaconfig = new SveaVmConfigurationProviderTest($method);
+            return NULL; // Another method was selected, do nothing
+        }
+        if (!$this->selectedThisElement($method->payment_element)) {
+            return false;
+        }
+        $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
         $returnArray = array();
         //Get address request
         if(JRequest::getVar('type') == 'getBanks'){
             try {
-                 $svea = WebPay::getPaymentMethods($sveaconfig)
+                 $svea = WebPay::getPaymentMethods($sveaConfig)
                    ->doRequest();
             } catch (Exception $e) {
                  vmError ($e->getMessage (), $e->getMessage ());
