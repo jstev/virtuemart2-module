@@ -253,7 +253,21 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                 }
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                $session->destroy();
+                 //clear all svea keys from session
+                $sessionKeys = array(
+                                    "svea_addressselector_$method->virtuemart_paymentmethod_id",
+                                    "svea_customertype_$method->virtuemart_paymentmethod_id",
+                                    "svea_ssn_$method->virtuemart_paymentmethod_id",
+                                    "svea_birthday_$method->virtuemart_paymentmethod_id",
+                                    "svea_birthmonth_$method->virtuemart_paymentmethod_id",
+                                    "svea_birthyear_$method->virtuemart_paymentmethod_id",
+                                    "svea_initials_$method->virtuemart_paymentmethod_id"
+                                    );
+                foreach ($sessionKeys as $key) {
+                    if($session->has("$key")){
+                        $session->clear("$key");
+                    }
+                }
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
@@ -400,9 +414,9 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
 	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) {
             $request = JRequest::get();
             $session = JFactory::getSession();
-            
+
             //skicka med adressdata i html/i sessionen & skriv till cart här om ej inloggad
-            
+
             foreach ($request as $key => $value) {
                 $sveaName = substr($key, 0,4);
                 if($sveaName == "svea"){
@@ -685,7 +699,7 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
         if (!$this->selectedThisElement($method->payment_element)) {
                 return false;
         }
-        $sveaconfig = new SveaVmConfigurationProviderTest($method);     
+        $sveaconfig = new SveaVmConfigurationProviderTest($method);
         if(JRequest::getVar('type') == 'getAddress'){
             try {
               $svea = WebPay::getAddresses($sveaconfig)
@@ -864,8 +878,8 @@ class plgVmPaymentSveainvoice extends vmPSPlugin {
                                         countrycode: countrycode_$paymentId
                                     },
                                     url: url_$paymentId,".
-                
-                                    // callback for getaddress return                
+
+                                    // callback for getaddress return
                                     "success: function(data){
                                         var json_$paymentId = JSON.parse(data);
                                          if (json_$paymentId.svea_error){
