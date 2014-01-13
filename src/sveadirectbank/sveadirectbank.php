@@ -72,7 +72,6 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)'
 
-                        // TODO check if removed/reinstated xml config fields are needed here as well? + other payment methods
 		);
 
 		return $SQLfields;
@@ -127,7 +126,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
              //add shipping
             $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-             //add coupons TODO: kolla checkbetween to rates i opencart
+            //add coupon
             $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
             $countryId = $order['details']['BT']->virtuemart_country_id;
             if(isset($countryId) == FALSE){
@@ -136,10 +135,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
             $return_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' .$order['details']['BT']->order_number .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
             $cancel_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->virtuemart_order_id);
-            //From Payson. For what?
-            //$ipn____url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginnotification&on=' .$order['details']['BT']->virtuemart_order_id .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id);
-
-             //add customer
+            //add customer
              $session = JFactory::getSession();
              $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
            try {
@@ -177,8 +173,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
             $modelOrder = VmModel::getModel ('orders');
 
-            //TODO: check why its set to canceled?
-            $order['order_status'] = $method->status_denied;
+            $order['order_status'] = $method->status_denied;//sets to cancel until returned to shop, cause we don't want to save a cancelled order
             $order['customer_notified'] = 0;
             //$order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
@@ -709,7 +704,6 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
     }
 
     /**
-     * TODO: check if company
      * @param type $param0
      * @param type $countryCode
      * @return string

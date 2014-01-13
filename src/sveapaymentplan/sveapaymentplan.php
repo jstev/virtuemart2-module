@@ -119,7 +119,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
              //add shipping
             $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-             //add coupons TODO: kolla checkbetween to rates i opencart
+             //add coupons
             $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
             $countryId = $order['details']['BT']->virtuemart_country_id;
             if(isset($countryId) == FALSE){
@@ -707,7 +707,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             if (isset($svea_params->errormessage)) {
                 $returnArray = array("svea_error" => "Svea error: " .$svea_params->errormessage);
             } else {
-                $formattedPrice = JRequest::getVar('sveacarttotal');//TODO: check if needs to format currency
+                $formattedPrice = JRequest::getVar('sveacarttotal');
                 $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params);
                  if (!class_exists ('CurrencyDisplay')) {
 			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
@@ -737,8 +737,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
     }
 
     /**
-     * TODO: check if company
-     * Sveafix: Javasciript vars needs to have unique names, therfore we use arrays with unique keys instead.
+      * Sveafix: Javasciript vars needs to have unique names, therfore we use arrays with unique keys instead.
      * @param type $param0
      * @param type $countryCode
      * @return string

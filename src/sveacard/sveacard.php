@@ -125,7 +125,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
              //add shipping
             $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-             //add coupons TODO: kolla checkbetween to rates i opencart
+
             $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
 
             if(isset( $order['details']['BT']->virtuemart_country_id)){
@@ -138,10 +138,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
             $return_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' .$order['details']['BT']->order_number .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
             $cancel_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->virtuemart_order_id);
-            //From Payson. For what?
-            //$ipn____url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginnotification&on=' .$order['details']['BT']->virtuemart_order_id .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id);
-
-             //add customer
+            //add customer
              $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
            try {
                 $form = $svea
@@ -178,8 +175,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 
             $modelOrder = VmModel::getModel ('orders');
 
-            //TODO: check why its set to canceled? = Probably cause you don't know if it will go thru yet.
-            $order['order_status'] = $method->status_denied;
+            $order['order_status'] = $method->status_denied;//sets to cancel until returned to shop, cause we don't want to save a cancelled order
             $order['customer_notified'] = 0;
             $order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
@@ -670,7 +666,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
              */
 
     /**
-     * TODO: check if company
      * @param type $param0
      * @param type $countryCode
      * @return string
