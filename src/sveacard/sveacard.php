@@ -117,7 +117,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 $sveaConfig = $method->testmode_card == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage ());
+                $html .= SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -156,12 +156,11 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                                 ->getPaymentForm();
 
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage ());
+                $html .= SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
-           //TODO: translate Skickar till SveaWebPay...
-             $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
+            $html .= '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
             //form
             $fields = $form->htmlFormFieldsAsArray;
             $html .= $fields['form_start_tag'];
@@ -171,8 +170,8 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $html .= $fields['form_end_tag'];
 
             $html .= ' <script type="text/javascript">';
-                    $html .= ' document.paymentForm.submit();';
-                    $html .= ' </script></body></html>';
+            $html .= ' document.paymentForm.submit();';
+            $html .= ' </script></body></html>';
 
             $cart->_confirmDone = FALSE;
             $cart->_dataValidated = FALSE;
@@ -450,8 +449,8 @@ class plgVmPaymentSveacard extends vmPSPlugin {
          */
         function onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter) {
             return parent::onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter);
-        }     
-        
+        }
+
 	/**
 	 * This method is fired when showing the order details in the frontend.
 	 * It displays the method-specific data.

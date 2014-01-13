@@ -119,7 +119,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage ());
+                $html .= SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -148,19 +148,19 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                         ->setCurrency($currency_code_3)
                         ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
                         ->setOrderDate(date('c'))
-                        ->usePaymentMethod($session->get('svea_bank'))
+                        ->usePaymentMethod($session->get("svea_bank_$method->virtuemart_paymentmethod_id"))
                             ->setReturnUrl($return_url)
                             //->setCancelUrl($cancel_url) does nothing for bank
                             //->setCallbackUrl($cancel_url) does nothong for bank
                                 ->getPaymentForm();
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage ());
+                $html .= SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
+            $html .= '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
 
-             $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
-            //form
+             //form
             $fields = $form->htmlFormFieldsAsArray;
             $html .= $fields['form_start_tag'];
             $html .= $fields['input_merchantId'];
@@ -169,8 +169,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $html .= $fields['form_end_tag'];
 
             $html .= ' <script type="text/javascript">';
-                    $html .= ' document.paymentForm.submit();';
-                    $html .= ' </script></body></html>';
+            $html .= ' document.paymentForm.submit();';
+            $html .= ' </script></body></html>';
 
             $cart->_confirmDone = FALSE;
             $cart->_dataValidated = FALSE;
@@ -648,7 +648,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
 		$html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>';
                 $html .= '</div>' . "\n";
-               
+
 
             }else{
                 $order['order_status'] = $method->status_denied;
