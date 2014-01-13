@@ -139,8 +139,8 @@
                     $totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
                     $cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
-                $sveaConfig = "";
                 //Svea Create order
+                $sveaConfig = "";
                 try {
                     $sveaConfig = $method->testmode_invoice == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                     $svea = WebPay::createOrder($sveaConfig);
@@ -148,23 +148,23 @@
                     vmError ($e->getMessage (), $e->getMessage ());
                     return NULL;
                }
-                //order items
+                //set order items
                 $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
-                //invoice fee
+                //set invoice fee
                 $svea = SveaHelper::formatInvoiceFee($svea,$order,$method->payment_currency);
-                 //add shipping
+                //set shipping
                 $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-                 //add coupons TODO: kolla checkbetween to rates i opencart
+                //add coupons TODO: kolla checkbetween to rates i opencart
                 $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
                 $countryId = $order['details']['BT']->virtuemart_country_id;
                 if(isset($countryId) == FALSE){
                     return;
                 }
                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                 $session = JFactory::getSession();
-                 //add customer
-                 $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
-               try {
+                $session = JFactory::getSession();
+                //add customer
+                $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
+                try {
                     $svea = $svea
                           ->setCountryCode($countryCode)
                           ->setCurrency($currency_code_3)
@@ -172,11 +172,11 @@
                           ->setOrderDate(date('c'))
                           ->useInvoicePayment()
                             ->doRequest();
-               } catch (Exception $e) {
+                } catch (Exception $e) {
                     $html = SveaHelper::errorResponse('',$e->getMessage ());
                     vmError ($e->getMessage (), $e->getMessage ());
                     return NULL;
-               }
+                }
 
                 if ($svea->accepted == 1) {
                     //override billing address
@@ -552,11 +552,12 @@
              *
              * @return boolean True when the data was valid, false otherwise. If the plugin is not activated, it should return null.
              * @author Max Milbers
-
-            public function plgVmOnCheckoutCheckDataPayment(  VirtueMartCart $cart) {
-            return null;
-            }
              */
+            public function plgVmOnCheckoutCheckDataPayment( VirtueMartCart $cart ) {
+                $cart->BT['first_name'] = "changed";
+                
+                return true; 
+            }
 
             /**
              * This method is fired when showing when priting an Order

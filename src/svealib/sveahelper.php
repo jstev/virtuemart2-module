@@ -224,7 +224,7 @@ class SveaHelper {
      * Extracts an associative array of address fields from the svea response object.
      * Array keys match virtuemart order_userinfo address fields.
      * 
-     * @param type $svea
+     * @param Svea\CreateOrderEuResponse $svea
      * @return array 
      */
     public static function buildAddressArray($svea) {
