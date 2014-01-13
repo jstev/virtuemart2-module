@@ -171,7 +171,7 @@ class SveaHelper {
         $const = "VMPAYMENT_SVEA_ERROR_CODE_".(string)$resultcode;
        $errortranslate = JText::sprintf ($const);
        if(preg_match("/^VMPAYMENT_SVEA_ERROR_CODE/", $errortranslate))
-                $errortranslate = JText::sprintf ("VMPAYMENT_SVEA_ERROR_CODE_DEFAULT").$errormessage;;
+                $errortranslate = JText::sprintf ("VMPAYMENT_SVEA_ERROR_CODE_DEFAULT",$resultcode).$errormessage;
         $app = JFactory::getApplication ();
         $app->enqueueMessage ( $errortranslate,'error');
         $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart'));
