@@ -673,8 +673,11 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
     public function plgVmOnSelfCallFE($type,$name,&$render) {
         if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
-			return NULL; // Another method was selected, do nothing
-		}
+            return NULL; // Another method was selected, do nothing
+        }
+        if (!$this->selectedThisElement($method->payment_element)) {
+            return false;
+        }
         $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
         $returnArray = array();
         //Get address request
