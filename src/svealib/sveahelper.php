@@ -79,7 +79,7 @@ class SveaHelper {
                 $item = $item->setVatNumber( $session->get("svea_ssn_$paymentId") );
             }else{
                 $item = $item->setNationalIdNumber( $session->get("svea_ssn_$paymentId"));
-                $item = $item->setAddressSelector($session->get("svea_addresselector_$paymentId"));
+                $item = $item->setAddressSelector($session->get("svea_addressselector_$paymentId"));
             }
             $svea = $svea->addCustomerDetails($item);
         }else{
