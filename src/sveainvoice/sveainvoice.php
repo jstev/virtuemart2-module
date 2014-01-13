@@ -688,11 +688,9 @@
                     return false;
             }
             $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
-
-            $sveaconfig = new SveaVmConfigurationProviderTest($method);
             if(JRequest::getVar('type') == 'getAddress'){
                 try {
-                  $svea = WebPay::getAddresses($sveaconfig)
+                  $svea = WebPay::getAddresses($sveaConfig)
                           ->setOrderTypeInvoice()
                           ->setCountryCode(JRequest::getVar('countrycode'));
                     if(JRequest::getVar('customertype')== "svea_invoice_customertype_company"){

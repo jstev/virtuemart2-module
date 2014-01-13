@@ -675,12 +675,12 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
         if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
 			return NULL; // Another method was selected, do nothing
 		}
-        $sveaconfig = new SveaVmConfigurationProviderTest($method);
+        $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
         $returnArray = array();
         //Get address request
         if(JRequest::getVar('type') == 'getBanks'){
             try {
-                 $svea = WebPay::getPaymentMethods($sveaconfig)
+                 $svea = WebPay::getPaymentMethods($sveaConfig)
                    ->doRequest();
             } catch (Exception $e) {
                  vmError ($e->getMessage (), $e->getMessage ());
