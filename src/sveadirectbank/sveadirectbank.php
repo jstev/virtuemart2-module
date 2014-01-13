@@ -115,7 +115,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $this->storePSPluginInternalData($dbValues);
             //Svea Create order
             try {
-                $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 $html .= SveaHelper::errorResponse('',$e->getMessage ());
@@ -611,7 +611,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
             $order = $modelOrder->getOrder ($virtuemart_order_id);
 
-            $sveaConfig = $method->testmode_directbank == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+            $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             $countryId = $order['details']['BT']->virtuemart_country_id;
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
 

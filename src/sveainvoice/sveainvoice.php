@@ -141,7 +141,7 @@
                 $sveaConfig = "";
                 //Svea Create order
                 try {
-                    $sveaConfig = $method->testmode_invoice == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                    $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                     $svea = WebPay::createOrder($sveaConfig);
                } catch (Exception $e) {
                     vmError ($e->getMessage (), $e->getMessage ());
@@ -687,6 +687,8 @@
             if (!$this->selectedThisElement($method->payment_element)) {
                     return false;
             }
+            $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+
             $sveaconfig = new SveaVmConfigurationProviderTest($method);
             if(JRequest::getVar('type') == 'getAddress'){
                 try {

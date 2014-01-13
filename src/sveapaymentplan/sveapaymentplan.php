@@ -108,7 +108,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
   //Svea Create order
             try {
-                $sveaConfig = $method->testmode_paymentplan == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
