@@ -388,7 +388,6 @@
             }
 
             /**
-             * Svea: get request and save to session for later
              * This event is fired after the payment method has been selected. It can be used to store
              * additional payment info in the cart.
              *
@@ -401,11 +400,17 @@
              */
             public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) {
                 
-                $this->parseSelectCheckPayment( JRequest::get(), JFactory::getSession() );
+                $onSelectCheck = parent::OnSelectCheck($cart);
                 
-                return $this->OnSelectCheck($cart);
+                if( $onSelectCheck )
+                {
+                    $this->storeDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
+                    $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
+                }
+                return $onSelectCheck;
+                
+                
             }
-
             
             /**
              * Parse the JRequest::get() parameters passed from editpayment, i.e. the ssn et al and address fields.
@@ -414,34 +419,36 @@
              * @param mixed $request
              * @param JSession $session
              */
-            private function parseSelectCheckPayment( $request, $session )
+            private function storeDataFromSelectPayment( $request, $session )
             {
                 $methodId = $request['virtuemart_paymentmethod_id'];
                 $addressSelector = $request["svea_addressselector_".$methodId];
                 
                 $svea_prefix = "svea";                    
                 $svea_addressSelector_prefix = $addressSelector;
-                $length = strlen( $svea_addressSelector_prefix );
                 
                 foreach ($request as $key => $value) {            
                     $svea_key = "";
                     if(substr($key, 0, strlen( $svea_prefix ) ) == $svea_prefix)     // store keys in the format "svea_xxx"
                     {
                         // trim addressSelector, methodId
-                        if(substr($key, 0, $length ) == $svea_addressSelector_prefix)
-                        {
-                            $svea_key = "svea_".substr($key, strlen($svea_prefix)+1+strlen($addressSelector)+1, -(strlen(strval($methodId))+1) );
-                        }
-                        else 
-                        {
-                            $svea_key = "svea_".substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1));
+                           
+                        $svea_attribute = substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx 
+                        $svea_key = $svea_prefix."_".$svea_attribute;
+                        
+                        // svea_addressSelector_?
+                        if(substr($svea_attribute, 0, strlen($svea_addressSelector_prefix)) == $svea_addressSelector_prefix)
+                        {                          
+                            $svea_address = substr($svea_attribute, strlen($svea_addressSelector_prefix)+3 ); // addressselector_address => address
+                            
+                            $svea_key = $svea_prefix."_".$svea_address;
                         }                        
                     }    
                     $session->set($svea_key, $value);
-                    print_r($svea_key);
-                    print_r("\n");
+                    //print_r($svea_key); print_r( " "); print_r( $value );
+                    //print_r("\n");
                 }
-                die();
+                //die();
             }
             
             /**
@@ -583,10 +590,45 @@
              * @author Max Milbers
              */
             public function plgVmOnCheckoutCheckDataPayment( VirtueMartCart $cart ) {
-                $cart->BT['first_name'] = "changed";
                 
+                $this->populateBillToFromGetAddressesData( $cart );
                 return true; 
             }
+            
+            
+            /**
+             * Fills in cart billto address from  getAddresses data stored in the session
+             * 
+             * @param VirtueMartCart $cart
+             * @return boolean
+             */
+            private function populateBillToFromGetAddressesData( VirtueMartCart $cart )
+            {
+                $session = JFactory::getSession();
+                
+                if( $session->get('svea_customertype' == 'svea_invoice_customertype_company' ) )
+                {
+                    $cart->BT['company'] = $session->get('svea_fullName', "");   
+                    $cart->BT['first_name'] = "";  
+                    $cart->BT['last_name'] = "";
+                }
+                else 
+                {
+                    $cart->BT['company'] = "";   
+                    $cart->BT['first_name'] = $session->get('svea_firstName', "");  
+                    $cart->BT['last_name'] = $session->get('svea_lastName', "");  
+                }
+                $cart->BT['address_1'] = $session->get('svea_street');
+                $cart->BT['address_2'] = $session->get('svea_address_2');
+                $cart->BT['zip'] = $session->get('svea_zipCode');
+                $cart->BT['city'] = $session->get('svea_locality');
+                $cart->BT['virtuemart_country_id'] = $session->get('svea_virtuemart_country_id');
+                
+                // keep other cart attributes, if set. also, vm does own validation on checkout.
+                //print_r( $cart ); die;
+                return true; 
+            }
+            
 
             /**
              * This method is fired when showing when priting an Order
@@ -752,7 +794,8 @@
                                         "address_2" => $ci->coAddress,
                                         "zipCode"  => $ci->zipCode,
                                         "locality"  => $ci->locality,
-                                        "addressSelector" => $ci->addressSelector
+                                        "addressSelector" => $ci->addressSelector,
+                                        "virtuemart_country_id" => ShopFunctions::getCountryIDByName(JRequest::getVar('countrycode'))
                                 );
 //                                      vm order_userinfos address fields
 //                                        Array
@@ -986,25 +1029,28 @@
                                                                                         
                                             // for each addressSelector, also store hidden address fields to pass on to next step
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'".$paymentId."'+'_firstName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_firstName_".$paymentId."\" value=\"'+value.firstName+'\" />' 
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_firstName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_firstName_".$paymentId."\" value=\"'+value.firstName+'\" />' 
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'".$paymentId."'+'_lastName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_lastName_".$paymentId."\" value=\"'+value.lastName+'\" />' 
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_lastName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_lastName_".$paymentId."\" value=\"'+value.lastName+'\" />' 
                                             );                                            
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'".$paymentId."'+'_fullName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_fullName_".$paymentId."\" value=\"'+value.fullName+'\" />' 
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_fullName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_fullName_".$paymentId."\" value=\"'+value.fullName+'\" />' 
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'".$paymentId."'+'_street\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_street_".$paymentId."\" value=\"'+value.street+'\" />' 
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_street\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_street_".$paymentId."\" value=\"'+value.street+'\" />' 
                                             );
                                            jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'".$paymentId."'+'_address_2\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_address_2_".$paymentId."\" value=\"'+value.address_2+'\" />' 
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_address_2\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_address_2_".$paymentId."\" value=\"'+value.address_2+'\" />' 
                                             );                                            
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'".$paymentId."'+'_zipCode\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_zipCode_".$paymentId."\" value=\"'+value.zipCode+'\" />' 
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_zipCode\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_zipCode_".$paymentId."\" value=\"'+value.zipCode+'\" />' 
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'".$paymentId."'+'_locality\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_locality_".$paymentId."\" value=\"'+value.locality+'\" />' 
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_locality\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_locality_".$paymentId."\" value=\"'+value.locality+'\" />'
+                                            );
+                                            jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_virtuemart_country_id\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_virtuemart_country_id_".$paymentId."\" value=\"'+value.virtuemart_country_id+'\" />'
                                             );                                            
                                         });
                                     if(customertype_$paymentId == 'svea_invoice_customertype_company') // company, may get several addresses
