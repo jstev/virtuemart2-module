@@ -179,23 +179,24 @@
                 }
 
                 if ($svea->accepted == 1) {
-                    //override billing address
-                    SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
-                    //override shipping address                    
-                    SveaHelper::updateSTAddress($svea,$order['details']['BT']->virtuemart_order_id);
-
-                    $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
-                    $dbValues['order_number']                = $order['details']['BT']->order_number;
-                    $dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
-                    $dbValues['cost_per_transaction']        = $method->cost_per_transaction;
-                    $dbValues['payment_currency']            = $currency_code_3;
-                    $dbValues['payment_order_total']         = $totalInPaymentCurrency;
-                    $dbValues['tax_id']                      = $method->tax_id;
-                    $dbValues['svea_order_id']               = $svea->sveaOrderId;
-                    $dbValues['svea_approved_amount']        = $svea->amount;
-                    $dbValues['svea_expiration_date']        = $svea->expirationDate;
-
-                    $this->storePSPluginInternalData($dbValues);
+//                    //override billing address
+//                    SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
+//                    //override shipping address                    
+//                    SveaHelper::updateSTAddress($svea,$order['details']['BT']->virtuemart_order_id);
+//
+//                    $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
+//                    $dbValues['order_number']                = $order['details']['BT']->order_number;
+//                    $dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
+//                    $dbValues['cost_per_transaction']        = $method->cost_per_transaction;
+//                    $dbValues['payment_currency']            = $currency_code_3;
+//                    $dbValues['payment_order_total']         = $totalInPaymentCurrency;
+//                    $dbValues['tax_id']                      = $method->tax_id;
+//                    $dbValues['svea_order_id']               = $svea->sveaOrderId;
+//                    $dbValues['svea_approved_amount']        = $svea->amount;
+//                    $dbValues['svea_expiration_date']        = $svea->expirationDate;
+//
+//                    $this->storePSPluginInternalData($dbValues);
+//                    
                     //Print html on thank you page. Will also say "thank you for your order!"
                     $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
                     $html =  '<img src="'.$logoImg.'" /><br /><br />';
