@@ -4,11 +4,11 @@ require_once "$root/../Includes.php";
 
 /**
  * @implements ConfigurationProvider interface
- * 
- * This class returns virtuemart payment metod configuration data in a manner 
+ *
+ * This class returns virtuemart payment metod configuration data in a manner
  * the Svea integration package (i.e. the included svealib) can use
- * 
- * As each payment method is an instance with its own ConfigurationProvider 
+ *
+ * As each payment method is an instance with its own ConfigurationProvider
  * implementation, methods often just return the configuration setting.
  */
 class SveaVmConfigurationProviderProd implements ConfigurationProvider
@@ -28,14 +28,14 @@ class SveaVmConfigurationProviderProd implements ConfigurationProvider
      * getter for this payment method instance (test) password
      */
     public function getPassword($type, $country) {
-        return $this->config->password;     // same for test and prod
+        return property_exists( $this->config, "password" ) ? $this->config->password : false;  // same for test and prod
     }
 
     /**
      * getter for this payment method instance (test) username
      */
     public function getUsername($type, $country) {
-        return $this->config->username;     // same for test and prod
+        return property_exists( $this->config, "username" ) ? $this->config->username : false;  // same for test and prod
     }
 
     public function getEndPoint($type) {
@@ -52,22 +52,22 @@ class SveaVmConfigurationProviderProd implements ConfigurationProvider
     }
     /**
      * getter for this payment method instance (test) merchantid
-     * 
+     *
      * @param $type -- not used
      * @param $country -- not used
      * @return returns this payment method instance (test) merchantid
      */
     public function getMerchantId($type, $country) {
-        return $this->config->merchantid_prod;
+        return property_exists( $this->config, "merchantid_prod" ) ? $this->config->merchantid_prod : false;
     }
     /**
      * getter for this payment method instance (test) secret
-     * 
+     *
      * @param $type -- not used
      * @param $country -- not used
      * @return returns this payment method instance (test) secret
      */
     public function getSecret($type, $country) {
-        return $this->config->secret_prod;
+        return property_exists( $this->config, "secret_prod" ) ? $this->config->secret_prod : false;
     }
 }

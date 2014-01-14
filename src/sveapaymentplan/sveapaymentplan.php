@@ -108,7 +108,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
   //Svea Create order
             try {
-                $sveaConfig = $method->testmode_paymentplan == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
@@ -119,7 +119,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
              //add shipping
             $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-             //add coupons TODO: kolla checkbetween to rates i opencart
+             //add coupons
             $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
             $countryId = $order['details']['BT']->virtuemart_country_id;
             if(isset($countryId) == FALSE){
@@ -136,14 +136,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                       ->setCurrency($currency_code_3)
                       ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
                       ->setOrderDate(date('c'))
-                      ->usePaymentPlanPayment($session->get('svea_campaigncode'))
+                      ->usePaymentPlanPayment($session->get("svea_campaigncode_$method->virtuemart_paymentmethod_id"))
                         ->doRequest();
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
-
             if ($svea->accepted == 1) {
                 //override billing address
                 SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
@@ -207,7 +206,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                $session->destroy();
+
             }  else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
@@ -665,12 +664,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 return false;
         }
 
-        $sveaconfig = new SveaVmConfigurationProviderTest($method);
+        $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
         $returnArray = array();
         //Get address request
         if(JRequest::getVar('type') == 'getAddress'){
             try {
-              $svea = WebPay::getAddresses($sveaconfig);
+              $svea = WebPay::getAddresses($sveaConfig);
               $svea = $svea->setOrderTypePaymentPlan()
                         ->setCountryCode(JRequest::getVar('countrycode'))
                         ->setIndividual(JRequest::getVar('svea_ssn'))
@@ -697,7 +696,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
 
         }elseif(JRequest::getVar('type') == 'getParams'){
-            $svea_params = WebPay::getPaymentPlanParams($sveaconfig);
+            $svea_params = WebPay::getPaymentPlanParams($sveaConfig);
             try {
                  $svea_params = $svea_params->setCountryCode(JRequest::getVar('countrycode'))
                     ->doRequest();
@@ -708,7 +707,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             if (isset($svea_params->errormessage)) {
                 $returnArray = array("svea_error" => "Svea error: " .$svea_params->errormessage);
             } else {
-                $formattedPrice = JRequest::getVar('sveacarttotal');//TODO: check if needs to format currency
+                $formattedPrice = JRequest::getVar('sveacarttotal');
                 $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params);
                  if (!class_exists ('CurrencyDisplay')) {
 			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
@@ -738,8 +737,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
     }
 
     /**
-     * TODO: check if company
-     * Sveafix: Javasciript vars needs to have unique names, therfore we use arrays with unique keys instead.
+      * Sveafix: Javasciript vars needs to have unique names, therfore we use arrays with unique keys instead.
      * @param type $param0
      * @param type $countryCode
      * @return string

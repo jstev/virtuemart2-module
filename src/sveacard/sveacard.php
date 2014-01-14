@@ -114,10 +114,10 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $this->storePSPluginInternalData($dbValues);
             //Svea Create order
             try {
-                $sveaConfig = $method->testmode_card == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage ());
+                $html .= SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -125,7 +125,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
              //add shipping
             $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-             //add coupons TODO: kolla checkbetween to rates i opencart
+
             $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
 
             if(isset( $order['details']['BT']->virtuemart_country_id)){
@@ -138,10 +138,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
             $return_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' .$order['details']['BT']->order_number .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
             $cancel_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->virtuemart_order_id);
-            //From Payson. For what?
-            //$ipn____url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginnotification&on=' .$order['details']['BT']->virtuemart_order_id .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id);
-
-             //add customer
+            //add customer
              $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
            try {
                 $form = $svea
@@ -156,12 +153,11 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                                 ->getPaymentForm();
 
            } catch (Exception $e) {
-                $html = SveaHelper::errorResponse('',$e->getMessage ());
+                $html .= SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
-           //TODO: translate Skickar till SveaWebPay...
-             $html  = '<html><head><title>Skickar till svea</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
+            $html .= '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
             //form
             $fields = $form->htmlFormFieldsAsArray;
             $html .= $fields['form_start_tag'];
@@ -171,16 +167,15 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $html .= $fields['form_end_tag'];
 
             $html .= ' <script type="text/javascript">';
-                    $html .= ' document.paymentForm.submit();';
-                    $html .= ' </script></body></html>';
+            $html .= ' document.paymentForm.submit();';
+            $html .= ' </script></body></html>';
 
             $cart->_confirmDone = FALSE;
             $cart->_dataValidated = FALSE;
 
             $modelOrder = VmModel::getModel ('orders');
 
-            //TODO: check why its set to canceled? = Probably cause you don't know if it will go thru yet.
-            $order['order_status'] = $method->status_denied;
+            $order['order_status'] = $method->status_denied;//sets to cancel until returned to shop, cause we don't want to save a cancelled order
             $order['customer_notified'] = 0;
             $order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
@@ -450,8 +445,8 @@ class plgVmPaymentSveacard extends vmPSPlugin {
          */
         function onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter) {
             return parent::onCheckAutomaticSelected($cart, $cart_prices, $paymentCounter);
-        }     
-        
+        }
+
 	/**
 	 * This method is fired when showing the order details in the frontend.
 	 * It displays the method-specific data.
@@ -607,7 +602,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $virtuemart_order_id = VirtueMartModelOrders::getOrderIdByOrderNumber($order_number);
             $order = $modelOrder->getOrder ($virtuemart_order_id);
 
-            $sveaConfig = $method->testmode_card == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+            $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             $countryId = $order['details']['BT']->virtuemart_country_id;
             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
 
@@ -671,7 +666,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
              */
 
     /**
-     * TODO: check if company
      * @param type $param0
      * @param type $countryCode
      * @return string
