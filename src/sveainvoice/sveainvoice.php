@@ -438,10 +438,10 @@
                         }                        
                     }    
                     $session->set($svea_key, $value);
-                    //print_r($svea_key);
-                    //print_r("\n");
+                    print_r($svea_key);
+                    print_r("\n");
                 }
-                //die();
+                die();
             }
             
             /**
@@ -972,8 +972,6 @@
                                 }
                                 else // handle response address data
                                 {
-                                    if(customertype_$paymentId == 'svea_invoice_customertype_company') // company, may get several addresses
-                                    {
                                         jQuery('#svea_address_div_$paymentId').empty().append(
                                             '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressselector_$paymentId\"></select>'
                                         );
@@ -1008,14 +1006,15 @@
                                             jQuery('#sveaAddressDiv_$paymentId').append(
                                                 '<input type=\"text\" id=\"svea_'+value.addressSelector+'".$paymentId."'+'_locality\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_locality_".$paymentId."\" value=\"'+value.locality+'\" />' 
                                             );                                            
-
                                         });
+                                    if(customertype_$paymentId == 'svea_invoice_customertype_company') // company, may get several addresses
+                                    {
+                                        //empty
                                     }
                                     else // private individual, only one address
                                     {
-                                        jQuery('#svea_address_div_$paymentId').hide();
-                                        jQuery('#sveaAddressDiv_$paymentId').remove();
-                                        jQuery('#svea_address_div_$paymentId').append(
+                                        jQuery('#svea_address_div_$paymentId select').hide();   // hide dropdown for individuals
+                                        jQuery('#svea_address_div_$paymentId').append(          // show individual address
                                             '<div id=\"sveaAddressDiv_$paymentId\">'+
                                                 //'<strong>'+json_$paymentId"."[0].fullName+'</strong><br> '+
                                                 '<strong>'+json_$paymentId"."[0].firstName+' '+
