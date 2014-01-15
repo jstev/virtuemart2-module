@@ -104,7 +104,8 @@
                             'tax_id'                        => 'smallint(1)',
                             'svea_order_id'                 => 'int(1) UNSIGNED',
                             'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
-                            'svea_expiration_date'          => 'datetime'
+                            'svea_expiration_date'          => 'datetime',
+                            //TODO add: customerinfo, sveaorderid,
                     );
 
                     return $SQLfields;
@@ -138,32 +139,32 @@
                     $totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
                     $cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
-                $sveaConfig = "";
                 //Svea Create order
+                $sveaConfig = "";
                 try {
-                    $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                    $sveaConfig = $method->testmode_invoice == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                     $svea = WebPay::createOrder($sveaConfig);
                } catch (Exception $e) {
                     vmError ($e->getMessage (), $e->getMessage ());
                     return NULL;
                }
-                //order items
+                //set order items
                 $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
-                //invoice fee
+                //set invoice fee
                 $svea = SveaHelper::formatInvoiceFee($svea,$order,$method->payment_currency);
-                 //add shipping
+                //set shipping
                 $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-                 //add coupons
+                //add coupons TODO: kolla checkbetween to rates i opencart
                 $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
                 $countryId = $order['details']['BT']->virtuemart_country_id;
                 if(isset($countryId) == FALSE){
                     return;
                 }
                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                 $session = JFactory::getSession();
-                 //add customer
-                 $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
-               try {
+                $session = JFactory::getSession();
+                //add customer
+                $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
+                try {
                     $svea = $svea
                           ->setCountryCode($countryCode)
                           ->setCurrency($currency_code_3)
@@ -171,28 +172,31 @@
                           ->setOrderDate(date('c'))
                           ->useInvoicePayment()
                             ->doRequest();
-               } catch (Exception $e) {
+                } catch (Exception $e) {
                     $html = SveaHelper::errorResponse('',$e->getMessage ());
                     vmError ($e->getMessage (), $e->getMessage ());
                     return NULL;
-               }
+                }
 
                 if ($svea->accepted == 1) {
-                    //override billing address
-                    SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
-
-                    $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
-                    $dbValues['order_number']                = $order['details']['BT']->order_number;
-                    $dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
-                    $dbValues['cost_per_transaction']        = $method->cost_per_transaction;
-                    $dbValues['payment_currency']            = $currency_code_3;
-                    $dbValues['payment_order_total']         = $totalInPaymentCurrency;
-                    $dbValues['tax_id']                      = $method->tax_id;
-                    $dbValues['svea_order_id']               = $svea->sveaOrderId;
-                    $dbValues['svea_approved_amount']        = $svea->amount;
-                    $dbValues['svea_expiration_date']        = $svea->expirationDate;
-
-                    $this->storePSPluginInternalData($dbValues);
+//                    //override billing address
+//                    SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
+//                    //override shipping address
+//                    SveaHelper::updateSTAddress($svea,$order['details']['BT']->virtuemart_order_id);
+//
+//                    $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
+//                    $dbValues['order_number']                = $order['details']['BT']->order_number;
+//                    $dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
+//                    $dbValues['cost_per_transaction']        = $method->cost_per_transaction;
+//                    $dbValues['payment_currency']            = $currency_code_3;
+//                    $dbValues['payment_order_total']         = $totalInPaymentCurrency;
+//                    $dbValues['tax_id']                      = $method->tax_id;
+//                    $dbValues['svea_order_id']               = $svea->sveaOrderId;
+//                    $dbValues['svea_approved_amount']        = $svea->amount;
+//                    $dbValues['svea_expiration_date']        = $svea->expirationDate;
+//
+//                    $this->storePSPluginInternalData($dbValues);
+//
                     //Print html on thank you page. Will also say "thank you for your order!"
                     $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
                     $html =  '<img src="'.$logoImg.'" /><br /><br />';
@@ -228,7 +232,7 @@
                         $deliverObj = SveaHelper::formatInvoiceFee($deliverObj,$order,$method->payment_currency);
                          //add shipping
                         $deliverObj = SveaHelper::formatShippingRows($deliverObj,$order,$method->payment_currency);
-                         //add coupons
+                         //add coupons TODO: kolla checkbetween to rates i opencart
                         $deliverObj = SveaHelper::formatCoupon($deliverObj,$order,$method->payment_currency);
 
                         try {
@@ -252,6 +256,7 @@
                     }
                     $order['customer_notified'] = 1;
                     $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
+                    //$session->destroy();
                 }  else {
                     $order['customer_notified'] = 0;
                     $order['order_status'] = $method->status_denied;
@@ -259,6 +264,7 @@
                     $order['comments'] = $html;
 
                 }
+
                 //We delete the old stuff
                 $cart->emptyCart ();
                 JRequest::setVar ('html', $html);
@@ -317,7 +323,6 @@
 
                     if( empty($address) ) {  // i.e. user not logged in --
                         $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
-                        //$returnValue = false;       // need billto address for this payment method
                     }
                     else    // we show payment method if registered customer billto address is in configured list of payment method countries
                     {
@@ -349,7 +354,6 @@
                 if (!is_array($address)) {
                     $address = array();
                     $address['virtuemart_country_id'] = 0;
-
                 }
                 if (!isset($address['virtuemart_country_id'])) {
                     $address['virtuemart_country_id'] = 0;
@@ -384,7 +388,6 @@
             }
 
             /**
-             * Svea: get request and save to session for later
              * This event is fired after the payment method has been selected. It can be used to store
              * additional payment info in the cart.
              *
@@ -396,20 +399,131 @@
              *
              */
             public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) {
-                $request = JRequest::get();
-                $session = JFactory::getSession();
 
-                //skicka med adressdata i html/i sessionen & skriv till cart här om ej inloggad
-
-                foreach ($request as $key => $value) {
-                    $sveaName = substr($key, 0,4);
-                    if($sveaName == "svea"){
-                        $session->set($key, $value);
+                try     // return error message
+                {
+                    $onSelectCheck = parent::OnSelectCheck($cart);  // parent, should return true
+                    if( $onSelectCheck )
+                    {
+                        $this->validateDataFromSelectPayment( JRequest::get() );    // raise exception if missing needed request credentials
+                        $this->saveDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
+                        $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
                     }
+                    return $onSelectCheck;
+                }
+                catch( Exception $e )
+                {
+                    $msg = $e->getMessage();   //TODO check if can set msg to error (red)?
+                    return FALSE;
+                }
+            }
 
+            /**
+             * Make sure all needed fields to create the order are passed to us from the editpayment page.
+             * If not, raise an exception.
+             * @param mixed $request
+             * @throws Exception
+             */
+            private function validateDataFromSelectPayment( $request )
+            {
+                $methodId = $request['virtuemart_paymentmethod_id'];
+
+                //print_r($request); die;
+
+                $countryCode = $request['svea_countryCode_'.$methodId];
+
+                // getAddress countries need the addressSelector
+                if( $countryCode == 'SE' ||
+                    $countryCode == 'DK' ||
+                    ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_company')
+                )
+                {
+                    if( !array_key_exists( "svea_addressSelector_".$methodId, $request ) )    // no addresselector => did not press getAddress
+                    {
+                        throw new Exception( "error: check starred fields" );    // TODO "translations" sätt röd stjärna vid fälten!
+                    }
                 }
 
-                return $this->OnSelectCheck($cart);
+                // FI, NO private need SSN
+                if( $countryCode == 'FI' ||
+                    ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
+                )
+                {
+                    if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
+                    {
+                        throw new Exception( "error: check starred fields" );
+                    }
+                }
+
+                // DE, NL need address fields, but that is checked by virtuemart (BillTo), so no worry of ours
+                // DE, NL need birthdate
+                if( $countryCode == 'DE' ||
+                    $countryCode == 'NL'
+                )
+                {
+                    if( !array_key_exists( "svea_birthday_".$methodId, $request ) ||
+                        !array_key_exists( "svea_birthmonth_".$methodId, $request ) ||
+                        !array_key_exists( "svea_birthyear_".$methodId, $request )
+                    )
+                    {
+                        throw new Exception( "error: check starred fields" );
+                    }
+                }
+                if( $countryCode == 'NL'
+                )
+                {
+                    if( !array_key_exists( "svea_initials_".$methodId, $request )
+                    )
+                    {
+                        throw new Exception( "error: check starred fields" );
+                    }
+                }
+            }
+
+            /**
+             * Parse the JRequest::get() parameters passed from editpayment, i.e. the ssn et al and address fields.
+             * Writes all relevant svea addressfields corresponding to the selected payment method to the session
+             * in the format "svea_xxx" where xxx is i.e. ssn, addresselector, customertype and various address fields
+             * @param mixed $request
+             * @param JSession $session
+             */
+            private function saveDataFromSelectPayment( $request, $session )
+            {
+                $methodId = $request['virtuemart_paymentmethod_id'];
+                $countryCode = $request['svea_countryCode_'.$methodId];
+
+                $svea_prefix = "svea";
+
+                foreach ($request as $key => $value) {
+                    $svea_key = "";
+                    if(substr($key, 0, strlen( $svea_prefix ) ) == $svea_prefix)     // store keys in the format "svea_xxx"
+                    {
+                        // trim addressSelector, methodId
+
+                        $svea_attribute = substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx
+                        $svea_key = $svea_prefix."_".$svea_attribute;
+
+                        // getAddress countries have the addressSelector address fields set
+                        if( $countryCode == 'SE' ||
+                            $countryCode == 'DK' ||
+                            ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_company')
+                        )
+                        {
+                            $svea_addressSelector_prefix =  $request["svea_addressSelector_".$methodId];
+                            // svea_addressSelector_?
+                            if(substr($svea_attribute, 0, strlen($svea_addressSelector_prefix)) == $svea_addressSelector_prefix)
+                            {
+                                $svea_address = substr($svea_attribute, strlen($svea_addressSelector_prefix)+3 ); // addressselector_address => address
+
+                                $svea_key = $svea_prefix."_".$svea_address;
+                            }
+                        }
+                    }
+                    $session->set($svea_key, $value);
+                    //print_r($svea_key); print_r( " "); print_r( $value );
+                    //print_r("\n");
+                }
+                //die();
             }
 
             /**
@@ -549,11 +663,47 @@
              *
              * @return boolean True when the data was valid, false otherwise. If the plugin is not activated, it should return null.
              * @author Max Milbers
-
-            public function plgVmOnCheckoutCheckDataPayment(  VirtueMartCart $cart) {
-            return null;
-            }
              */
+            public function plgVmOnCheckoutCheckDataPayment( VirtueMartCart $cart ) {
+
+                $this->populateBillToFromGetAddressesData( $cart );
+                return true;
+            }
+
+
+            /**
+             * Fills in cart billto address from  getAddresses data stored in the session
+             *
+             * @param VirtueMartCart $cart
+             * @return boolean
+             */
+            private function populateBillToFromGetAddressesData( VirtueMartCart $cart )
+            {
+                $session = JFactory::getSession();
+
+                if( $session->get('svea_customertype' == 'svea_invoice_customertype_company' ) )
+                {
+                    $cart->BT['company'] = $session->get('svea_fullName', "");
+                    $cart->BT['first_name'] = "";
+                    $cart->BT['last_name'] = "";
+                }
+                else
+                {
+                    $cart->BT['company'] = "";
+                    $cart->BT['first_name'] = $session->get('svea_firstName', "");
+                    $cart->BT['last_name'] = $session->get('svea_lastName', "");
+                }
+                $cart->BT['address_1'] = $session->get('svea_street');
+                $cart->BT['address_2'] = $session->get('svea_address_2');
+                $cart->BT['zip'] = $session->get('svea_zipCode');
+                $cart->BT['city'] = $session->get('svea_locality');
+                $cart->BT['virtuemart_country_id'] = $session->get('svea_virtuemart_country_id');
+
+                // keep other cart attributes, if set. also, vm does own validation on checkout.
+                //print_r( $cart ); die;
+                return true;
+            }
+
 
             /**
              * This method is fired when showing when priting an Order
@@ -687,10 +837,11 @@
             if (!$this->selectedThisElement($method->payment_element)) {
                     return false;
             }
-            $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+
+            $sveaconfig = new SveaVmConfigurationProviderTest($method);     // TODO check test/prod and use correct config
             if(JRequest::getVar('type') == 'getAddress'){
                 try {
-                  $svea = WebPay::getAddresses($sveaConfig)
+                  $svea = WebPay::getAddresses($sveaconfig)
                           ->setOrderTypeInvoice()
                           ->setCountryCode(JRequest::getVar('countrycode'));
                     if(JRequest::getVar('customertype')== "svea_invoice_customertype_company"){
@@ -706,18 +857,38 @@
                 if($svea->accepted == 0){
                     $returnArray = array("svea_error" => $svea->errormessage);
                     vmError ('Svea Error: '.$svea->errormessage, 'Svea Error: '.$svea->errormessage);
-
                 }  else {
                      foreach ($svea->customerIdentity as $ci){
                         $name = ($ci->fullName) ? $ci->fullName : $ci->legalName;
 
-                        $returnArray[] =  array("fullName"  => $name,
+                        $returnArray[] =  array(
+                                        "fullName"  => $name,
+                                        "firstName" => $ci->firstName,
+                                        "lastName" => $ci->lastName,
                                         "street"    => $ci->street,
                                         "address_2" => $ci->coAddress,
                                         "zipCode"  => $ci->zipCode,
                                         "locality"  => $ci->locality,
-                                        "addressSelector" => $ci->addressSelector
+                                        "addressSelector" => $ci->addressSelector,
+                                        "virtuemart_country_id" => ShopFunctions::getCountryIDByName(JRequest::getVar('countrycode'))
                                 );
+//                                      vm order_userinfos address fields
+//                                        Array
+//                                        (
+//                                            [address_type_name] => Shipment
+//                                            [company] =>
+//                                            [first_name] => k
+//                                            [middle_name] =>
+//                                            [last_name] => m
+//                                            [address_1] => d
+//                                            [address_2] =>
+//                                            [zip] => 122
+//                                            [city] => st
+//                                            [virtuemart_country_id] => 203
+//                                            [phone_1] =>
+//                                            [phone_2] =>
+//                                            [fax] =>
+//                                        )
                      }
                 }
             }
@@ -726,6 +897,7 @@
             }
 
         /**
+         * TODO: översättningar, hämta från språkfil
          * TODO: img-loader
          * Svea GetAddress view for html and jQuery
          * @return string
@@ -821,12 +993,18 @@
                 // if customer is located in Netherlands, get initials
                 if($countryCode == "NL")
                 {
+
                     $inputFields .=
-                        JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.$session->get
-                            ("svea_initials_$paymentId").'" name="svea_initials_'.$paymentId.'" class="required" /><span style="color: red; "> * </span>
+                        JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.
+                            $session->get("svea_initials_$paymentId").'" name="svea_initials_'.$paymentId.'" class="required" /><span style="color: red; "> * </span>
                     ';
                 }
             }
+
+            // pass along the selected method country (used in plgVmOnSelectCheckPayment when checking that all required fields are set)
+            $inputFields .=
+                '<input type="hidden" id="svea_countryCode_'.$paymentId.'" value="'.$countryCode.'" name="svea_countryCode_'.$paymentId.'" />
+            ';
 
             // show getAddressButton, if applicable
             if( $countryCode == "SE" ||
@@ -836,6 +1014,7 @@
                 $getAddressButton =
                 ' <fieldset>
                     <input type="button" id="svea_getaddress_submit_'.$paymentId.'" value="'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_GET_ADDRESS").'" />
+                    <span style="color: red; "> * </span>
                 </fieldset>';
             }
 
@@ -877,7 +1056,6 @@
                 );
             ';
 
-
             //ajax for getAddress
             $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice';
 
@@ -891,7 +1069,7 @@
 
                     if(svea_ssn_$paymentId == '')
                     {
-                        jQuery('#svea_ssn_$paymentId').addClass('invalid');".
+                        jQuery('#svea_ssn_$paymentId').addClass('invalid');".  // TODO translation for below required error?
                         "jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * fields required');
                     }
                     else
@@ -913,35 +1091,65 @@
                             // callback for getaddress return
                             "success: function(data){
                                 var json_$paymentId = JSON.parse(data);
-                                if (json_$paymentId.svea_error)
+                                if (json_$paymentId.svea_error) // display error
                                 {
                                     jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>'+json_$paymentId.svea_error).show();
                                 }
-                                else
+                                else // handle response address data
                                 {
-                                    if(customertype_$paymentId == 'svea_invoice_customertype_company')
-                                    {
                                         jQuery('#svea_address_div_$paymentId').empty().append(
-                                            '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressselector_$paymentId\"></select>'
+                                            '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressSelector_$paymentId\"></select>'
                                         );
 
                                         jQuery.each(json_$paymentId,function(key,value){
+
+                                            // show addressSelector dropdown with addresses
                                             jQuery('#sveaAddressDiv_$paymentId').append(
                                                 '<option value=\"'+value.addressSelector+'\">'+value.fullName+' '+value.street+
                                                     ' '+value.zipCode+' '+value.locality+'</option>'
                                             );
-                                        });
 
-                                        jQuery('#svea_address_div_$paymentId').show();
-                                    }
-                                    else
+                                            // for each addressSelector, also store hidden address fields to pass on to next step
+                                            jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_firstName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_firstName_".$paymentId."\" value=\"'+value.firstName+'\" />'
+                                            );
+                                            jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_lastName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_lastName_".$paymentId."\" value=\"'+value.lastName+'\" />'
+                                            );
+                                            jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_fullName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_fullName_".$paymentId."\" value=\"'+value.fullName+'\" />'
+                                            );
+                                            jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_street\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_street_".$paymentId."\" value=\"'+value.street+'\" />'
+                                            );
+                                           jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_address_2\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_address_2_".$paymentId."\" value=\"'+value.address_2+'\" />'
+                                            );
+                                            jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_zipCode\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_zipCode_".$paymentId."\" value=\"'+value.zipCode+'\" />'
+                                            );
+                                            jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_locality\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_locality_".$paymentId."\" value=\"'+value.locality+'\" />'
+                                            );
+                                            jQuery('#sveaAddressDiv_$paymentId').append(
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_virtuemart_country_id\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_virtuemart_country_id_".$paymentId."\" value=\"'+value.virtuemart_country_id+'\" />'
+                                            );
+                                        });
+                                    if(customertype_$paymentId == 'svea_invoice_customertype_company') // company, may get several addresses
                                     {
-                                        jQuery('#svea_address_div_$paymentId').hide();
-                                        jQuery('#sveaAddressDiv_$paymentId').remove();
-                                        jQuery('#svea_address_div_$paymentId').append(
-                                            '<div id=\"sveaAddressDiv_$paymentId\"><strong>'+json_$paymentId".
-                                            "[0].fullName+'</strong><br> '+json_$paymentId"."[0].street+' <br> '+json_$paymentId".
-                                            "[0].zipCode+' '+json_$paymentId"."[0].locality+'</div>'
+                                        //empty
+                                    }
+                                    else // private individual, only one address
+                                    {
+                                        jQuery('#svea_address_div_$paymentId select').hide();   // hide dropdown for individuals
+                                        jQuery('#svea_address_div_$paymentId').append(          // show individual address
+                                            '<div id=\"sveaAddressDiv_$paymentId\">'+
+                                                //'<strong>'+json_$paymentId"."[0].fullName+'</strong><br> '+
+                                                '<strong>'+json_$paymentId"."[0].firstName+' '+
+                                                json_$paymentId"."[0].lastName+'</strong><br> '+
+                                                json_$paymentId"."[0].street+' <br> '+
+                                                json_$paymentId"."[0].zipCode+' '+json_$paymentId"."[0].locality+
+                                            '</div>'
                                         );
                                     }
                                     jQuery('#svea_address_div_$paymentId').show();
