@@ -938,6 +938,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $inputFields .=  JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.$session->get("svea_initials_$paymentId").'" name="svea_initials_'.$paymentId.'" class="required" /><span style="color: red; "> * </span>';
             }
         }
+        
+        // pass along the selected method country (used in plgVmOnSelectCheckPayment when checking that all required fields are set)
+        $inputFields .= 
+            '<input type="hidden" id="svea_countryCode_'.$paymentId.'" value="'.$countryCode.'" name="svea_countryCode_'.$paymentId.'" />
+        ';
+
+        // show getAddressButton, if applicable    
         if($countryCode == "SE" || $countryCode == "DK") {
             $getAddressButton =
                         ' <fieldset>
@@ -1047,56 +1054,57 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                         countrycode: countrycode_".$paymentId."
                                     },
                                     url: url_".$paymentId.",
+                                        
+                                    // getAddress callback
                                     success: function(data){
+
+                                        console.log( data );
+
                                         var json_$paymentId = JSON.parse(data);
-                                         jQuery('#svea_getaddress_error_$paymentId').hide();
-                                         if (json_".$paymentId.".svea_error){
-                                             jQuery('#svea_getaddress_error_$paymentId').empty().append(' Svea Error: <br>'+json_".$paymentId.".svea_error).show();
+
+                                        jQuery('#svea_getaddress_error_$paymentId').hide();
+                                        if (json_".$paymentId.".svea_error){
+                                            jQuery('#svea_getaddress_error_$paymentId').empty().append(' Svea Error: <br>'+json_".$paymentId.".svea_error).show();
                                         }
                                         else // handle response address data
                                         {
-                                            jQuery('#svea_address_div_$paymentId').empty().append(
-                                                '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressSelector_$paymentId\"></select>'
+                                            jQuery('#svea_address_div_$paymentId').empty();
+                                                
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_addressSelector_".$paymentId."\" name=\"svea_addressSelector_".$paymentId."\" value=\"'+json_".$paymentId.".addressSelector+'\" />' 
                                             );
-
-                                            jQuery.each(json_$paymentId,function(key,value){
-
-                                                // for each addressSelector, also store hidden address fields to pass on to next step
-                                                jQuery('#sveaAddressDiv_$paymentId').append(
-                                                    '<input type=\"text\" id=\"svea_'+value.addressSelector+'_firstName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_firstName_".$paymentId."\" value=\"'+value.firstName+'\" />' 
-                                                );
-                                                jQuery('#sveaAddressDiv_$paymentId').append(
-                                                    '<input type=\"text\" id=\"svea_'+value.addressSelector+'_lastName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_lastName_".$paymentId."\" value=\"'+value.lastName+'\" />' 
-                                                );                                            
-                                                jQuery('#sveaAddressDiv_$paymentId').append(
-                                                    '<input type=\"text\" id=\"svea_'+value.addressSelector+'_fullName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_fullName_".$paymentId."\" value=\"'+value.fullName+'\" />' 
-                                                );
-                                                jQuery('#sveaAddressDiv_$paymentId').append(
-                                                    '<input type=\"text\" id=\"svea_'+value.addressSelector+'_street\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_street_".$paymentId."\" value=\"'+value.street+'\" />' 
-                                                );
-                                               jQuery('#sveaAddressDiv_$paymentId').append(
-                                                    '<input type=\"text\" id=\"svea_'+value.addressSelector+'_address_2\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_address_2_".$paymentId."\" value=\"'+value.address_2+'\" />' 
-                                                );                                            
-                                                jQuery('#sveaAddressDiv_$paymentId').append(
-                                                    '<input type=\"text\" id=\"svea_'+value.addressSelector+'_zipCode\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_zipCode_".$paymentId."\" value=\"'+value.zipCode+'\" />' 
-                                                );
-                                                jQuery('#sveaAddressDiv_$paymentId').append(
-                                                    '<input type=\"text\" id=\"svea_'+value.addressSelector+'_locality\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_locality_".$paymentId."\" value=\"'+value.locality+'\" />'
-                                                );
-                                                jQuery('#sveaAddressDiv_$paymentId').append(
-                                                    '<input type=\"text\" id=\"svea_'+value.addressSelector+'_virtuemart_country_id\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_virtuemart_country_id_".$paymentId."\" value=\"'+value.virtuemart_country_id+'\" />'
-                                                );                                            
-                                            });
+                                            
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_firstName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_firstName_".$paymentId."\" value=\"'+json_".$paymentId.".firstName+'\" />' 
+                                            );
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_lastName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_lastName_".$paymentId."\" value=\"'+json_".$paymentId.".lastName+'\" />' 
+                                            );                                            
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_fullName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_fullName_".$paymentId."\" value=\"'+json_".$paymentId.".fullName+'\" />' 
+                                            );
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_street_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_street_".$paymentId."\" value=\"'+json_".$paymentId.".street+'\" />' 
+                                            );
+                                           jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_address_2_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_address_2_".$paymentId."\" value=\"'+json_".$paymentId.".address_2+'\" />' 
+                                            );                                            
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_zipCode_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_zipCode_".$paymentId."\" value=\"'+json_".$paymentId.".zipCode+'\" />' 
+                                            );
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_locality_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_locality_".$paymentId."\" value=\"'+json_".$paymentId.".locality+'\" />'
+                                            );
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_virtuemart_country_id_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_virtuemart_country_id_".$paymentId."\" value=\"'+json_".$paymentId.".virtuemart_country_id+'\" />'
+                                            );                                            
 
                                             jQuery('#svea_address_div_$paymentId').append(          // show individual address
-                                                '<div id=\"sveaAddressDiv_$paymentId\">'+
-                                                    //'<strong>'+json_$paymentId"."[0].fullName+'</strong><br> '+
-                                                    '<strong>'+json_$paymentId"."[0].firstName+' '+
-                                                    json_$paymentId"."[0].lastName+'</strong><br> '+
-                                                    json_$paymentId"."[0].street+' <br> '+
-                                                    json_$paymentId"."[0].zipCode+' '+json_$paymentId"."[0].locality+
-                                                '</div>'
-                                            );
+                                                    '<strong>'+json_$paymentId".".firstName+' '+
+                                                    json_$paymentId".".lastName+'</strong><br> '+
+                                                    json_$paymentId".".street+' <br> '+
+                                                    json_$paymentId".".zipCode+' '+json_$paymentId".".locality
+                                           );
                                             jQuery('#svea_address_div_$paymentId').show();
                                             jQuery('#svea_getaddress_error_$paymentId').hide();
                                         }
