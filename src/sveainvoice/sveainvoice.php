@@ -211,14 +211,16 @@
                     $currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
                     $html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
                     $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>';
-               $html .= '</div>' . "\n";
+                    $html .= '</div>' . "\n";
                     $modelOrder = VmModel::getModel ('orders');
 
                     $order['order_status'] = $method->status_success;
 
                     $order['comments'] = 'Order created at Svea. Svea orderId: '.$svea->sveaOrderId;
 
-                    if($method->autodeliver == TRUE){
+                    // autodeliver order if set
+                    if($method->autodeliver == TRUE){                      
+                        // reconstruct order rows, in autodeliver, so == original order rows
                         $deliverObj = WebPay::deliverOrder($sveaConfig);
                          //order items
                         $deliverObj = SveaHelper::formatOrderRows($deliverObj, $order,$method->payment_currency);
@@ -244,19 +246,16 @@
                         if($deliverObj->accepted == 1){
                             $order['comments'] = 'Order delivered at Svea. Svea orderId: '.$svea->sveaOrderId;
                             $order['order_status'] = $method->status_shipped;
-
                         }
-
                     }
                     $order['customer_notified'] = 1;
                     $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                    //$session->destroy();
                 }  else {
+
                     $order['customer_notified'] = 0;
                     $order['order_status'] = $method->status_denied;
                     $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
                     $order['comments'] = $html;
-
                 }
 
                 //We delete the old stuff
@@ -291,14 +290,15 @@
             }
             /**
              * getCosts() will return the invoice fee for Svea Invoice payment method
-             *
+             * @override
+             * 
              * @param VirtueMartCart $cart
              * @param type $method
              * @param type $cart_prices
              * @return type cost_per_transaction -- as defined by invoice config setting (should be given ex vat)
              */
             function getCosts(VirtueMartCart $cart, $method, $cart_prices) {
-                    return ($method->cost_per_transaction);
+                return ($method->cost_per_transaction);
             }
 
             /**
@@ -323,8 +323,6 @@
                         $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
                     }
                     //Check min and max amount. Copied from standard payment
-                    // We come from the calculator, the $cart->pricesUnformatted does not exist yet
-                    //$amount = $cart->pricesUnformatted['billTotal'];
                     $amount = $cart_prices['salesPrice'];
                     $amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
                             OR
@@ -365,10 +363,6 @@
 
                 return (count($countriesArray) == 0 || in_array($address['virtuemart_country_id'], $countriesArray)); // ==0 means all countries
             }
-
-            /*
-    * We must reimplement this triggers for joomla 1.7
-    */
 
             /**
              * Create the table for this plugin if it does not yet exist.

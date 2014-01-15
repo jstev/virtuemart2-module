@@ -159,6 +159,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$this->storePSPluginInternalData($dbValues);
                   //Print html on thank you page. Will also say "thank you for your order!"
                  $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
+
                 $html =  '<img src="'.$logoImg.'" /><br /><br />';
                 $html .= '<div class="vmorder-done">' . "\n";
                 $html .= '<div class="vmorder-done-payinfo">'.JText::sprintf('VMPAYMENT_SVEA_PAYMENTPLAN').'</div>';
@@ -183,7 +184,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
 		$order['comments'] = 'Order created at Svea. Svea orderId: '.$svea->sveaOrderId;
 
-                  if($method->autodeliver == TRUE){
+                // autodeliver order if set
+                if($method->autodeliver == TRUE){
                     try {
                         $deliverObj = WebPay::deliverOrder($sveaConfig)
                                             ->setCountryCode($countryCode)
@@ -199,28 +201,22 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     if($deliverObj->accepted == 1){
                         $order['comments'] = 'Order delivered at Svea. Svea orderId: '.$svea->sveaOrderId;
                         $order['order_status'] = $method->status_shipped;
-
                     }
-
                 }
-
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-
-            }  else {
+            }  
+            else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
-                 $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
+                $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
                 $order['comments'] = $html;
-
-
             }
 
             //We delete the old stuff
             $cart->emptyCart ();
             JRequest::setVar ('html', $html);
             return TRUE;
-
 	}
 
 	/**
@@ -238,7 +234,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $html = '<table class="adminlist">' . "\n";
 		$html .= $this->getHtmlHeaderBE();
                 $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
-                $html .= '<tr class="row2"><td>' . JText::sprintf('VMPAYMENT_SVEA_INVOICEFEE').'</td><td align="left">'. $paymentTable->cost_per_transaction.'</td></tr>';
+//                $html .= '<tr class="row2"><td>' . JText::sprintf('VMPAYMENT_SVEA_INVOICEFEE').'</td><td align="left">'. $paymentTable->cost_per_transaction.'</td></tr>';
                 $html .= '<tr class="row2"><td>Approved amount</td><td align="left">'. $paymentTable->svea_approved_amount.'</td></tr>';
                 $html .= '<tr class="row2"><td>Expiration date</td><td align="left">'. $paymentTable->svea_expiration_date.'</td></tr>';
                 $html .= '<tr class="row3"><td>Svea orderId</td><td align="left">'. $paymentTable->svea_order_id.'</td></tr>';
@@ -249,14 +245,15 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
         /**
          * getCosts() will return the invoice fee for Svea Part payment payment method
-         *
+         * @override
+         * 
          * @param VirtueMartCart $cart
          * @param type $method
          * @param type $cart_prices
          * @return type cost_per_transaction -- as defined by part payment config cost_per_transaction setting (should be given ex vat)
          */
 	function getCosts(VirtueMartCart $cart, $method, $cart_prices) {
-		return ($method->cost_per_transaction);
+            return 0.0;//($method->cost_per_transaction); // TODO remove cost_per_transaction outright
 	}
 
 	/**
@@ -275,16 +272,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                 if( empty($address) ) {  // i.e. user not logged in --
                     $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
-                    //$returnValue = false;       // need billto address for this payment method
                 }
                 else    // we show payment method if registered customer billto address is in configured list of payment method countries
                 {
-
                     $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
                 }
                 //Check min and max amount. Copied from standard payment
-                // We come from the calculator, the $cart->pricesUnformatted does not exist yet
-		//$amount = $cart->pricesUnformatted['billTotal'];
 		$amount = $cart_prices['salesPrice'];
 		$amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
 			OR
@@ -326,10 +319,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             return (count($countriesArray) == 0 || in_array($address['virtuemart_country_id'], $countriesArray)); // ==0 means all countries
         }
 
-	/*
-* We must reimplement this triggers for joomla 1.7
-*/
-
 	/**
 	 * Create the table for this plugin if it does not yet exist.
 	 * This functions checks if the called plugin is active one.
@@ -352,18 +341,131 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 * @return null if the payment was not selected, true if the data is valid, error message if the data is not vlaid
 	 *
 	 */
-	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) {
-            $request = JRequest::get();
-            $session = JFactory::getSession();
-            foreach ($request as $key => $value) {
-                $sveaName = substr($key, 0,4);
-                if($sveaName == "svea"){
-                    $session->set($key, $value);
+	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) 
+        {
+            try
+            {       
+                $onSelectCheck = parent::OnSelectCheck($cart);  // parent, should return true
+                if( $onSelectCheck )
+                {
+                    $this->validateDataFromSelectPayment( JRequest::get() );    // raise exception if missing needed request credentials                  
+                    $this->saveDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
+                    $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
+                }
+                return $onSelectCheck;
+            }
+            catch( Exception $e )
+            {
+                $msg = $e->getMessage();   //TODO check if can set msg to error (red)?
+                return FALSE;
+            }
+	}
+        
+       /**
+        * Make sure all needed fields to create the order are passed to us from the editpayment page.
+        * If not, raise an exception.
+        * @param mixed $request
+        * @throws Exception
+        */
+       private function validateDataFromSelectPayment( $request )
+       {
+            $methodId = $request['virtuemart_paymentmethod_id'];
+
+            //print_r($request); die;
+
+            $countryCode = $request['svea_countryCode_'.$methodId];
+
+            // getAddress countries need the addressSelector
+            if( $countryCode == 'SE' ||
+                $countryCode == 'DK'     
+            )
+            {      
+                if( !array_key_exists( "svea_addressSelector_".$methodId, $request ) )    // no addresselector => did not press getAddress
+                {
+                    throw new Exception( "error: check starred fields" );    // TODO "translations" sätt röd stjärna vid fälten!
                 }
             }
 
-            return $this->OnSelectCheck($cart);
-	}
+            // FI, NO private need SSN
+            if( $countryCode == 'FI' ||    
+                ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
+            )
+            {      
+                if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
+                {
+                    throw new Exception( "error: check starred fields" );
+                }
+            }
+
+            // DE, NL need address fields, but that is checked by virtuemart (BillTo), so no worry of ours
+            // DE, NL need birthdate
+            if( $countryCode == 'DE' ||    
+                $countryCode == 'NL' 
+            )
+            {      
+                if( !array_key_exists( "svea_birthday_".$methodId, $request ) ||
+                    !array_key_exists( "svea_birthmonth_".$methodId, $request ) ||    
+                    !array_key_exists( "svea_birthyear_".$methodId, $request )
+                )        
+                {
+                    throw new Exception( "error: check starred fields" );
+                }
+            }   
+            if( $countryCode == 'NL' 
+            )
+            {      
+                if( !array_key_exists( "svea_initials_".$methodId, $request )
+                )        
+                {
+                    throw new Exception( "error: check starred fields" );
+                }
+            }       
+        }
+        
+        /**
+         * Parse the JRequest::get() parameters passed from editpayment, i.e. the ssn et al and address fields.
+         * Writes all relevant svea addressfields corresponding to the selected payment method to the session
+         * in the format "svea_xxx" where xxx is i.e. ssn, addresselector, customertype and various address fields
+         * @param mixed $request
+         * @param JSession $session
+         */
+        private function saveDataFromSelectPayment( $request, $session )
+        {
+            $methodId = $request['virtuemart_paymentmethod_id'];
+            $countryCode = $request['svea_countryCode_'.$methodId];
+
+            $svea_prefix = "svea";
+
+            foreach ($request as $key => $value) {            
+                $svea_key = "";
+                if(substr($key, 0, strlen( $svea_prefix ) ) == $svea_prefix)     // store keys in the format "svea_xxx"
+                {
+                    // trim addressSelector, methodId
+
+                    $svea_attribute = substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx 
+                    $svea_key = $svea_prefix."_".$svea_attribute;
+
+                    // getAddress countries have the addressSelector address fields set
+                    if( $countryCode == 'SE' ||
+                        $countryCode == 'DK'     
+                    )
+                    { 
+                        $svea_addressSelector_prefix =  $request["svea_addressSelector_".$methodId];
+                        // svea_addressSelector_?
+                        if(substr($svea_attribute, 0, strlen($svea_addressSelector_prefix)) == $svea_addressSelector_prefix)
+                        {                          
+                            $svea_address = substr($svea_attribute, strlen($svea_addressSelector_prefix)+3 ); // addressselector_address => address
+
+                            $svea_key = $svea_prefix."_".$svea_address;
+                        }
+                    }
+                }    
+                $session->set($svea_key, $value);
+                //print_r($svea_key); print_r( " "); print_r( $value );
+                //print_r("\n");
+            }
+            //die();
+        }
 
 	/**
 	 * plgVmDisplayListFEPayment
