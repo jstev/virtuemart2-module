@@ -823,7 +823,7 @@
                 {
                     $inputFields .=
                         JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.$session->get
-                            ("svea_initials_$paymentId").'" name="initials" class="required" /><span style="color: red; "> * </span>
+                            ("svea_initials_$paymentId").'" name="svea_initials_'.$paymentId.'" class="required" /><span style="color: red; "> * </span>
                     ';
                 }
             }
