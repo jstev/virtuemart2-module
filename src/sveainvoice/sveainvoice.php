@@ -142,7 +142,7 @@
                 //Svea Create order
                 $sveaConfig = "";
                 try {
-                    $sveaConfig = $method->testmode_invoice == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                    $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                     $svea = WebPay::createOrder($sveaConfig);
                } catch (Exception $e) {
                     vmError ($e->getMessage (), $e->getMessage ());
@@ -837,11 +837,10 @@
             if (!$this->selectedThisElement($method->payment_element)) {
                     return false;
             }
-
-            $sveaconfig = new SveaVmConfigurationProviderTest($method);     // TODO check test/prod and use correct config
+            $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             if(JRequest::getVar('type') == 'getAddress'){
                 try {
-                  $svea = WebPay::getAddresses($sveaconfig)
+                  $svea = WebPay::getAddresses($sveaConfig)
                           ->setOrderTypeInvoice()
                           ->setCountryCode(JRequest::getVar('countrycode'));
                     if(JRequest::getVar('customertype')== "svea_invoice_customertype_company"){
