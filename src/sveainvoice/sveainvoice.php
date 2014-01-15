@@ -530,7 +530,7 @@
                     return $this->displayListFE($cart, $selected, $htmlIn);
             }
             /**
-             * @override -- adds our Svea getAddress customer credentials form fiels to html
+             * @override -- adds our Svea getAddress customer credentials form fields to html
              * This event is fired to display the pluginmethods in the cart (edit shipment/payment) for example
              *
              * @param object  $cart Cart object
@@ -588,7 +588,7 @@
                 return FALSE;
             }
 
-            /**
+       /**
         * plgVmonSelectedCalculatePricePayment
         * Calculate the price (value, tax_id) of the selected method
         * It is called by the calculator
@@ -690,13 +690,12 @@
                 $cart->BT['virtuemart_country_id'] = $session->get('svea_virtuemart_country_id');
 
                 // keep other cart attributes, if set. also, vm does own validation on checkout.
-                //print_r( $cart ); die;
                 return true;
             }
 
 
             /**
-             * This method is fired when showing when priting an Order
+             * This method is fired when showing when printing an Order
              * It displays the the payment method-specific data.
              *
              * @param integer $_virtuemart_order_id The order ID
@@ -819,7 +818,6 @@
          * @param type $name
          * @param type $render
          */
-
         public function plgVmOnSelfCallFE($type,$name,&$render) {
             if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
                             return NULL; // Another method was selected, do nothing
@@ -827,6 +825,7 @@
             if (!$this->selectedThisElement($method->payment_element)) {
                     return false;
             }
+            
             $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             if(JRequest::getVar('type') == 'getAddress'){
                 try {
@@ -851,33 +850,16 @@
                         $name = ($ci->fullName) ? $ci->fullName : $ci->legalName;
 
                         $returnArray[] =  array(
-                                        "fullName"  => $name,
-                                        "firstName" => $ci->firstName,
-                                        "lastName" => $ci->lastName,
-                                        "street"    => $ci->street,
-                                        "address_2" => $ci->coAddress,
-                                        "zipCode"  => $ci->zipCode,
-                                        "locality"  => $ci->locality,
-                                        "addressSelector" => $ci->addressSelector,
-                                        "virtuemart_country_id" => ShopFunctions::getCountryIDByName(JRequest::getVar('countrycode'))
-                                );
-//                                      vm order_userinfos address fields
-//                                        Array
-//                                        (
-//                                            [address_type_name] => Shipment
-//                                            [company] =>
-//                                            [first_name] => k
-//                                            [middle_name] =>
-//                                            [last_name] => m
-//                                            [address_1] => d
-//                                            [address_2] =>
-//                                            [zip] => 122
-//                                            [city] => st
-//                                            [virtuemart_country_id] => 203
-//                                            [phone_1] =>
-//                                            [phone_2] =>
-//                                            [fax] =>
-//                                        )
+                            "fullName"  => $name,
+                            "firstName" => $ci->firstName,
+                            "lastName" => $ci->lastName,
+                            "street"    => $ci->street,
+                            "address_2" => $ci->coAddress,
+                            "zipCode"  => $ci->zipCode,
+                            "locality"  => $ci->locality,
+                            "addressSelector" => $ci->addressSelector,
+                            "virtuemart_country_id" => ShopFunctions::getCountryIDByName(JRequest::getVar('countrycode'))
+                        );                   
                      }
                 }
             }
@@ -886,8 +868,6 @@
             }
 
         /**
-         * TODO: översättningar, hämta från språkfil
-         * TODO: img-loader
          * Svea GetAddress view for html and jQuery
          * @return string
          */
@@ -1058,8 +1038,13 @@
 
                     if(svea_ssn_$paymentId == '')
                     {
+<<<<<<< HEAD
                         jQuery('#svea_ssn_$paymentId').addClass('invalid');".  // TODO translation for below required error?
                         "jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * fields required');
+=======
+                        jQuery('#svea_ssn_$paymentId').addClass('invalid');".  // TODO translation for below required error?                    
+                        "jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * required');
+>>>>>>> WIP ported over js fixes for setting billto et al from invoice
                     }
                     else
                     {
