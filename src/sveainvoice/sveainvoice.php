@@ -681,6 +681,8 @@
             {
                 $session = JFactory::getSession();
 
+                if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
+                
                 if( $session->get('svea_customertype' == 'svea_invoice_customertype_company' ) )
                 {
                     $cart->BT['company'] = $session->get('svea_fullName', "");
