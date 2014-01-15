@@ -343,23 +343,21 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 */
 	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) 
         {
-            try
+            $onSelectCheck = parent::OnSelectCheck($cart);  // parent, should return true
+            if( $onSelectCheck )
             {       
-                $onSelectCheck = parent::OnSelectCheck($cart);  // parent, should return true
-                if( $onSelectCheck )
-                {
+                try {       
                     $this->validateDataFromSelectPayment( JRequest::get() );    // raise exception if missing needed request credentials                  
-                    $this->saveDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
-                    $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
                 }
-                return $onSelectCheck;
+                catch( Exception $e ) {
+                    $msg = $e->getMessage();   //TODO check if can set msg to error (red)?
+                    return FALSE;
+                }
+                $this->saveDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
+                $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
             }
-            catch( Exception $e )
-            {
-                $msg = $e->getMessage();   //TODO check if can set msg to error (red)?
-                return FALSE;
-            }
-	}
+            return $onSelectCheck;
+        }
         
        /**
         * Make sure all needed fields to create the order are passed to us from the editpayment page.
@@ -640,15 +638,45 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         {
             $session = JFactory::getSession();
 
-            $cart->BT['company'] = "";   
-            $cart->BT['first_name'] = $session->get('svea_firstName', "");  
-            $cart->BT['last_name'] = $session->get('svea_lastName', "");  
+//            print_r($session->get('svea_firstName'));
+//            $tmp = $session->get('svea_firstName');
+//            echo isset( $tmp ) ? "isset" : "notset";
+//            echo empty($session->get('svea_firstName')) ? "isempty" : "notempty";
+//            echo $session->get('svea_firstName') === "" ? "isemptystring" : "notemptystring";
+//              
+//            echo("1\n");
+//            print_r($session->get('svea_lastName'));
+//            echo("2\n");
+//            print_r($session->get('svea_street'));
+//            echo("3\n");
+//            print_r($session->get('svea_address_2'));
+//            echo("4\n");
+//            print_r($session->get('svea_zipCode'));
+//            echo("5\n");
+//            print_r($session->get('svea_locality'));
+//            echo("6\n");
+//            print_r($session->get('svea_virtuemart_country_id'));
+//            echo("7\n");
+//            die();
+//                       
+            $cart->BT['company'] = empty( $session->get('svea_fullName') ) ? $cart->BT['company'] : $session->get('svea_fullName');
+            $cart->BT['first_name'] = empty( $session->get('svea_firstName') ) ? $cart->BT['first_name'] : $session->get('svea_firstName');  
+            $cart->BT['last_name'] = empty( $session->get('svea_lastName') ) ? $cart->BT['last_name'] : $session->get('svea_lastName');  
+            $cart->BT['address_1'] = empty( $session->get('svea_street') ) ? $cart->BT['address_1'] : $session->get('svea_street');  
+            $cart->BT['address_2'] = empty( $session->get('svea_address_2') ) ? $cart->BT['address_2'] : $session->get('svea_address_2');  
+            $cart->BT['zip'] = empty( $session->get('svea_zipCode') ) ? $cart->BT['zip'] : $session->get('svea_zipCode');  
+            $cart->BT['city'] = empty( $session->get('svea_locality') ) ? $cart->BT['city'] : $session->get('svea_locality');  
+            $cart->BT['virtuemart_country_id'] = empty( $session->get('svea_virtuemart_country_id') ) ? $cart->BT['virtuemart_country_id'] : $session->get('svea_virtuemart_country_id');  
 
-            $cart->BT['address_1'] = $session->get('svea_street');
-            $cart->BT['address_2'] = $session->get('svea_address_2');
-            $cart->BT['zip'] = $session->get('svea_zipCode');
-            $cart->BT['city'] = $session->get('svea_locality');
-            $cart->BT['virtuemart_country_id'] = $session->get('svea_virtuemart_country_id');
+//            $cart->BT['company'] = "";   
+//            $cart->BT['first_name'] = $session->get('svea_firstName');  
+//            $cart->BT['last_name'] = $session->get('svea_lastName');  
+//
+//            $cart->BT['address_1'] = $session->get('svea_street');
+//            $cart->BT['address_2'] = $session->get('svea_address_2');
+//            $cart->BT['zip'] = $session->get('svea_zipCode');
+//            $cart->BT['city'] = $session->get('svea_locality');
+//            $cart->BT['virtuemart_country_id'] = $session->get('svea_virtuemart_country_id');
 
             // keep other cart attributes, if set. also, vm does own validation on checkout.
             return true; 
