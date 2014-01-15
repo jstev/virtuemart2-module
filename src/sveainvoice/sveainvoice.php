@@ -323,10 +323,9 @@
 
                     if( empty($address) ) {  // i.e. user not logged in --
                         $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
-                        //$returnValue = false;       // need billto address for this payment method
                     }
                     else    // we show payment method if registered customer billto address is in configured list of payment method countries
-                    {
+                    {                   
                         $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
                     }
                     //Check min and max amount. Copied from standard payment
@@ -401,16 +400,84 @@
              */
             public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) {
                 
-                $onSelectCheck = parent::OnSelectCheck($cart);
-                
-                if( $onSelectCheck )
-                {
-                    $this->storeDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
-                    $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
+                try     // return error message
+                {       
+                    $onSelectCheck = parent::OnSelectCheck($cart);  // parent, should return true
+                    if( $onSelectCheck )
+                    {
+                        $this->validateDataFromSelectPayment( JRequest::get() );    // raise exception if missing needed request credentials                  
+                        $this->saveDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
+                        $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
+                    }
+                    return $onSelectCheck;
                 }
-                return $onSelectCheck;
+                catch( Exception $e )
+                {
+                    $msg = $e->getMessage();   //TODO check if can set msg to error (red)?
+                    return FALSE;
+                }
+            }
+            
+            /**
+             * Make sure all needed fields to create the order are passed to us from the editpayment page.
+             * If not, raise an exception.
+             * @param mixed $request
+             * @throws Exception
+             */
+            private function validateDataFromSelectPayment( $request )
+            {
+                $methodId = $request['virtuemart_paymentmethod_id'];
                 
+                //print_r($request); die;
+
+                $countryCode = $request['svea_countryCode_'.$methodId];
                 
+                // getAddress countries need the addressSelector
+                if( $countryCode == 'SE' ||
+                    $countryCode == 'DK' ||     
+                    ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_company')
+                )
+                {      
+                    if( !array_key_exists( "svea_addressSelector_".$methodId, $request ) )    // no addresselector => did not press getAddress
+                    {
+                        throw new Exception( "error: check starred fields" );    // TODO "translations" sätt röd stjärna vid fälten!
+                    }
+                }
+                
+                // FI, NO private need SSN
+                if( $countryCode == 'FI' ||    
+                    ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
+                )
+                {      
+                    if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
+                    {
+                        throw new Exception( "error: check starred fields" );
+                    }
+                }
+                
+                // DE, NL need address fields, but that is checked by virtuemart (BillTo), so no worry of ours
+                // DE, NL need birthdate
+                if( $countryCode == 'DE' ||    
+                    $countryCode == 'NL' 
+                )
+                {      
+                    if( !array_key_exists( "svea_birthday_".$methodId, $request ) ||
+                        !array_key_exists( "svea_birthmonth_".$methodId, $request ) ||    
+                        !array_key_exists( "svea_birthyear_".$methodId, $request )
+                    )        
+                    {
+                        throw new Exception( "error: check starred fields" );
+                    }
+                }   
+                if( $countryCode == 'NL' 
+                )
+                {      
+                    if( !array_key_exists( "svea_initials_".$methodId, $request )
+                    )        
+                    {
+                        throw new Exception( "error: check starred fields" );
+                    }
+                }       
             }
             
             /**
@@ -420,13 +487,12 @@
              * @param mixed $request
              * @param JSession $session
              */
-            private function storeDataFromSelectPayment( $request, $session )
+            private function saveDataFromSelectPayment( $request, $session )
             {
                 $methodId = $request['virtuemart_paymentmethod_id'];
-                $addressSelector = $request["svea_addressselector_".$methodId];
-                
+                $countryCode = $request['svea_countryCode_'.$methodId];
+                                                
                 $svea_prefix = "svea";                    
-                $svea_addressSelector_prefix = $addressSelector;
                 
                 foreach ($request as $key => $value) {            
                     $svea_key = "";
@@ -436,14 +502,22 @@
                            
                         $svea_attribute = substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx 
                         $svea_key = $svea_prefix."_".$svea_attribute;
-                        
-                        // svea_addressSelector_?
-                        if(substr($svea_attribute, 0, strlen($svea_addressSelector_prefix)) == $svea_addressSelector_prefix)
-                        {                          
-                            $svea_address = substr($svea_attribute, strlen($svea_addressSelector_prefix)+3 ); // addressselector_address => address
-                            
-                            $svea_key = $svea_prefix."_".$svea_address;
-                        }                        
+                
+                        // getAddress countries have the addressSelector address fields set
+                        if( $countryCode == 'SE' ||
+                            $countryCode == 'DK' ||     
+                            ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_company')
+                        )
+                        { 
+                            $svea_addressSelector_prefix =  $request["svea_addressSelector_".$methodId];
+                            // svea_addressSelector_?
+                            if(substr($svea_attribute, 0, strlen($svea_addressSelector_prefix)) == $svea_addressSelector_prefix)
+                            {                          
+                                $svea_address = substr($svea_attribute, strlen($svea_addressSelector_prefix)+3 ); // addressselector_address => address
+
+                                $svea_key = $svea_prefix."_".$svea_address;
+                            }
+                        }
                     }    
                     $session->set($svea_key, $value);
                     //print_r($svea_key); print_r( " "); print_r( $value );
@@ -920,12 +994,17 @@
                 if($countryCode == "NL")
                 {
                     $inputFields .= 
-                        JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.$session->get
-                            ("svea_initials_$paymentId").'" name="initials" class="required" /><span style="color: red; "> * </span>
+                        JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.
+                            $session->get("svea_initials_$paymentId").'" name="svea_initials_'.$paymentId.'" class="required" /><span style="color: red; "> * </span>
                     ';
                 }
             }
-
+            
+            // pass along the selected method country (used in plgVmOnSelectCheckPayment when checking that all required fields are set)
+            $inputFields .= 
+                '<input type="hidden" id="svea_countryCode_'.$paymentId.'" value="'.$countryCode.'" name="svea_countryCode_'.$paymentId.'" />
+            ';
+   
             // show getAddressButton, if applicable
             if( $countryCode == "SE" ||
                 $countryCode == "DK" ||
@@ -934,6 +1013,7 @@
                 $getAddressButton =
                 ' <fieldset>
                     <input type="button" id="svea_getaddress_submit_'.$paymentId.'" value="'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_GET_ADDRESS").'" />
+                    <span style="color: red; "> * </span>
                 </fieldset>';
             }
 
@@ -1017,7 +1097,7 @@
                                 else // handle response address data
                                 {
                                         jQuery('#svea_address_div_$paymentId').empty().append(
-                                            '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressselector_$paymentId\"></select>'
+                                            '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressSelector_$paymentId\"></select>'
                                         );
 
                                         jQuery.each(json_$paymentId,function(key,value){
@@ -1128,7 +1208,7 @@
                     });
                 ";
             }
-
+         
             $javascript .=  '</script>';
 
             return $html.$javascript;
