@@ -25,7 +25,7 @@
      */
 
     /**
-     *  note on workaround for VM2 (2.0.24a) discount tax calculations
+     *  note on workaround for VM2 (2.0.24a-26a(current) ) discount tax calculations
 
         Invoicefee contributes to subTotal when weighting tax classes => discount tax is wrong.
 
@@ -178,11 +178,6 @@
                 }
 
                 if ($svea->accepted == 1) {
-//                    //override billing address
-//                    SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
-//                    //override shipping address
-//                    SveaHelper::updateSTAddress($svea,$order['details']['BT']->virtuemart_order_id);
-
                     $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
                     $dbValues['order_number']                = $order['details']['BT']->order_number;
                     $dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
