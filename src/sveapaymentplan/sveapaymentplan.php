@@ -638,48 +638,30 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         {
             $session = JFactory::getSession();
 
-//            print_r($session->get('svea_firstName'));
-//            $tmp = $session->get('svea_firstName');
-//            echo isset( $tmp ) ? "isset" : "notset";
-//            echo empty($session->get('svea_firstName')) ? "isempty" : "notempty";
-//            echo $session->get('svea_firstName') === "" ? "isemptystring" : "notemptystring";
-//              
-//            echo("1\n");
-//            print_r($session->get('svea_lastName'));
-//            echo("2\n");
-//            print_r($session->get('svea_street'));
-//            echo("3\n");
-//            print_r($session->get('svea_address_2'));
-//            echo("4\n");
-//            print_r($session->get('svea_zipCode'));
-//            echo("5\n");
-//            print_r($session->get('svea_locality'));
-//            echo("6\n");
-//            print_r($session->get('svea_virtuemart_country_id'));
-//            echo("7\n");
-//            die();
-//                       
-            $cart->BT['company'] = empty( $session->get('svea_fullName') ) ? $cart->BT['company'] : $session->get('svea_fullName');
-            $cart->BT['first_name'] = empty( $session->get('svea_firstName') ) ? $cart->BT['first_name'] : $session->get('svea_firstName');  
-            $cart->BT['last_name'] = empty( $session->get('svea_lastName') ) ? $cart->BT['last_name'] : $session->get('svea_lastName');  
-            $cart->BT['address_1'] = empty( $session->get('svea_street') ) ? $cart->BT['address_1'] : $session->get('svea_street');  
-            $cart->BT['address_2'] = empty( $session->get('svea_address_2') ) ? $cart->BT['address_2'] : $session->get('svea_address_2');  
-            $cart->BT['zip'] = empty( $session->get('svea_zipCode') ) ? $cart->BT['zip'] : $session->get('svea_zipCode');  
-            $cart->BT['city'] = empty( $session->get('svea_locality') ) ? $cart->BT['city'] : $session->get('svea_locality');  
-            $cart->BT['virtuemart_country_id'] = empty( $session->get('svea_virtuemart_country_id') ) ? $cart->BT['virtuemart_country_id'] : $session->get('svea_virtuemart_country_id');  
+            if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
 
-//            $cart->BT['company'] = "";   
-//            $cart->BT['first_name'] = $session->get('svea_firstName');  
-//            $cart->BT['last_name'] = $session->get('svea_lastName');  
-//
-//            $cart->BT['address_1'] = $session->get('svea_street');
-//            $cart->BT['address_2'] = $session->get('svea_address_2');
-//            $cart->BT['zip'] = $session->get('svea_zipCode');
-//            $cart->BT['city'] = $session->get('svea_locality');
-//            $cart->BT['virtuemart_country_id'] = $session->get('svea_virtuemart_country_id');
-
+            if( $session->get('svea_customertype' == 'svea_invoice_customertype_company' ) )
+            {
+                $cart->BT['company'] = $session->get('svea_fullName', !empty($cart->BT['full_name']) ? $cart->BT['full_name'] : "" );
+                $cart->BT['first_name'] = "";
+                $cart->BT['last_name'] = "";
+            }
+            else
+            {
+                $cart->BT['company'] = "";
+                $cart->BT['first_name'] = $session->get('svea_firstName', !empty($cart->BT['first_name']) ? $cart->BT['first_name'] : "" );
+                $cart->BT['last_name'] = $session->get('svea_lastName', !empty($cart->BT['last_name']) ? $cart->BT['last_name'] : "" );
+            }
+            $cart->BT['address_1'] = $session->get('svea_street', !empty($cart->BT['address_1']) ? $cart->BT['address_1'] : "" );
+            $cart->BT['address_2'] = $session->get('svea_address_2', !empty($cart->BT['address_2']) ? $cart->BT['address_2'] : "");
+            $cart->BT['zip'] = $session->get('svea_zipCode', !empty($cart->BT['zip']) ? $cart->BT['zip'] : "");
+            $cart->BT['city'] = $session->get('svea_locality', !empty($cart->BT['city']) ? $cart->BT['city'] : "");
+            $cart->BT['virtuemart_country_id'] = 
+                $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
+            
             // keep other cart attributes, if set. also, vm does own validation on checkout.
-            return true; 
+            //print_r( $cart ); die;
+            return true;  
         }
         
 
