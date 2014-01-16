@@ -64,7 +64,7 @@ class SveaHelper {
         preg_match($pattern, $order['details']['BT']->address_1, $addressArr);
         if( !array_key_exists( 2, $addressArr ) ) { $addressArr[2] = ""; } //fix for addresses w/o housenumber
         if( !array_key_exists( 1, $addressArr ) ) { $addressArr[1] = $order['details']['BT']->address_1; }  // fallback for cases w/no match at all :(
-        
+
          if ($customerType == "svea_invoice_customertype_company"){
 
             $item = Item::companyCustomer();
@@ -181,7 +181,7 @@ class SveaHelper {
         return $html;
     }
 
-    
+
     public static function updateBTAddress($svea,$orderId) {
         $data = SveaHelper::buildAddressArray($svea);
         $db = JFactory::getDBO();
@@ -200,7 +200,7 @@ class SveaHelper {
             $db->execute($formattedQuery);
            return TRUE;
     }
-    
+
     public static function updateSTAddress($svea,$orderId) {
         $data = SveaHelper::buildAddressArray($svea);
         $db = JFactory::getDBO();
@@ -223,9 +223,9 @@ class SveaHelper {
     /**
      * Extracts an associative array of address fields from the svea response object.
      * Array keys match virtuemart order_userinfo address fields.
-     * 
+     *
      * @param Svea\CreateOrderEuResponse $svea
-     * @return array 
+     * @return array
      */
     public static function buildAddressArray($svea) {
         $sveaAddresses = array();
@@ -246,7 +246,7 @@ class SveaHelper {
             isset($svea->customerIdentity->locality) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
             isset($svea->customerIdentity->zipCode) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
         }
-        else // private individual customer 
+        else // private individual customer
         {
             if( isset($svea->customerIdentity->firstName) &&  isset($svea->customerIdentity->lastName) ){
                $sveaAddresses["first_name"] = $svea->customerIdentity->firstName;

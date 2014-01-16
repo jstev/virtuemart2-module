@@ -128,7 +128,6 @@
                     $lang     = JFactory::getLanguage();
                     $filename = 'com_virtuemart';
                     $lang->load($filename, JPATH_ADMINISTRATOR);
-                    $vendorId = 0;
                     $this->getPaymentCurrency($method, true);
 
                     $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
@@ -136,7 +135,7 @@
                     $db->setQuery($q);
                     $currency_code_3        = $db->loadResult();
                     $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
-                    $totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
+                    $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);
                     $cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
                 //Svea Create order
@@ -682,7 +681,7 @@
                 $session = JFactory::getSession();
 
                 if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
-                
+
                 if( $session->get('svea_customertype' == 'svea_invoice_customertype_company' ) )
                 {
                     $cart->BT['company'] = $session->get('svea_fullName', "");
