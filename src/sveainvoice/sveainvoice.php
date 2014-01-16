@@ -693,7 +693,6 @@
                 return true;  
             }
 
-
             /**
              * This method is fired when showing when printing an Order
              * It displays the the payment method-specific data.
@@ -1038,13 +1037,8 @@
 
                     if(svea_ssn_$paymentId == '')
                     {
-<<<<<<< HEAD
-                        jQuery('#svea_ssn_$paymentId').addClass('invalid');".  // TODO translation for below required error?
-                        "jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * fields required');
-=======
                         jQuery('#svea_ssn_$paymentId').addClass('invalid');".  // TODO translation for below required error?                    
                         "jQuery('#svea_getaddress_error_$paymentId').empty().append('Svea Error: * required');
->>>>>>> WIP ported over js fixes for setting billto et al from invoice
                     }
                     else
                     {
