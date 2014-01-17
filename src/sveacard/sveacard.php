@@ -94,7 +94,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
 		$vendorId = 0;
-		$this->getPaymentCurrency($method, true);
+		$this->getPaymentCurrency($method);
 
                 $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
 		$db = JFactory::getDBO();
@@ -117,7 +117,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
            } catch (Exception $e) {
-                $html .= SveaHelper::errorResponse('',$e->getMessage ());
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
@@ -139,25 +139,25 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $return_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' .$order['details']['BT']->order_number .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
             $cancel_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->virtuemart_order_id);
             //add customer
-             $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
-           try {
-                $form = $svea
-                        ->setCountryCode("")
-                        ->setCurrency($currency_code_3)
-                        ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
-                        ->setOrderDate(date('c'))
-                        ->usePaymentMethod(PaymentMethod::KORTCERT)
-                            ->setReturnUrl($return_url)
-                            //->setCancelUrl($cancel_url)//Not used by Certitrade cardpage
-                            //->setCallbackUrl($cancel_url)//Not used by Certitrade cardpage
-                                ->getPaymentForm();
+            $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
+            try {
+                 $form = $svea
+                         ->setCountryCode("")
+                         ->setCurrency($currency_code_3)
+                         ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
+                         ->setOrderDate(date('c'))
+                         ->usePaymentMethod(PaymentMethod::KORTCERT)
+                             ->setReturnUrl($return_url)
+                             //->setCancelUrl($cancel_url)//Not used by Certitrade cardpage
+                             //->setCallbackUrl($cancel_url)//Not used by Certitrade cardpage
+                                 ->getPaymentForm();
 
-           } catch (Exception $e) {
-                $html .= SveaHelper::errorResponse('',$e->getMessage ());
-                vmError ($e->getMessage (), $e->getMessage ());
-                return NULL;
-           }
-            $html .= '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
+            } catch (Exception $e) {
+                 $html = SveaHelper::errorResponse('',$e->getMessage ());
+                 vmError ($e->getMessage (), $e->getMessage ());
+                 return NULL;
+            }
+            $html = '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
             //form
             $fields = $form->htmlFormFieldsAsArray;
             $html .= $fields['form_start_tag'];

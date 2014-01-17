@@ -83,7 +83,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 * @author Val?rie Isaksen
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
-
+           
 		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
 			return NULL; // Another method was selected, do nothing
 		}
@@ -95,7 +95,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
 		$vendorId = 0;
-		$this->getPaymentCurrency($method, true);
+		$this->getPaymentCurrency($method);
 
                 $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
 		$db = JFactory::getDBO();
@@ -117,14 +117,14 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             try {
                 $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::createOrder($sveaConfig);
-           } catch (Exception $e) {
-                $html .= SveaHelper::errorResponse('',$e->getMessage ());
+            } catch (Exception $e) {
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
-           }
-             //order items
+            }
+            //order items
             $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
-             //add shipping
+            //add shipping
             $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
             //add coupon
             $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
@@ -136,9 +136,9 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $return_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginresponsereceived&on=' .$order['details']['BT']->order_number .'&pm=' .$order['details']['BT']->virtuemart_paymentmethod_id . '&Itemid=' . JRequest::getInt ('Itemid'));
             $cancel_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->virtuemart_order_id);
             //add customer
-             $session = JFactory::getSession();
-             $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
-           try {
+            $session = JFactory::getSession();
+            $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
+            try {
                 $form = $svea
                         ->setCountryCode($countryCode)
                         ->setCurrency($currency_code_3)
@@ -149,12 +149,12 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                             //->setCancelUrl($cancel_url) does nothing for bank
                             //->setCallbackUrl($cancel_url) does nothong for bank
                                 ->getPaymentForm();
-           } catch (Exception $e) {
-                $html .= SveaHelper::errorResponse('',$e->getMessage ());
+            } catch (Exception $e) {
+                $html = SveaHelper::errorResponse('',$e->getMessage ());
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
-           }
-            $html .= '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
+            }
+            $html = '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
 
              //form
             $fields = $form->htmlFormFieldsAsArray;
@@ -175,7 +175,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
             $order['order_status'] = $method->status_denied;//sets to cancel until returned to shop, cause we don't want to save a cancelled order
             $order['customer_notified'] = 0;
-            //$order['comments'] = '';
+            $order['comments'] = '';
             $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
             JRequest::setVar ('html', $html);

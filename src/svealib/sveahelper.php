@@ -41,7 +41,7 @@ class SveaHelper {
                 if($rule->virtuemart_order_item_id == $product->virtuemart_order_item_id && ($rule->calc_kind == 'VatTax' || $rule->calc_kind == 'Tax')){
                     $taxPercent = $rule->calc_value;
                 }
-            }
+            }           
              $svea = $svea
                     ->addOrderRow(Item::orderRow()
                     ->setQuantity(floatval($product->product_quantity))

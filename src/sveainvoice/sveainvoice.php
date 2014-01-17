@@ -123,13 +123,13 @@
                     }
                     if (!$this->selectedThisElement($method->payment_element)) {
                             return false;
-                    }
+                    }              
                     $order['order_status'] = $method->status_pending;
                     $lang     = JFactory::getLanguage();
                     $filename = 'com_virtuemart';
                     $lang->load($filename, JPATH_ADMINISTRATOR);
-                    $this->getPaymentCurrency($method, true);
-
+                    $this->getPaymentCurrency($method);
+                  
                     $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
                     $db = JFactory::getDBO();
                     $db->setQuery($q);
@@ -147,7 +147,7 @@
                     vmError ($e->getMessage (), $e->getMessage ());
                     return NULL;
                }
-                //set order items
+                //set order items        
                 $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
                 //set invoice fee
                 $svea = SveaHelper::formatInvoiceFee($svea,$order,$method->payment_currency);
@@ -414,8 +414,6 @@
             {
                 $methodId = $request['virtuemart_paymentmethod_id'];
 
-                //print_r($request); die;
-
                 $countryCode = $request['svea_countryCode_'.$methodId];
 
                 // getAddress countries need the addressSelector
@@ -506,10 +504,7 @@
                         }
                     }
                     $session->set($svea_key, $value);
-                    //print_r($svea_key); print_r( " "); print_r( $value );
-                    //print_r("\n");
                 }
-                //die();
             }
 
             /**
@@ -689,7 +684,6 @@
                     $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
 
                 // keep other cart attributes, if set. also, vm does own validation on checkout.
-                //print_r( $cart ); die;
                 return true;  
             }
 
@@ -900,7 +894,7 @@
                         <label for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
                         <input type="text" id="svea_ssn_'.$paymentId.'" name="svea_ssn_'.$paymentId.
                             '" value="'.$session->get("svea_ssn_$paymentId").'" class="required" />
-                        <span style="color: red; "> * </span>
+                        <span id="svea_getaddress_starred_'.$paymentId.'" style="color: red; "> * </span>
                     </fieldset>
                ';
             }
@@ -1008,17 +1002,21 @@
 
                     if(checked_'.$paymentId.' != sveaid_'.$paymentId.'){
                         jQuery("#svea_getaddress_'.$paymentId.'").hide();
+                        jQuery("#svea_getaddress_starred_'.$paymentId.'").hide();                                   
                     }else{
-                         jQuery("#svea_getaddress_'.$paymentId.'").show();
+                        jQuery("#svea_getaddress_'.$paymentId.'").show();
+                        jQuery("#svea_getaddress_starred_'.$paymentId.'").hide();                                   
                     }
 
                     jQuery("input[name=\'virtuemart_paymentmethod_id\']").change( function()
                     {
                         checked_'.$paymentId.' = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
                         if(checked_'.$paymentId.' == sveaid_'.$paymentId.'){
-                              jQuery("#svea_getaddress_'.$paymentId.'").show();
+                            jQuery("#svea_getaddress_'.$paymentId.'").show();
+                            jQuery("#svea_getaddress_starred_'.$paymentId.'").show();     
                         }else{
                             jQuery("#svea_getaddress_'.$paymentId.'").hide();
+                            jQuery("#svea_getaddress_starred_'.$paymentId.'").hide();                                    
                         }
                     }
                 );
