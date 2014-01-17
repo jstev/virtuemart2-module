@@ -116,7 +116,7 @@
              *
              * @author Val?rie Isaksen
              */
-            function plgVmConfirmedOrder($cart, $order) {
+            function plgVmConfirmedOrder($cart, $order) {               
                     //while processing set to pending
                     if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
                             return NULL; // Another method was selected, do nothing
@@ -387,7 +387,7 @@
              *
              */
             public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) 
-            {
+            {               
                 $onSelectCheck = parent::OnSelectCheck($cart);  // parent, should return true
                 if( $onSelectCheck )
                 {       
@@ -411,15 +411,16 @@
              * @throws Exception
              */
             private function validateDataFromSelectPayment( $request )
-            {
+            {             
                 $methodId = $request['virtuemart_paymentmethod_id'];
 
                 $countryCode = $request['svea_countryCode_'.$methodId];
+                $customerType = $request['svea_customertype_'.$methodId];
 
                 // getAddress countries need the addressSelector
                 if( $countryCode == 'SE' ||
                     $countryCode == 'DK' ||
-                    ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_company')
+                    ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_company')
                 )
                 {
                     if( !array_key_exists( "svea_addressSelector_".$methodId, $request ) )    // no addresselector => did not press getAddress
@@ -430,7 +431,7 @@
 
                 // FI, NO private need SSN
                 if( $countryCode == 'FI' ||
-                    ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
+                    ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_private')
                 )
                 {
                     if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
@@ -441,8 +442,8 @@
 
                 // DE, NL need address fields, but that is checked by virtuemart (BillTo), so no worry of ours
                 // DE, NL need birthdate
-                if( $countryCode == 'DE' ||
-                    $countryCode == 'NL'
+                if( ($countryCode == 'DE' && $customerType == 'svea_invoice_customertype_private') ||
+                    ($countryCode == 'NL' && $customerType == 'svea_invoice_customertype_private')
                 )
                 {
                     if( !array_key_exists( "svea_birthday_".$methodId, $request ) ||
@@ -453,10 +454,21 @@
                         throw new Exception( "error: check starred fields" );
                     }
                 }
-                if( $countryCode == 'NL'
+                if( ($countryCode == 'NL' && $customerType == 'svea_invoice_customertype_private')
                 )
                 {
-                    if( !array_key_exists( "svea_initials_".$methodId, $request )
+                    if( !array_key_exists( "svea_initials_".$methodId, $request ) ||
+                        $request["svea_initials_".$methodId] == ""
+                    )
+                    {
+                        throw new Exception( "error: check starred fields" );
+                    }
+                }
+                if( ($countryCode == 'NL' && $customerType == 'svea_invoice_customertype_company')
+                )
+                {
+                    if( !array_key_exists( "svea_ssn_".$methodId, $request )  ||
+                        $request["svea_ssn_".$methodId] == ""   
                     )
                     {
                         throw new Exception( "error: check starred fields" );
@@ -472,10 +484,11 @@
              * @param JSession $session
              */
             private function saveDataFromSelectPayment( $request, $session )
-            {
+            {               
                 $methodId = $request['virtuemart_paymentmethod_id'];
                 $countryCode = $request['svea_countryCode_'.$methodId];
-
+                $customerType = $request['svea_customertype_'.$methodId];
+                
                 $svea_prefix = "svea";
 
                 foreach ($request as $key => $value) {
@@ -490,10 +503,10 @@
                         // getAddress countries have the addressSelector address fields set
                         if( $countryCode == 'SE' ||
                             $countryCode == 'DK' ||
-                            ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_company')
+                            ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_company')
                         )
                         {
-                            $svea_addressSelector_prefix =  $request["svea_addressSelector_".$methodId];
+                            $svea_addressSelector_prefix = $request["svea_addressSelector_".$methodId];
                             // svea_addressSelector_?
                             if(substr($svea_attribute, 0, strlen($svea_addressSelector_prefix)) == $svea_addressSelector_prefix)
                             {
@@ -503,8 +516,10 @@
                             }
                         }
                     }
+//                    print_r( $svea_key );
                     $session->set($svea_key, $value);
                 }
+//                die;
             }
 
             /**
@@ -646,7 +661,7 @@
              * @author Max Milbers
              */
             public function plgVmOnCheckoutCheckDataPayment( VirtueMartCart $cart ) {
-
+  
                 $this->populateBillToFromGetAddressesData( $cart );
                 return true;
             }
@@ -663,26 +678,21 @@
                 $session = JFactory::getSession();
 
                 if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
+                
+                if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
+                {
+                    $cart->BT['company'] = $session->get('svea_fullName', !empty($cart->BT['company']) ? $cart->BT['company'] : "" );
+                }
 
-                if( $session->get('svea_customertype' == 'svea_invoice_customertype_company' ) )
-                {
-                    $cart->BT['company'] = $session->get('svea_fullName', !empty($cart->BT['full_name']) ? $cart->BT['full_name'] : "" );
-                    $cart->BT['first_name'] = "";
-                    $cart->BT['last_name'] = "";
-                }
-                else
-                {
-                    $cart->BT['company'] = "";
-                    $cart->BT['first_name'] = $session->get('svea_firstName', !empty($cart->BT['first_name']) ? $cart->BT['first_name'] : "" );
-                    $cart->BT['last_name'] = $session->get('svea_lastName', !empty($cart->BT['last_name']) ? $cart->BT['last_name'] : "" );
-                }
+                $cart->BT['first_name'] = $session->get('svea_firstName', !empty($cart->BT['first_name']) ? $cart->BT['first_name'] : "" );
+                $cart->BT['last_name'] = $session->get('svea_lastName', !empty($cart->BT['last_name']) ? $cart->BT['last_name'] : "" );
                 $cart->BT['address_1'] = $session->get('svea_street', !empty($cart->BT['address_1']) ? $cart->BT['address_1'] : "" );
                 $cart->BT['address_2'] = $session->get('svea_address_2', !empty($cart->BT['address_2']) ? $cart->BT['address_2'] : "");
                 $cart->BT['zip'] = $session->get('svea_zipCode', !empty($cart->BT['zip']) ? $cart->BT['zip'] : "");
                 $cart->BT['city'] = $session->get('svea_locality', !empty($cart->BT['city']) ? $cart->BT['city'] : "");
                 $cart->BT['virtuemart_country_id'] = 
                     $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
-
+          
                 // keep other cart attributes, if set. also, vm does own validation on checkout.
                 return true;  
             }

@@ -635,25 +635,20 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
             if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
 
-            if( $session->get('svea_customertype' == 'svea_invoice_customertype_company' ) )
+            if( $session->get('svea_customertype') == 'svea_partpayment_customertype_company' )
             {
-                $cart->BT['company'] = $session->get('svea_fullName', !empty($cart->BT['full_name']) ? $cart->BT['full_name'] : "" );
-                $cart->BT['first_name'] = "";
-                $cart->BT['last_name'] = "";
+                $cart->BT['company'] = $session->get('svea_fullName', !empty($cart->BT['company']) ? $cart->BT['company'] : "" );
             }
-            else
-            {
-                $cart->BT['company'] = "";
-                $cart->BT['first_name'] = $session->get('svea_firstName', !empty($cart->BT['first_name']) ? $cart->BT['first_name'] : "" );
-                $cart->BT['last_name'] = $session->get('svea_lastName', !empty($cart->BT['last_name']) ? $cart->BT['last_name'] : "" );
-            }
+
+            $cart->BT['first_name'] = $session->get('svea_firstName', !empty($cart->BT['first_name']) ? $cart->BT['first_name'] : "" );
+            $cart->BT['last_name'] = $session->get('svea_lastName', !empty($cart->BT['last_name']) ? $cart->BT['last_name'] : "" );
             $cart->BT['address_1'] = $session->get('svea_street', !empty($cart->BT['address_1']) ? $cart->BT['address_1'] : "" );
             $cart->BT['address_2'] = $session->get('svea_address_2', !empty($cart->BT['address_2']) ? $cart->BT['address_2'] : "");
             $cart->BT['zip'] = $session->get('svea_zipCode', !empty($cart->BT['zip']) ? $cart->BT['zip'] : "");
             $cart->BT['city'] = $session->get('svea_locality', !empty($cart->BT['city']) ? $cart->BT['city'] : "");
             $cart->BT['virtuemart_country_id'] = 
                 $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
-            
+
             // keep other cart attributes, if set. also, vm does own validation on checkout.
             return true;  
         }
