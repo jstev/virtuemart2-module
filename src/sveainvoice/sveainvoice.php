@@ -874,6 +874,14 @@
                 $checkedCompany = "checked";
                 $checkedPrivate = "";
             }
+            //show customerype for all
+            $inputFields .= '
+                <fieldset id="svea_customertype_div_'.$paymentId.'">
+                    <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype_'.
+                        $paymentId.'"'.$checkedPrivate.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'
+                    <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype_'.
+                        $paymentId.'"'.$checkedCompany.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'
+                </fieldset>';
 
             // NORDIC credentials form fields
             // get ssn & selects private/company for SE, NO, DK, FI
@@ -884,12 +892,6 @@
             {
                 $inputFields .=
                 '
-                    <fieldset id="svea_customertype_div_'.$paymentId.'">
-                        <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype_'.
-                            $paymentId.'"'.$checkedPrivate.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'
-                        <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype_'.
-                            $paymentId.'"'.$checkedCompany.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'
-                    </fieldset>
                     <fieldset id="svea_ssn_div_'.$paymentId.'">
                         <label id="svea_ssn_fieldset'.$paymentId.'" for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
                         <label id="svea_vat_fieldset'.$paymentId.'" for="svea_ssn_'.$paymentId.'" style="display:none" >'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_VATNO").'</label>
@@ -947,20 +949,31 @@
                 }
                 $birthYear = "<select name='svea_birthyear_".$paymentId."' id='birthYear_".$paymentId."'>$years</select>";
 
-                $inputFields =
+                $inputFields .=
                 '
-                    <label for="svea_birthdate_'.$paymentId.'">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_BIRTHDATE").'</label>
-                    <fieldset id="svea_birthdate_'.$paymentId.'">'. $birthDay . $birthMonth . $birthYear .'</fieldset>
+                    <fieldset id="svea_birthdate_'.$paymentId.'">
+                         <label for="svea_birthdate_'.$paymentId.'">'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_BIRTHDATE").'</label>'
+                        . $birthDay . $birthMonth . $birthYear .
+                    '</fieldset>
                 ';
 
                 // if customer is located in Netherlands, get initials
-                if($countryCode == "NL")
-                {
-
+                if($countryCode == "NL"){
                     $inputFields .=
+                      '<fieldset id="svea_nl_initials_fieldset_'.$paymentId.'">'.
                         JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.
                             $session->get("svea_initials_$paymentId").'" name="svea_initials_'.$paymentId.'" class="required" /><span style="color: red; "> * </span>
-                    ';
+                        </fieldset>';
+
+                }
+                if($countryCode == "NL" || $countryCode == "DE"){
+                    $inputFields .=
+                    '<fieldset id="svea_nl_de_vat_fieldset_'.$paymentId.'">
+                        <label id="svea_nl_de_vat_label'.$paymentId.'" for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_VATNO").'</label>
+                        <input type="text" id="svea_nl_de_vat_'.$paymentId.'" name="svea_ssn_'.$paymentId.
+                            '" value="'.$session->get("svea_ssn_$paymentId").'" class="required" />
+                        <span style="color: red; "> * </span>
+                    </fieldset>';
                 }
             }
 
@@ -977,7 +990,7 @@
                 $getAddressButton =
                 ' <fieldset>
                     <input type="button" id="svea_getaddress_submit_'.$paymentId.'" value="'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_GET_ADDRESS").'" />
-                    <span style="color: red; "> * </span>
+
                 </fieldset>';
             }
 
@@ -1026,6 +1039,7 @@
             // change text on ssn on customer_type change
             $javascript .= "
                 $('#svea_vat_fieldset".$paymentId."').hide();
+                $('#svea_nl_de_vat_fieldset_".$paymentId."').hide();
 
                jQuery(\"input:radio[name='svea_customertype_".$paymentId."']\").click(function(){
                    var checked_customertype_$paymentId =  jQuery(\"input:radio[name='svea_customertype_".$paymentId."']:checked\").val();
@@ -1033,11 +1047,23 @@
 
                          $('#svea_ssn_fieldset".$paymentId."').show();
                          $('#svea_vat_fieldset".$paymentId."').hide();
+                        //NL and DE
+                         $('#svea_birthdate_".$paymentId."').show();
+                        //nl
+                        $('#svea_nl_de_vat_fieldset_".$paymentId."').hide();
+                        $('#svea_nl_initials_fieldset_".$paymentId."').show();
+                            console.log('privat');
                     }else{
 
                         $('#svea_ssn_fieldset".$paymentId."').hide();
-                         $('#svea_vat_fieldset".$paymentId."').show();
+                        $('#svea_vat_fieldset".$paymentId."').show();
+                        //NL and DE
+                        $('#svea_birthdate_".$paymentId."').hide();
 
+                        //NL
+                        $('#svea_nl_de_vat_fieldset_".$paymentId."').show();
+                        $('#svea_nl_initials_fieldset_".$paymentId."').hide();
+                             console.log('företag');
                     }
                 });
             ";
