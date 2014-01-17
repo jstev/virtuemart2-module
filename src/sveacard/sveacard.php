@@ -94,7 +94,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
 		$vendorId = 0;
-		$this->getPaymentCurrency($method, true);
+		$this->getPaymentCurrency($method);
 
                 $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
 		$db = JFactory::getDBO();
