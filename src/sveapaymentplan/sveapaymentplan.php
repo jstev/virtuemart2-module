@@ -205,7 +205,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 }
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-            }  
+            }
             else {
                 $order['customer_notified'] = 0;
                 $order['order_status'] = $method->status_denied;
@@ -246,7 +246,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         /**
          * getCosts() will return the invoice fee for Svea Part payment payment method
          * @override
-         * 
+         *
          * @param VirtueMartCart $cart
          * @param type $method
          * @param type $cart_prices
@@ -341,13 +341,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 * @return null if the payment was not selected, true if the data is valid, error message if the data is not vlaid
 	 *
 	 */
-	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg) 
+	public function plgVmOnSelectCheckPayment (VirtueMartCart $cart,  &$msg)
         {
             $onSelectCheck = parent::OnSelectCheck($cart);  // parent, should return true
             if( $onSelectCheck )
-            {       
-                try {       
-                    $this->validateDataFromSelectPayment( JRequest::get() );    // raise exception if missing needed request credentials                  
+            {
+                try {
+                    $this->validateDataFromSelectPayment( JRequest::get() );    // raise exception if missing needed request credentials
                 }
                 catch( Exception $e ) {
                     $msg = $e->getMessage();   //TODO check if can set msg to error (red)?
@@ -358,7 +358,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
             return $onSelectCheck;
         }
-        
+
        /**
         * Make sure all needed fields to create the order are passed to us from the editpayment page.
         * If not, raise an exception.
@@ -373,9 +373,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
             // getAddress countries need the addressSelector
             if( $countryCode == 'SE' ||
-                $countryCode == 'DK'     
+                $countryCode == 'DK'
             )
-            {      
+            {
                 if( !array_key_exists( "svea_addressSelector_".$methodId, $request ) )    // no addresselector => did not press getAddress
                 {
                     throw new Exception( "error: check starred fields" );    // TODO "translations" sätt röd stjärna vid fälten!
@@ -383,10 +383,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
 
             // FI, NO private need SSN
-            if( $countryCode == 'FI' ||    
+            if( $countryCode == 'FI' ||
                 ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
             )
-            {      
+            {
                 if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
                 {
                     throw new Exception( "error: check starred fields" );
@@ -395,29 +395,29 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
             // DE, NL need address fields, but that is checked by virtuemart (BillTo), so no worry of ours
             // DE, NL need birthdate
-            if( $countryCode == 'DE' ||    
-                $countryCode == 'NL' 
+            if( $countryCode == 'DE' ||
+                $countryCode == 'NL'
             )
-            {      
+            {
                 if( !array_key_exists( "svea_birthday_".$methodId, $request ) ||
-                    !array_key_exists( "svea_birthmonth_".$methodId, $request ) ||    
+                    !array_key_exists( "svea_birthmonth_".$methodId, $request ) ||
                     !array_key_exists( "svea_birthyear_".$methodId, $request )
-                )        
+                )
                 {
                     throw new Exception( "error: check starred fields" );
                 }
-            }   
-            if( $countryCode == 'NL' 
+            }
+            if( $countryCode == 'NL'
             )
-            {      
+            {
                 if( !array_key_exists( "svea_initials_".$methodId, $request )
-                )        
+                )
                 {
                     throw new Exception( "error: check starred fields" );
                 }
-            }       
+            }
         }
-        
+
         /**
          * Parse the JRequest::get() parameters passed from editpayment, i.e. the ssn et al and address fields.
          * Writes all relevant svea addressfields corresponding to the selected payment method to the session
@@ -432,30 +432,30 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
             $svea_prefix = "svea";
 
-            foreach ($request as $key => $value) {            
+            foreach ($request as $key => $value) {
                 $svea_key = "";
                 if(substr($key, 0, strlen( $svea_prefix ) ) == $svea_prefix)     // store keys in the format "svea_xxx"
                 {
                     // trim addressSelector, methodId
 
-                    $svea_attribute = substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx 
+                    $svea_attribute = substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx
                     $svea_key = $svea_prefix."_".$svea_attribute;
 
                     // getAddress countries have the addressSelector address fields set
                     if( $countryCode == 'SE' ||
-                        $countryCode == 'DK'     
+                        $countryCode == 'DK'
                     )
-                    { 
+                    {
                         $svea_addressSelector_prefix =  $request["svea_addressSelector_".$methodId];
                         // svea_addressSelector_?
                         if(substr($svea_attribute, 0, strlen($svea_addressSelector_prefix)) == $svea_addressSelector_prefix)
-                        {                          
+                        {
                             $svea_address = substr($svea_attribute, strlen($svea_addressSelector_prefix)+3 ); // addressselector_address => address
 
                             $svea_key = $svea_prefix."_".$svea_address;
                         }
                     }
-                }    
+                }
                 $session->set($svea_key, $value);
             }
         }
@@ -498,7 +498,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 }
             }
             //keep end
-            
+
             $html = array();
             $method_name = $this->_psType . '_name';
             foreach ($this->methods as $method) {
@@ -620,12 +620,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	public function plgVmOnCheckoutCheckDataPayment(  VirtueMartCart $cart) {
 
             $this->populateBillToFromGetAddressesData( $cart );
-            return true; 
+            return true;
 	}
 
         /**
          * Fills in cart billto address from  getAddresses data stored in the session
-         * 
+         *
          * @param VirtueMartCart $cart
          * @return boolean
          */
@@ -651,13 +651,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $cart->BT['address_2'] = $session->get('svea_address_2', !empty($cart->BT['address_2']) ? $cart->BT['address_2'] : "");
             $cart->BT['zip'] = $session->get('svea_zipCode', !empty($cart->BT['zip']) ? $cart->BT['zip'] : "");
             $cart->BT['city'] = $session->get('svea_locality', !empty($cart->BT['city']) ? $cart->BT['city'] : "");
-            $cart->BT['virtuemart_country_id'] = 
+            $cart->BT['virtuemart_country_id'] =
                 $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
-            
+
             // keep other cart attributes, if set. also, vm does own validation on checkout.
-            return true;  
+            return true;
         }
-        
+
 
 	/**
 	 * This method is fired when showing when prnting an Order
@@ -785,6 +785,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
      * @param type $render
      */
     public function plgVmOnSelfCallFE($type,$name,&$render) {
+
         if (!($method = $this->getVmPluginMethod(JRequest::getVar('sveaid')))) {
 			return NULL; // Another method was selected, do nothing
         }
@@ -827,7 +828,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                  }
             }
         }
-        
+
         //Get payment plan params request
         elseif(JRequest::getVar('type') == 'getParams'){
             $svea_params = WebPay::getPaymentPlanParams($sveaConfig);
@@ -849,17 +850,18 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $CurrencyCode = SveaHelper::getCurrencyCodeByCountry(JRequest::getVar('countrycode'));
                 $currencyId = ShopFunctions::getCurrencyIDByName($CurrencyCode);
                 $currency = CurrencyDisplay::getInstance ();
+
                 if(sizeof($campaigns->values) > 0){
                     foreach ($campaigns->values as $cc){
                     $returnArray[] = array("campaignCode" => $cc['campaignCode'],
                                             "description" => $cc['description'],
-                                            "price_per_month" => $currency->priceDisplay($cc['pricePerMonth'], $currencyId,1.0) . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
+                                            "price_per_month" => $currency->priceDisplay($cc['pricePerMonth'], $currencyId,1.0) . "/",
+                                            "per_month" => JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
                                         );
 
                     }
                 }else{
-                        $error = JText::sprintf("VMPAYMENT_SVEA_DD_NO_CAMPAIGN_ON_AMOUNT");
-                     $returnArray = array("svea_error" => "$error");
+                     $returnArray = array("svea_error" => "error");
                 }
 
             }
@@ -943,13 +945,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $inputFields .=  JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.$session->get("svea_initials_$paymentId").'" name="svea_initials_'.$paymentId.'" class="required" /><span style="color: red; "> * </span>';
             }
         }
-        
+
         // pass along the selected method country (used in plgVmOnSelectCheckPayment when checking that all required fields are set)
-        $inputFields .= 
+        $inputFields .=
             '<input type="hidden" id="svea_countryCode_'.$paymentId.'" value="'.$countryCode.'" name="svea_countryCode_'.$paymentId.'" />
         ';
 
-        // show getAddressButton, if applicable    
+        // show getAddressButton, if applicable
         if($countryCode == "SE" || $countryCode == "DK") {
             $getAddressButton =
                         ' <fieldset>
@@ -977,6 +979,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     var sveaid_$paymentId = jQuery('#paymenttypesvea_$paymentId').val();
 
                     ";
+        $per_month = JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+        $error_params =  $error = JText::sprintf("VMPAYMENT_SVEA_DD_NO_CAMPAIGN_ON_AMOUNT");
         //do ajax to get params
         $campaignSaved = $session->get("svea_campaigncode_$paymentId");
         $html .= " jQuery.ajax({
@@ -989,11 +993,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             },
                             url: url_".$paymentId.",
                             success: function(data){
-
                                 var jsonP_$paymentId = JSON.parse(data);
-
                                  if (jsonP_$paymentId.svea_error ){
-                                    jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>'+jsonP_$paymentId.svea_error).show();
+                                    jQuery('#svea_getaddress_error_$paymentId').empty().append('<br>$error_params').show();
                                 }else{
                                     jQuery('#svea_params_div_$paymentId').hide();
                                     var count = 0;
@@ -1004,7 +1006,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                         }else if(count == 0){
                                             checkedCampaign = 'checked';
                                         }
-                                       jQuery('#svea_params_div_$paymentId').append('<li><input type=\"radio\" name=\"svea_campaigncode_$paymentId\" value=\"'+value.campaignCode+'\" '+checkedCampaign+'>&nbsp<strong>'+value.description+'</strong> ('+value.price_per_month+')</li>');
+                                       jQuery('#svea_params_div_$paymentId').append('<li><input type=\"radio\" name=\"svea_campaigncode_$paymentId\" value=\"'+value.campaignCode+'\" '+checkedCampaign+'>&nbsp<strong>'+value.description+'</strong> ('+value.price_per_month+'".$per_month.")</li>');
                                        count ++;
                                        checkedCampaign = '';
                                      });
@@ -1022,10 +1024,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         $html .= "
                         if(checked_".$paymentId." != sveaid_".$paymentId."){
                             jQuery('#svea_getaddress_$paymentId').hide();
-                            jQuery('#svea_getaddress_starred_$paymentId').hide();                                   
+                            jQuery('#svea_getaddress_starred_$paymentId').hide();
                         }else{
                             jQuery('#svea_getaddress_$paymentId').show();
-                            jQuery('#svea_getaddress_starred_$paymentId').hide();                                   
+                            jQuery('#svea_getaddress_starred_$paymentId').hide();
                         }
                     ";
         //toggle display form
@@ -1037,7 +1039,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                   jQuery("#svea_getaddress_starred_'.$paymentId.'").show();
                             }else{
                                 jQuery("#svea_getaddress_'.$paymentId.'").hide();
-                                jQuery("#svea_getaddress_starred_'.$paymentId.'").hide();                                    
+                                jQuery("#svea_getaddress_starred_'.$paymentId.'").hide();
                             }
                             });';
 
@@ -1053,7 +1055,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             }else{
                                 var countrycode_$paymentId = '$countryCode';
                                 var url_$paymentId = '$sveaUrlAjax';
-                            
+
                                 jQuery.ajax({
                                     type: 'GET',
                                     data: {
@@ -1063,7 +1065,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                         countrycode: countrycode_".$paymentId."
                                     },
                                     url: url_".$paymentId.",
-                                        
+
                                     // getAddress callback
                                     success: function(data){
 
@@ -1078,35 +1080,35 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                         else // handle response address data
                                         {
                                             jQuery('#svea_address_div_$paymentId').empty();
-                                                
+
                                             jQuery('#svea_address_div_$paymentId').append(
-                                                '<input type=\"hidden\" id=\"svea_addressSelector_".$paymentId."\" name=\"svea_addressSelector_".$paymentId."\" value=\"'+json_".$paymentId.".addressSelector+'\" />' 
+                                                '<input type=\"hidden\" id=\"svea_addressSelector_".$paymentId."\" name=\"svea_addressSelector_".$paymentId."\" value=\"'+json_".$paymentId.".addressSelector+'\" />'
                                             );
-                                            
+
                                             jQuery('#svea_address_div_$paymentId').append(
-                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_firstName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_firstName_".$paymentId."\" value=\"'+json_".$paymentId.".firstName+'\" />' 
-                                            );
-                                            jQuery('#svea_address_div_$paymentId').append(
-                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_lastName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_lastName_".$paymentId."\" value=\"'+json_".$paymentId.".lastName+'\" />' 
-                                            );                                            
-                                            jQuery('#svea_address_div_$paymentId').append(
-                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_fullName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_fullName_".$paymentId."\" value=\"'+json_".$paymentId.".fullName+'\" />' 
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_firstName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_firstName_".$paymentId."\" value=\"'+json_".$paymentId.".firstName+'\" />'
                                             );
                                             jQuery('#svea_address_div_$paymentId').append(
-                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_street_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_street_".$paymentId."\" value=\"'+json_".$paymentId.".street+'\" />' 
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_lastName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_lastName_".$paymentId."\" value=\"'+json_".$paymentId.".lastName+'\" />'
+                                            );
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_fullName_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_fullName_".$paymentId."\" value=\"'+json_".$paymentId.".fullName+'\" />'
+                                            );
+                                            jQuery('#svea_address_div_$paymentId').append(
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_street_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_street_".$paymentId."\" value=\"'+json_".$paymentId.".street+'\" />'
                                             );
                                            jQuery('#svea_address_div_$paymentId').append(
-                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_address_2_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_address_2_".$paymentId."\" value=\"'+json_".$paymentId.".address_2+'\" />' 
-                                            );                                            
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_address_2_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_address_2_".$paymentId."\" value=\"'+json_".$paymentId.".address_2+'\" />'
+                                            );
                                             jQuery('#svea_address_div_$paymentId').append(
-                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_zipCode_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_zipCode_".$paymentId."\" value=\"'+json_".$paymentId.".zipCode+'\" />' 
+                                                '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_zipCode_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_zipCode_".$paymentId."\" value=\"'+json_".$paymentId.".zipCode+'\" />'
                                             );
                                             jQuery('#svea_address_div_$paymentId').append(
                                                 '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_locality_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_locality_".$paymentId."\" value=\"'+json_".$paymentId.".locality+'\" />'
                                             );
                                             jQuery('#svea_address_div_$paymentId').append(
                                                 '<input type=\"hidden\" id=\"svea_'+json_".$paymentId.".addressSelector+'_virtuemart_country_id_".$paymentId."\" name=\"svea_'+json_".$paymentId.".addressSelector+'".$paymentId."'+'_virtuemart_country_id_".$paymentId."\" value=\"'+json_".$paymentId.".virtuemart_country_id+'\" />'
-                                            );                                            
+                                            );
 
                                             jQuery('#svea_address_div_$paymentId').append(          // show individual address
                                                     '<strong>'+json_$paymentId".".firstName+' '+
