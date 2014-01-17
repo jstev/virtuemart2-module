@@ -891,7 +891,8 @@
                             $paymentId.'"'.$checkedCompany.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'
                     </fieldset>
                     <fieldset id="svea_ssn_div_'.$paymentId.'">
-                        <label for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
+                        <label id="svea_ssn_fieldset'.$paymentId.'" for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
+                        <label id="svea_vat_fieldset'.$paymentId.'" for="svea_ssn_'.$paymentId.'" style="display:none" >'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_VATNO").'</label>
                         <input type="text" id="svea_ssn_'.$paymentId.'" name="svea_ssn_'.$paymentId.
                             '" value="'.$session->get("svea_ssn_$paymentId").'" class="required" />
                         <span id="svea_getaddress_starred_'.$paymentId.'" style="color: red; "> * </span>
@@ -1021,6 +1022,25 @@
                     }
                 );
             ';
+
+            // change text on ssn on customer_type change
+            $javascript .= "
+                $('#svea_vat_fieldset".$paymentId."').hide();
+
+               jQuery(\"input:radio[name='svea_customertype_".$paymentId."']\").click(function(){
+                   var checked_customertype_$paymentId =  jQuery(\"input:radio[name='svea_customertype_".$paymentId."']:checked\").val();
+                    if (checked_customertype_$paymentId == 'svea_invoice_customertype_private'){
+
+                         $('#svea_ssn_fieldset".$paymentId."').show();
+                         $('#svea_vat_fieldset".$paymentId."').hide();
+                    }else{
+
+                        $('#svea_ssn_fieldset".$paymentId."').hide();
+                         $('#svea_vat_fieldset".$paymentId."').show();
+
+                    }
+                });
+            ";
 
             //ajax for getAddress
             $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice';
