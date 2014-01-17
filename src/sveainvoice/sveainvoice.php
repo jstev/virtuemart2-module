@@ -900,7 +900,7 @@
                         <label for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
                         <input type="text" id="svea_ssn_'.$paymentId.'" name="svea_ssn_'.$paymentId.
                             '" value="'.$session->get("svea_ssn_$paymentId").'" class="required" />
-                        <span style="color: red; "> * </span>
+                        <span id="svea_getaddress_starred_'.$paymentId.'" style="color: red; "> * </span>
                     </fieldset>
                ';
             }
@@ -1008,17 +1008,21 @@
 
                     if(checked_'.$paymentId.' != sveaid_'.$paymentId.'){
                         jQuery("#svea_getaddress_'.$paymentId.'").hide();
+                        jQuery("#svea_getaddress_starred_'.$paymentId.'").hide();                                   
                     }else{
-                         jQuery("#svea_getaddress_'.$paymentId.'").show();
+                        jQuery("#svea_getaddress_'.$paymentId.'").show();
+                        jQuery("#svea_getaddress_starred_'.$paymentId.'").hide();                                   
                     }
 
                     jQuery("input[name=\'virtuemart_paymentmethod_id\']").change( function()
                     {
                         checked_'.$paymentId.' = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
                         if(checked_'.$paymentId.' == sveaid_'.$paymentId.'){
-                              jQuery("#svea_getaddress_'.$paymentId.'").show();
+                            jQuery("#svea_getaddress_'.$paymentId.'").show();
+                            jQuery("#svea_getaddress_starred_'.$paymentId.'").show();     
                         }else{
                             jQuery("#svea_getaddress_'.$paymentId.'").hide();
+                            jQuery("#svea_getaddress_starred_'.$paymentId.'").hide();                                    
                         }
                     }
                 );
