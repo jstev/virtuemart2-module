@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <install version="1.5" type="plugin" group="vmpayment" >
-    <name>VM - Svea library</name>
+    <name>SveaWebPay library</name>
     <creationDate>January 2014</creationDate>
     <author>Svea Ekonomi AB WebPay</author>
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
     <version>VMPAYMENT_SVEA_VERSION</version>
-    <description>Svea payment plugin for Virtuemart 2</description>
+    <description>SveaWebPay library for SweaWebPay payment plugins for Virtuemart 2. Do not use as payment.</description>
     <files>
 	<filename plugin="svealib">sveahelper.php</filename>
         <folder>integrationlib</folder>
