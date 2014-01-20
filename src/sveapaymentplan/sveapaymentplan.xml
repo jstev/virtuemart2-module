@@ -54,9 +54,5 @@
          </param>
           <param name="status_shipped" type="vmorderstate" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
 
-          <param name="distributiontype" type="radio" default="Post" label="VMPAYMENT_SVEA_DISTRIBUTIONTYPE" description="VMPAYMENT_SVEA_DISTRIBUTIONTYPE_DESC">
-             <option value="Post">Post</option>
-             <option value="Email">Email</option>
-         </param>
     </params>
 </install>
