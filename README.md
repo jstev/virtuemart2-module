@@ -1,14 +1,12 @@
 # Virtuemart 2 - Svea WebPay payment module installation guide
 
-##Index
-* [Requirements] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#requirements)
-* [Installation] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#installation)
-* [Important info] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#important-info)
+##Version 2.0.0
+This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments. This module is updated for the latest payment systems at SveaWebPay. 
+
+If you experience technical issues with this module, or you have feature suggestions, please submit an issue on the Github issue list.
 
 ## Requirements
-Joomla 2.5
-VirtueMart 2.0+
-Module has been developed and tested using Joomla 2.5.9-17, virtuemart 2.0.17-26a
+Joomla 2.5, VirtueMart 2.0+. The module has been developed and tested using Joomla 2.5.9-17, VirtueMart 2.0.17-26a.
 
 ## Virtuemart Svea Payment Method Installation Instructions
 
@@ -26,7 +24,6 @@ Before we can configure the individual instances of the payment methods in virtu
 4. Continue by installing the rest of the Svea payment methods (we recommend that you always install all four Svea payment methods).
 5. Go to Extensions -> Plug-in manager and activate the Svea modules you are going to use.
 
-// TODO screenshots?
 ### Payment Method instance installation
 In the joomla administration interface, select components/virtuemart. You should now be in the virtuemart control panel. Select payment methods. You should then see a list of all installed virtuemart payment methods.
 
@@ -216,4 +213,8 @@ As our servers are using SSL certificates, when using POST to fetch the response
 There's a bug in how VirtueMart calculates the discount vat in orders containing products with different tax rates, when a Svea Invoice fee is applied to the order. The bug involves the discount mean vat rate being calculated incorrectly, due to the invoice fee being included along with the product subtotal in the calculation. The sums are correct, but the vat tax rate is wrong. To workaround this, follow the below procedure:
 
 Create a separate tax rule to use for your invoice fee. In VirtueMart admin, go to the Products and Taxes & Calculation rules. Add a new rule with the following: "Vat tax per product", "+%", <your vat rate>. Then go to Shop -> Payment methods, and for your Svea Invoice payment method instances set the "Tax" (VMPAYMENT_SVEA_TAX) setting to use this vat rule. The Discount vat should now be correct on checkout.
+
+### Release history
+
+* 2.0.0   (20140120) Module rewritten to make use of the Svea PHP Integration package and increase compatibility with third part modules and plugins.
 
