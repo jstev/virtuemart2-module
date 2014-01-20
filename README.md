@@ -1,48 +1,62 @@
 # Virtuemart 2 - Svea WebPay payment module installation guide
 
-##TODO:
-- min version of joomla 2.5, because of hidden fields in configuration xml
-
-
 ##Index
 * [Requirements] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#requirements)
 * [Installation] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#installation)
 * [Important info] (https://github.com/sveawebpay/virtuemart2-module/tree/develop#important-info)
 
-
 ## Requirements
 Joomla 2.5
 VirtueMart 2.0+
+Module has been developed and tested using Joomla 2.5.9-17, virtuemart 2.0.17-26a
 
-## Installation
-1.  Run the install.sql script using your joomla prefix
-2.  Copy the remaining files to the root catalog of your joomla installation
-3.  Go to the virtuemart settings to shop -> payment methods
-4.  Select New
-5.  Fill in SveaWebPay in Payment Name
-6.  Change published to Yes
-7.  Fill in the description if you i.e are planning to take an invoice fee or give some other info
-8.  Select SveaWebPay Payment under Payment group and click save
-9.  Select the Configuration tab
-10. Select if you want to show the SVEA logo in the checkout
-11. Fill in you Merchant ID and Secret Word
+## Installation instructions
 
-You can now use SveaWebPays pay page with your configured payment methods
+We assume that you have a working installation of Joomla and Virtuemart 2 to begin with. These instructions detail how to install the various SveaWebPay payment methods -- Svea Invoice, Svea Payment Plan, Svea Directbank and Svea Card -- in your Virtuemart 2 shop.
 
-## Payment method Configuration
+### Installing the Svea payment methods -- overview
+
+1. Download or clone the Virtuemart2-module from github. If you downloaded the files as a zip, unzip the files to a local directory.
+2. Now make new zip archives from each folder under src, i.e. svealib.zip, sveainvoice.zip, sveapartpayment.zip, sveadirect.zip and sveacard.zip.
+3. Log into your joomla installation as administrator, then go to Extensions -> Extension Manager and install the zipped packages, starting with svealib.zip.
+4. Continue by installing the rest of the Svea payment methods (we recommend that you always install all four Svea payment methods).
+5. Go to Extensions -> Plug-in manager and activate the Svea modules you are going to use.
+
+// TODO screenshots?
+
+## Payment Method Installation and Configuration
 
 ### Svea Invoice payment
-If you plan on accepting Invoice payments from customers in several countries, you will need to configure multiple instances of the Invoice payment method. Each instance should accept payments from one country only, see further under client id and country settings below.
+Install one instance of the Svea Invoice payment method for each country that you will accept invoice payments from. If you plan on accepting invoice payments from customers in several countries, you will need to configure multiple instances of the Invoice payment method, each instance should accept payments from one country only. See further under client id and country settings below.
 
-The Invoice payment method may be used by unregistered users -- we present all instances, and it is up to the user to select the correct instance corresponding to the customer country. The provided Get Addresses functionality will avoid the customer needing to enter address data manually.
+For registered users, we present the invoice method corresponding to the user country, if given. The Invoice payment method may also be used by unregistered users, we then present all method instances, and it is up to the user to select the correct instance corresponding to the customer country. 
 
-#### Payment Method Information tab
+For countries where Get Address functionality is provided, we will pre-fill the invoice address information as a convenience for the user.
+
+The following currencies are accepted by the invoice payment method:
+* Sweden -> SEK, 
+* Norway -> NOK, 
+* Denmark -> DKK, 
+* Finland -> EUR, 
+* Germany -> EUR, 
+* Netherlands -> EUR
+
+#### Payment Method Installation
+In the joomla administration interface, select components/virtuemart. You should now be in the virtuemart control panel. Select payment methods. You should then see a list of all installed virtuemart payment methods.
+
+To add a new payment method instance, press the "new" icon. You will then be presented with the new instance Payment Method Information tab.
+
+#### Payment Method Information tab settings
+
+![Svea Invoice Payment Method Information tab] (https://github.com/sveawebpay/opencart-module/raw/develop/docs/image/Invoice_information.PNG "Svea Invoice Payment Method Information tab")
+
+
 * Payment Name -- set to "Svea faktura" or the equivalent in your language.
 * Payment Description -- "Sverige"
 * Payment Method -- select Svea Invoice.
 // TODO -- what happens if different languages -- recommend enter in local language/corresponding to country setting? -- See locale files for translations!
 
-#### Configuration tab
+#### Configuration tab settings
 * Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials.
 * Accepted Currency -- TODO
@@ -58,9 +72,9 @@ SVEA_COST_PERCENT_TOTAL -- set to 0 (or if fee is a percentage, use this?)
 SVEA_TAX -- the tax rate that should apply to the fee/cost percent total
 
 ### Svea Paymentplan
-Paymentplan may be used by unregistered users. We present the all methods, and it is up to the user to select the correct country invoice method.
 Only one country can be configured per instance of the method.
-Alowed currencys per country:
+Paymentplan may be used by unregistered users. We present the all methods, and it is up to the user to select the correct country invoice method.
+Allowed currencies per country:
 * Sweden -> SEK
 * Norway -> NOK
 * Denmark -> DKK
@@ -69,15 +83,7 @@ Alowed currencys per country:
 * Netherlands -> EUR
 
 ### Svea Invoice
-Invoice payment may be used by unregistered users. We present the all methods, and it is up to the user to select the correct country invoice method.
-Only one country can be configured per instance of the method.
-Alowed currencys per country:
-* Sweden -> SEK
-* Norway -> NOK
-* Denmark -> DKK
-* Finland -> EUR
-* Germany -> EUR
-* Netherlands -> EUR
+
 
 ### Svea Card payment
 Card payment may be used by un-registered users (i.e. no user is logged in during checkout). See also "Additional VirtueMart configuration requirements" below
