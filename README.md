@@ -48,8 +48,7 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 
 #### Payment Method Information tab settings
 
-![Svea Invoice Payment Method Information tab] (https://github.com/sveawebpay/opencart-module/raw/develop/docs/image/Invoice_information.PNG "Svea Invoice Payment Method Information tab")
-
+![Svea Invoice Payment Method Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Invoice_configuration.PNG "Svea Invoice Payment Method Information tab")
 
 * Payment Name -- set to "Svea faktura" or the equivalent in your language.
 * Payment Description -- "Sverige"
@@ -57,6 +56,9 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 // TODO -- what happens if different languages -- recommend enter in local language/corresponding to country setting? -- See locale files for translations!
 
 #### Configuration tab settings
+
+![Svea Invoice Payment Method Configuration tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Invoice_configuration.PNG "Svea Invoice Payment Method Configuration tab")
+
 * Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials.
 * Accepted Currency -- TODO
