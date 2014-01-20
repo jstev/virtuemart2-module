@@ -64,7 +64,7 @@ The following countries & currencies are accepted by the invoice payment method:
 * Logos -- select the logo file corresponding to the payment method instance country (language) from the dropdown list.
 * Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
 
-* Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials.
+* Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. If you have lost your credentials information, please contact your Svea account manager.
 
 * Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings. See
 * Country -- select the country corresponding to this instance client id.
@@ -105,13 +105,12 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 * List Order -- defines the order in which the available payment methods are presented to the user. We recommend presenting invoice as the first choice.
 
 #### Payment Plan Configuration tab settings
-
-// TODO picture
+![Svea Payment Plan Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Part_Payment_configuration.PNG "Svea Payment Plan Information tab")
 
 * Logos -- select the logo file corresponding to the payment method instance country (language) from the dropdown list.
 * Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
 
-* Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials.
+* Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. If you have lost your credentials information, please contact your Svea account manager.
 
 * Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings. See
 * Country -- select the country corresponding to this instance client id.
@@ -123,8 +122,6 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 * Autodeliver order -- Set this to "YES" to auto deliver the order. Note that this functionality must first be enabled in the Svea admin panel. Please contact your Svea account manager if you have further questions about this.
 * Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to Svea.
 
-* Svea invoice fee -- if you charge extra for orders made with this payment method, set the fee, excluding tax, here.
-* Tax -- select the invoice fee tax rate from the dropdown list. See also under Troubleshooting below.
 ---
 
 
