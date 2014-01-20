@@ -1,18 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <install version="1.5" type="plugin" group="vmpayment" >
-    <name>VMPAYMENT_SVEA_PAYMENTPLAN</name>
+    <name>SveaWebPay Paymentplan</name>
     <creationDate>January 2014</creationDate>
     <author>Anneli Halld'n, Kristian Grossman-Madsen</author>
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
-    <version>VMPAYMENT_SVEA_VERSION</version>
-    <description>SveaWebPay payment plugin</description>
+    <version>2.0.0</version>
+    <description>SveaWebPay PaymentPlan payment plugin for Virtuemart 2</description>
     <files>
 	<filename plugin="sveapaymentplan">sveapaymentplan.php</filename>
     </files>
     <params addpath="/administrator/components/com_virtuemart/elements">
 	<param type="vmjpluginwarning" />
+        <param type="spacer" default="VMPAYMENT_SVEA_PAYMENTPLAN" level="level1"/>
+        <param type="spacer" default="VMPAYMENT_SVEA_VERSION" level="level1"/>
 	<param	name="payment_logos" type="vmfiles" label="VMPAYMENT_SVEA_LOGOS"
 		description="VMPAYMENT_SVEA_LOGOS_DESC"
 		 directory="/plugins/vmpayment/svealib/assets/images"
