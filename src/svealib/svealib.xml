@@ -27,5 +27,7 @@
         <language tag="nl-NL">nl-NL/nl-NL.plg_vmpayment_sveainvoice.sys.ini</language>
         <language tag="no-NO">no-NO/no-NO.plg_vmpayment_sveainvoice.ini</language>
         <language tag="no-NO">no-NO/no-NO.plg_vmpayment_sveainvoice.sys.ini</language>
+        <language tag="da-DK">da-DK/da-DK.plg_vmpayment_sveainvoice.ini</language>
+        <language tag="da-DK">da-DK/da-DK.plg_vmpayment_sveainvoice.sys.ini</language>
     </languages>
 </install>
