@@ -49,7 +49,7 @@
         <param name="min_amount" type="text"  label="VMPAYMENT_SVEA_MIN_AMOUNT" description="VMPAYMENT_SVEA_MIN_AMOUNT_EXPLAIN" />
 	<param name="max_amount" type="text"  label="VMPAYMENT_SVEA_MAX_AMOUNT" description="VMPAYMENT_SVEA_MAX_AMOUNT_EXPLAIN" />
 
-        <param name="payment_info" type="textarea" cols="30" rows="3" default="add a message to display with the order" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
+        <param name="payment_info" type="textarea" cols="30" rows="3" default="" label="VMPAYMENT_SVEA_PAYMENTINFO" description="VMPAYMENT_SVEA_PAYMENTINFO_EXPLAIN" />
          <!-- hidden fields needs to exist in database -->
         <param name="cost_per_transaction" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PER_TRANSACTION" description="VMPAYMENT_SVEA_COST_PER_TRANSACTION_EXPLAIN" />
         <param name="cost_percent_total" type="hidden" default="" label="VMPAYMENT_SVEA_COST_PERCENT_TOTAL" description="VMPAYMENT_SVEA_COST_PERCENT_TOTAL_EXPLAIN" />

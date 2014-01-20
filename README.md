@@ -10,11 +10,13 @@ Joomla 2.5
 VirtueMart 2.0+
 Module has been developed and tested using Joomla 2.5.9-17, virtuemart 2.0.17-26a
 
-## Installation instructions
+## Virtuemart Svea Payment Method Installation Instructions
 
-We assume that you have a working installation of Joomla and Virtuemart 2 to begin with. These instructions detail how to install the various SveaWebPay payment methods -- Svea Invoice, Svea Payment Plan, Svea Directbank and Svea Card -- in your Virtuemart 2 shop.
+We assume that you have a working installation of Joomla and Virtuemart 2 to begin with. These instructions detail how to install the various SveaWebPay payment methods -- Svea Invoice, Svea Payment Plan, Svea Directbank and Svea Card -- in your Virtuemart 2 shop, as well as how to install and configure individual instances of these payment methods.
 
 ### Installing the Svea payment methods -- overview
+
+Before we can configure the individual instances of the payment methods in virtuemart, we have to install the payment methods themselves. Each payment method, as well as their common support file package, is installed as a joomla extension.
 
 1. Download or clone the Virtuemart2-module from github. If you downloaded the files as a zip, unzip the files to a local directory.
 2. Now make new zip archives from each folder under src, i.e. svealib.zip, sveainvoice.zip, sveapartpayment.zip, sveadirect.zip and sveacard.zip.
@@ -24,10 +26,10 @@ We assume that you have a working installation of Joomla and Virtuemart 2 to beg
 
 // TODO screenshots?
 
-## Payment Method Installation and Configuration
+## Svea Payment Method Instance Installation and Configuration
 
 ### Svea Invoice payment
-Install one instance of the Svea Invoice payment method for each country that you will accept invoice payments from. If you plan on accepting invoice payments from customers in several countries, you will need to configure multiple instances of the Invoice payment method, each instance should accept payments from one country only. See further under client id and country settings below.
+Install one instance of the Svea Invoice payment method for each country that you will accept invoice payments from. If you plan on accepting invoice payments from customers in several countries, you will need to configure multiple instances of the Invoice payment method, each instance should accept payments from one country only, as each client id is valid for one country only. See further under client id and country settings below.
 
 For registered users, we present the invoice method corresponding to the user country, if given. The Invoice payment method may also be used by unregistered users, we then present all method instances, and it is up to the user to select the correct instance corresponding to the customer country. 
 
@@ -41,29 +43,36 @@ The following currencies are accepted by the invoice payment method:
 * Germany -> EUR, 
 * Netherlands -> EUR
 
-#### Payment Method Installation
+#### Payment Method instance configuration
 In the joomla administration interface, select components/virtuemart. You should now be in the virtuemart control panel. Select payment methods. You should then see a list of all installed virtuemart payment methods.
 
-To add a new payment method instance, press the "new" icon. You will then be presented with the new instance Payment Method Information tab.
+To add a new payment method instance, press the "new" icon. You will then be presented with the Information tab of the new payment method instance.
 
 #### Payment Method Information tab settings
 
-![Svea Invoice Payment Method Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Invoice_configuration.PNG "Svea Invoice Payment Method Information tab")
+![Svea Invoice Payment Method Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Invoice_information.PNG "Svea Invoice Payment Method Information tab")
 
-* Payment Name -- set to "Svea faktura" or the equivalent in your language.
-* Payment Description -- "Sverige"
-* Payment Method -- select Svea Invoice.
-// TODO -- what happens if different languages -- recommend enter in local language/corresponding to country setting? -- See locale files for translations!
+* Payment Name -- set to "Svea Invoice" or the equivalent in your language.
+* Sef Alias -- no need to change the default
+* Published -- if set to "Yes", this payment method will be available for use by your customers.
+* Payment Description -- we recommend that the description state what country the payment method instance corresponds to.
+* Payment Method -- select "Svea Invoice" from the dropdown list of payment methods.
+* Shopper Group -- if needed, set the shopper group here.
+* List Order -- defines the order in which the available payment methods are presented to the user. We recommend presenting invoice as the first choice.
 
 #### Configuration tab settings
 
 ![Svea Invoice Payment Method Configuration tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Invoice_configuration.PNG "Svea Invoice Payment Method Configuration tab")
 
+* Logos -- select the logo file corresponding to the payment method instance country (language) from the dropdown list.
 * Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials.
-* Accepted Currency -- TODO
-* Country -- select the country corresponding to this client id.
-* ...
+* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings. See
+* Country -- select the country corresponding to this instance client id.
+* Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your Svea account credentials.  
+* Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
+* Status Order Created -- the virtuemart status given to an order after it has been accepted by Svea.
+* Autodeliver order -- // TODO  
 // TODO other settings -- fix (hide?) sensible defaults for settings that are required but shouldn't need to be changed by user
 -- check what the VMConfig::get(name,default) defaults to?
 (...)
@@ -98,8 +107,13 @@ Direct bank payment may only be used by registered users (and the user must be l
 To configure additional VirtueMart settings, log in to your Joomla installation as administrator, and select Components/VirtueMart in the menu.
 In the lefthand VirtueMart menu, the following settings are relevant to Svea payment methods:
 
+### Shop
+#### Shop submenu/Vendor tab
+* Currency -- this is the "Default Vendor Currency" refered to in the various payment method.
+* List of accepted currencies -- This should include all of the currencies allowed by your Svea payment methods instances.
+
 ### Configuration
-#### Checkout tab
+#### Configuration submenu/Checkout tab
 * Only registred users can checkout -- this must be unchecked for unregisterd users to be able to checkout.
 * One Page Checkout enabled -- TODO
 * Enable Automatic Selected Payment -- for Svea Invoice and Paymentplan only, the "Select payment" link will show up even when this option is checked. This is due to these methods needing additional customer credentials collected in the "Select payment" step.
