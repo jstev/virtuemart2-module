@@ -46,14 +46,13 @@ For countries where Get Address functionality is provided, we will also pre-fill
 The following countries & currencies are accepted by the invoice payment method: Sweden (SEK), Norway (NOK), Denmark (DKK), Finland, Germany, Netherlands (EUR).
 
 #### Invoice Information tab settings
+![Svea Invoice Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Invoice_information.PNG "Svea Invoice Information tab")
 
-![Svea Payment Plan Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Invoice_information.PNG "Svea Payment Plan Information tab")
-
-* Payment Name -- set to "Svea Payment Plan" or the equivalent in your language.
+* Payment Name -- set to "SveaWebPay Invoice" or the equivalent in your language.
 * Sef Alias -- no need to change the default
 * Published -- if set to "Yes", this payment method will be available for use by your customers.
 * Payment Description -- we recommend that the description state what country the payment method instance corresponds to, i.e. "Sweden".
-* Payment Method -- select "Svea Invoice" from the dropdown list of payment methods.
+* Payment Method -- select "SveaWebPay Invoice" from the dropdown list of payment methods.
 * Shopper Group -- if needed, set the shopper group here.
 * List Order -- defines the order in which the available payment methods are presented to the user. We recommend presenting invoice as the first choice.
 
@@ -66,7 +65,7 @@ The following countries & currencies are accepted by the invoice payment method:
 
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. If you have lost your credentials information, please contact your Svea account manager.
 
-* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings. See
+* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings.
 * Country -- select the country corresponding to this instance client id.
 * Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your Svea account credentials.  
 
@@ -96,23 +95,23 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 #### Payment Plan Information tab settings
 ![Svea Payment Plan Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Part_Payment_information.PNG "Svea Payment Plan Information tab")
 
-* Payment Name -- set to "Svea Invoice" or the equivalent in your language.
+* Payment Name -- set to "SveaWebPay Payment Plan" or the equivalent in your language.
 * Sef Alias -- no need to change the default
 * Published -- if set to "Yes", this payment method will be available for use by your customers.
 * Payment Description -- we recommend that the description state what country the payment method instance corresponds to, i.e. "Sweden".
-* Payment Method -- select "Svea Invoice" from the dropdown list of payment methods.
+* Payment Method -- select "SveaWebPay Payment Plan" from the dropdown list of payment methods.
 * Shopper Group -- if needed, set the shopper group here.
-* List Order -- defines the order in which the available payment methods are presented to the user. We recommend presenting invoice as the first choice.
+* List Order -- defines the order in which the available payment methods are presented to the user. We recommend presenting part payment as the second choice.
 
 #### Payment Plan Configuration tab settings
-![Svea Payment Plan Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Part_Payment_configuration.PNG "Svea Payment Plan Information tab")
+![Svea Payment Plan Configuration tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Part_Payment_configuration.PNG "Svea Payment Plan Configuration tab")
 
 * Logos -- select the logo file corresponding to the payment method instance country (language) from the dropdown list.
 * Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
 
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. If you have lost your credentials information, please contact your Svea account manager.
 
-* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings. See
+* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings.
 * Country -- select the country corresponding to this instance client id.
 * Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your Svea account credentials.  
 
@@ -122,61 +121,99 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 * Autodeliver order -- Set this to "YES" to auto deliver the order. Note that this functionality must first be enabled in the Svea admin panel. Please contact your Svea account manager if you have further questions about this.
 * Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to Svea.
 
----
-
-
-
-
 ### Svea Card payment
-Card payment may be used by un-registered users (i.e. no user is logged in during checkout). See also "Additional VirtueMart configuration requirements" below
+Install one or more instances of the Svea Card payment method. The instances will be presented to all users regardless of registration status. 
 
-### Svea Direct bank payment
-Direct bank payment may only be used by registered users (and the user must be logged in during checkout).
+#### Card Information tab settings
+![Svea Card Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Card_information.PNG "Svea Card Information tab")
 
-## Additional VirtueMart configuration
+* Payment Name -- set to "SveaWebPay Card" or the equivalent in your language.
+* Sef Alias -- no need to change the default
+* Published -- if set to "Yes", this payment method will be available for use by your customers.
+* Payment Description -- an optional short description of the payment method.
+* Payment Method -- select "SveaWebPay Card" from the dropdown list of payment methods.
+* Shopper Group -- if needed, set the shopper group here.
+* List Order -- defines the order in which the available payment methods are presented to the user.
 
-To configure additional VirtueMart settings, log in to your Joomla installation as administrator, and select Components/VirtueMart in the menu.
+#### Card Configuration tab settings
+![Svea Card Configuration tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Card_configuration.PNG "Svea Card Configuration tab")
+
+* Logos -- select the logo file corresponding to the payment method instance language from the dropdown list.
+* Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
+
+* Merchant id, Secret Word -- Fill out the required fields merchant id and secret word. Note that you have been provided a different pair for test and production, make sure you enter each in the correct place. If you have lost your credentials information, please contact your Svea account manager.
+
+* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings.
+* Country -- select the countries in which to show this payment method, or leave empty for all countries.
+* Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user.
+
+* Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
+* Status for successful payment -- the virtuemart status given to an order after it has been accepted.
+
+### Svea Direct Bank payment
+Install one or more instances of the Svea Direct Bank payment method. The instances will be presented to all users regardless of registration status. 
+
+#### C Information tab settings
+![Svea Direct Bank Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Direct_information.PNG "Svea Direct Bank Information tab")
+
+* Payment Name -- set to "SveaWebPay Direkt Bank" or the equivalent in your language.
+* Sef Alias -- no need to change the default
+* Published -- if set to "Yes", this payment method will be available for use by your customers.
+* Payment Description -- an optional short description of the payment method.
+* Payment Method -- select "SveaWebPay Directbank" from the dropdown list of payment methods.
+* Shopper Group -- if needed, set the shopper group here.
+* List Order -- defines the order in which the available payment methods are presented to the user.
+
+#### Card Configuration tab settings
+![Svea Direct Bank Configuration tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Direct_configuration.PNG "Svea Direct Bank Configuration tab")
+
+* Logos -- select the logo file corresponding to the payment method instance language from the dropdown list.
+* Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
+
+* Merchant id, Secret Word -- Fill out the required fields merchant id and secret word. Note that you have been provided a different pair for test and production, make sure you enter each in the correct place. If you have lost your credentials information, please contact your Svea account manager.
+
+* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings.
+* Country -- select the countries in which to show this payment method, or leave empty for all countries.
+* Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user.
+
+* Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
+* Status for successful payment -- the virtuemart status given to an order after it has been accepted.
+
+## Additional VirtueMart configurations
+
+To configure additional VirtueMart settings, log in to your Joomla installation as administrator, and select Components -> VirtueMart in the menu.
 In the lefthand VirtueMart menu, the following settings are relevant to Svea payment methods:
+
+### Products
+#### Taxes & Calculation rules submenu
+If you use the Svea Invoice payment method and charge your users an invoice fee, please see under Troubleshooting below.
 
 ### Shop
 #### Shop submenu/Vendor tab
-* Currency -- this is the "Default Vendor Currency" refered to in the various payment method.
-* List of accepted currencies -- This should include all of the currencies allowed by your Svea payment methods instances.
+* Currency -- this is the "Default Vendor Currency" refered to in the various payment methods above.
+* List of accepted currencies -- make sure this list includes all of the currencies allowed by your various Svea payment methods instances.
 
 ### Configuration
+#### Configuration submenu/Shop tab
+* Languages Settings -- we provide translations for the following languages in our payment module: Swedish (sv-SE), Norwegian (no-NO), Danish (da-DK), Finnish (fi-FI), English (en-GB), German (de-DE), Dutch (nl-NL).
+
 #### Configuration submenu/Checkout tab
 * Only registred users can checkout -- this must be unchecked for unregisterd users to be able to checkout.
-* One Page Checkout enabled -- TODO
-* Enable Automatic Selected Payment -- for Svea Invoice and Paymentplan only, the "Select payment" link will show up even when this option is checked. This is due to these methods needing additional customer credentials collected in the "Select payment" step.
-* On checkout, ask for registration -- TODO
-* Only registered users can checkout -- for Svea Invoice and Paymentplan only, we populate the cart Bill to-address for unregistered users with the result of the GetAddress request. This avoids unregistered customers needing to enter their address manually upon checkout.
+* One Page Checkout enabled -- this has not been tested in release 2.0 of the payment modules.
+* Enable Automatic Selected Payment -- for Svea Invoice and Paymentplan only, the "Select payment" link will show up even when this option is checked. This is due to these methods needing additional customer credentials which is collected during the "Select payment" step.
 
+## Troubleshooting
 
-## Important info
-The request made from this module to SVEAs systems is made through a redirected form.
-The response of the payment is then sent back to the module via POST or GET (selectable in our admin).
+### Card and Direct Bank payments: SSL certificates
+When using Card and Direct Bank payments, the request made from this module to Sveas systems is made through a redirected form. The response of the payment is then sent back to the module via POST or GET. Which is used is selectable through your Svea account admin, if you have further questions about this, please contact your Svea account manager.
 
-
-
-
-
-###When using GET
 Have in mind that a long response string sent via GET could get cut off in some browsers and especially in some servers due to server limitations.
-Our recommendation to solve this is to check the PHP configuration of the server and set it to accept at LEAST 512 characters.
+Our recommendation to solve this is to check the PHP configuration of the server and set it to accept at least 512 characters.
 
+As our servers are using SSL certificates, when using POST to fetch the response from a payment, the users browser prompts the user whether to continue or not, should the receiving site not also have a certificate. If the customer then clicks cancel, the payment process is aborted. To avoid this, make sure your server holds a valid SSL certificate. We recommend that you purchase a SSL certificate from your provider.
 
-###When using POST
-As our servers are using SSL certificates and when using POST to get the response from a payment the users browser propmts the user with a question whether to continue or not, if the receiving site does not have a certificate.
-Would the customer then click cancel, the process does not continue.  This does not occur if your server holds a certicifate. To solve this we recommend that you purchase a SSL certificate from your provider.
+### Invoice payments: invoice fee discount tax calculation error
+There's a bug in how VirtueMart calculates the discount vat in orders containing products with different tax rates, when a Svea Invoice fee is applied to the order. The bug involves the discount mean vat rate being calculated incorrectly, due to the invoice fee being included along with the product subtotal in the calculation. The sums are correct, but the vat tax rate is wrong. To workaround this, follow the below procedure:
 
-We can recommend the following certificate providers:
-* InfraSec:  infrasec.se
-* VeriSign : verisign.com
-
-## Invoice payments: invoice fee discount tax calculation error
-There's a bug in how VirtueMart calculates the discount vat when the Svea Invoicefee is applied to an order. The bug involves the discount vat rate being calculated incorrectly due to the invoice fee being included along with the subtotal. The sums are correct, but the vat tax rate is wrong. To avoid this, use the below invoice vat workaround.
-
-Workaround: Create a separate tax rule to use for invoice fee. In VM2 Admin, go to Products/Taxes & Calculation rules. Add a new rule with the following:
-"Vat tax per product", "+%", <your vat rate>. Then go to Shop/Payment methods and under Svea Invoice set VMPAYMENT_SVEA_TAX to use this rule. Discount vat
-will now be correct on checkout.
+Create a separate tax rule to use for your invoice fee. In VirtueMart admin, go to the Products and Taxes & Calculation rules. Add a new rule with the following: "Vat tax per product", "+%", <your vat rate>. Then go to Shop -> Payment methods, and for your Svea Invoice payment method instances set the "Tax" (VMPAYMENT_SVEA_TAX) setting to use this vat rule. The Discount vat should now be correct on checkout.
 
