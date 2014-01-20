@@ -66,21 +66,24 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 
 * Logos -- select the logo file corresponding to the payment method instance country (language) from the dropdown list.
 * Test mode -- If set to Yes, payment and get address requests are made in Svea test environment. Test credentials provided by Svea must be used.
+
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your Svea account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials.
+
 * Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings. See
 * Country -- select the country corresponding to this instance client id.
 * Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your Svea account credentials.  
+
 * Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
 * Status Order Created -- the virtuemart status given to an order after it has been accepted by Svea.
-* Autodeliver order -- // TODO  
-// TODO other settings -- fix (hide?) sensible defaults for settings that are required but shouldn't need to be changed by user
--- check what the VMConfig::get(name,default) defaults to?
-(...)
-SVEA_MIN_AMOUNT -- set to 0
-SVEA_MAX_AMOUNT -- set to 100000 (or other sufficiently large number)?
-SVEA_INVOICEFEE -- set to amount ex. tax
-SVEA_COST_PERCENT_TOTAL -- set to 0 (or if fee is a percentage, use this?)
-SVEA_TAX -- the tax rate that should apply to the fee/cost percent total
+
+* Autodeliver order -- Set this to "YES" to auto deliver the order. Note that this functionality must first be enabled in the Svea admin panel. Please contact your Svea account manager if you have further questions about this.
+* Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to Svea.
+
+* Svea invoice fee -- if you charge extra for orders made with this payment method, set the fee, excluding tax, here.
+* Tax -- select the invoice fee tax rate from the dropdown list. See also under Troubleshooting below.
+
+//TODO go through rest of document
+
 
 ### Svea Paymentplan
 Only one country can be configured per instance of the method.
@@ -143,8 +146,8 @@ We can recommend the following certificate providers:
 * VeriSign : verisign.com
 
 
-## Invoice payments: discount vat calculation error
-There's a bug in how VirtueMart calculates the discount vat when Svea Invoicefee applies to an order. The bug involves the discount vat amount being scaled due to the invoice fee being included with the subtotal. The sums are correct, but the vat tax is wrong. To avoid this, use the below invoice vat workaround.
+## Invoice payments: invoice fee discount tax calculation error
+There's a bug in how VirtueMart calculates the discount vat when the Svea Invoicefee is applied to an order. The bug involves the discount vat rate being calculated incorrectly due to the invoice fee being included along with the subtotal. The sums are correct, but the vat tax rate is wrong. To avoid this, use the below invoice vat workaround.
 
 Workaround: Create a separate tax rule to use for invoice fee. In VM2 Admin, go to Products/Taxes & Calculation rules. Add a new rule with the following:
 "Vat tax per product", "+%", <your vat rate>. Then go to Shop/Payment methods and under Svea Invoice set VMPAYMENT_SVEA_TAX to use this rule. Discount vat
