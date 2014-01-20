@@ -15,6 +15,8 @@ These instructions detail how to install the various SveaWebPay payment methods 
 
 We assume that you have a working installation of Joomla and Virtuemart 2 to begin with. 
 
+Note: if you have an older version of the module than 2.0.0, please make sure to uninstall the old module before installing the new module.
+
 ### Installing the SveaWebPay Payment Methods in VirtueMart 2
 
 Before we can configure the individual instances of the payment methods in virtuemart, we have to install the payment methods themselves. Each payment method, as well as their common support file package, is installed as a joomla extension.
@@ -39,8 +41,6 @@ In payment method selection, for registered users, we present the instance corre
 
 For countries where Get Address functionality is provided, we will also pre-fill the returned address information as a convenience for the user.
 
-The following countries & currencies are accepted by the invoice payment method: Sweden (SEK), Norway (NOK), Denmark (DKK), Finland, Germany, Netherlands (EUR).
-
 #### Invoice Information tab settings
 ![SveaWebPay Invoice Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Invoice_information.PNG "SveaWebPay Invoice Information tab")
 
@@ -61,7 +61,7 @@ The following countries & currencies are accepted by the invoice payment method:
 
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your SveaWebPay account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. If you have lost your credentials information, please contact your SveaWebPay account manager.
 
-* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings.
+* Accepted Currency -- currency to accept payments in. The currency setting must match the country corresponding to this instance client id. The following countries & currencies are accepted by the invoice payment method: Sweden (SEK), Norway (NOK), Denmark (DKK), Finland, Germany, Netherlands (EUR). If set to "Default Vendor Currency", the payment method will use the shop global settings. 
 * Country -- select the country corresponding to this instance client id.
 * Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.  
 
@@ -107,7 +107,7 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your SveaWebPay account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. If you have lost your credentials information, please contact your SveaWebPay account manager.
 
-* Accepted Currency -- currency to accept payments in. If set to "Default Vendor Currency", the payment method will use the shop global settings.
+* Accepted Currency -- currency to accept payments in. The currency setting must match the country corresponding to this instance client id. The following countries & currencies are accepted by the invoice payment method: Sweden (SEK), Norway (NOK), Denmark (DKK), Finland, Germany, Netherlands (EUR). If set to "Default Vendor Currency", the payment method will use the shop global settings. 
 * Country -- select the country corresponding to this instance client id.
 * Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.  
 
@@ -191,7 +191,9 @@ If you use the SveaWebPay Invoice payment method and charge your users an invoic
 
 ### Configuration
 #### Configuration submenu/Shop tab
-* Languages Settings -- we provide translations for the following languages in our payment module: Swedish (sv-SE), Norwegian (no-NO), Danish (da-DK), Finnish (fi-FI), English (en-GB), German (de-DE), Dutch (nl-NL).
+* Languages Settings -- we provide translations for the following languages in our payment module: Swedish (sv-SE), Norwegian (no-NO), Danish (da-DK), Finnish (fi-FI), English (en-GB), German (de-DE), Dutch (nl-NL). Note that you have to have the language installed for the payment module translations to be included. 
+
+If you install a supported language after the module, please copy the language translation files to the corresponding language folder manually, or reinstall the svealib payment module and they will be included.
 
 #### Configuration submenu/Checkout tab
 * Only registred users can checkout -- this must be unchecked for unregisterd users to be able to checkout.
@@ -211,7 +213,7 @@ As our servers are using SSL certificates, when using POST to fetch the response
 ### Invoice payments: invoice fee discount tax calculation error
 There's a bug in how VirtueMart calculates the discount vat in orders containing products with different tax rates, when a SveaWebPay Invoice fee is applied to the order. The bug involves the discount mean vat rate being calculated incorrectly, due to the invoice fee being included along with the product subtotal in the calculation. The sums are correct, but the vat tax rate is wrong. To workaround this, follow the below procedure:
 
-Create a separate tax rule to use for your invoice fee. In VirtueMart admin, go to the Products and Taxes & Calculation rules. Add a new rule with the following: "Vat tax per product", "+%", <your vat rate>. Then go to Shop -> Payment methods, and for your SveaWebPay Invoice payment method instances set the "Tax" (VMPAYMENT_SVEA_TAX) setting to use this vat rule. The Discount vat should now be correct on checkout.
+Create a separate tax rule to use for your invoice fee. In VirtueMart admin, go to the Products and Taxes & Calculation rules. Add a new rule with the following: "Vat tax per product", "+%", <your vat rate>. Then go to Shop -> Payment methods, and for your SveaWebPay Invoice payment method instances set the "Tax" setting to use this vat rule. The Discount vat should now be correct on checkout.
 
 ### Release history
 
