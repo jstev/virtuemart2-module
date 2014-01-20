@@ -350,8 +350,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     $this->validateDataFromSelectPayment( JRequest::get() );    // raise exception if missing needed request credentials
                 }
                 catch( Exception $e ) {
-                    $msg = $e->getMessage();   //TODO check if can set msg to error (red)?
-                    return FALSE;
+                    $app = JFactory::getApplication ();
+                    $app->enqueueMessage ( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS"),'error');
+                    $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=editpayment'));
+                    $msg = $app->getError();
                 }
                 $this->saveDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
                 $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
@@ -378,7 +380,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             {
                 if( !array_key_exists( "svea_addressSelector_".$methodId, $request ) )    // no addresselector => did not press getAddress
                 {
-                    throw new Exception( "error: check starred fields" );    // TODO "translations" sätt röd stjärna vid fälten!
+                    throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
             }
 
@@ -389,7 +391,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             {
                 if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
                 {
-                    throw new Exception( "error: check starred fields" );
+                     throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
             }
 
@@ -404,7 +406,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     !array_key_exists( "svea_birthyear_".$methodId, $request )
                 )
                 {
-                    throw new Exception( "error: check starred fields" );
+                    throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
             }
             if( $countryCode == 'NL'
@@ -413,7 +415,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 if( !array_key_exists( "svea_initials_".$methodId, $request )
                 )
                 {
-                    throw new Exception( "error: check starred fields" );
+                    throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
             }
         }
