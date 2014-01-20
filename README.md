@@ -215,7 +215,3 @@ There's a bug in how VirtueMart calculates the discount vat in orders containing
 
 Create a separate tax rule to use for your invoice fee. In VirtueMart admin, go to the Products and Taxes & Calculation rules. Add a new rule with the following: "Vat tax per product", "+%", <your vat rate>. Then go to Shop -> Payment methods, and for your SveaWebPay Invoice payment method instances set the "Tax" setting to use this vat rule. The Discount vat should now be correct on checkout.
 
-### Release history
-
-* 2.0.0   (20140120) Module rewritten to make use of the SveaWebPay PHP Integration package and increase compatibility with third part modules and plugins.
-
