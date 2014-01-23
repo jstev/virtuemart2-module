@@ -60,11 +60,9 @@ class SveaHelper {
     public static function formatCustomer($svea, $order,$countryCode,$paymentId) {
         $session = JFactory::getSession();
         $customerType = $session->get("svea_customertype_$paymentId");
-        $pattern = "/^(?:\s)*([0-9]*[A-ZÄÅÆÖØÜßäåæöøüa-z]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]+)(?:\s*)([0-9]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]*[^\s])?(?:\s)*$/";
-        preg_match($pattern, $order['details']['BT']->address_1, $addressArr);
-        if( !array_key_exists( 2, $addressArr ) ) { $addressArr[2] = ""; } //fix for addresses w/o housenumber
-        if( !array_key_exists( 1, $addressArr ) ) { $addressArr[1] = $order['details']['BT']->address_1; }  // fallback for cases w/no match at all :(
 
+        $addressArr = Helper::splitStreetAddress( $order['details']['BT']->address_1 );         
+        
          if ($customerType == "svea_invoice_customertype_company"){
 
             $item = Item::companyCustomer();
