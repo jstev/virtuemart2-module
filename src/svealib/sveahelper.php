@@ -61,7 +61,7 @@ class SveaHelper {
         $session = JFactory::getSession();
         $customerType = $session->get("svea_customertype_$paymentId");
 
-        $addressArr = Helper::splitStreetAddress( $order['details']['BT']->address_1 );         
+        $addressArr = Svea\Helper::splitStreetAddress( $order['details']['BT']->address_1 );         
         
          if ($customerType == "svea_invoice_customertype_company"){
 
