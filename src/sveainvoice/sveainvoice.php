@@ -162,7 +162,7 @@
                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
                 $session = JFactory::getSession();
                 //add customer
-                $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
+                $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
                 try {
                     $svea = $svea
                           ->setCountryCode($countryCode)
