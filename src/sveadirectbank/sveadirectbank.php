@@ -83,7 +83,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 * @author Val?rie Isaksen
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
-           
+
 		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
 			return NULL; // Another method was selected, do nothing
 		}
@@ -137,7 +137,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $cancel_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->virtuemart_order_id);
             //add customer
             $session = JFactory::getSession();
-            $svea = SveaHelper::formatCustomer($svea,$order,$countryCode,$method->virtuemart_paymentmethod_id);
+            $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
             try {
                 $form = $svea
                         ->setCountryCode($countryCode)
