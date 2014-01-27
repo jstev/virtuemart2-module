@@ -402,6 +402,34 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 
         }
 
+        /**
+	 * displays the logos of a VirtueMart plugin
+	 *
+	 * @author Valerie Isaksen
+	 * @author Max Milbers
+	 * @param array $logo_list
+	 * @return html with logos
+	 */
+	protected function displayLogos ($logo_list) {
+
+		$img = "";
+
+		if (!(empty($logo_list))) {
+
+			$url = JURI::root () . 'plugins/vmpayment/svealib/assets/images/';
+
+			//$url = JURI::root () . 'images/stories/virtuemart/' . $this->_psType . '/';
+			if (!is_array ($logo_list)) {
+				$logo_list = (array)$logo_list;
+			}
+			foreach ($logo_list as $logo) {
+				$alt_text = substr ($logo, 0, strpos ($logo, '.'));
+				$img .= '<span class="vmCartPaymentLogo" ><img align="middle" src="' . $url . $logo . '"  alt="' . $alt_text . '" /></span> ';
+			}
+		}
+		return $img;
+	}
+
 	/**
     * plgVmonSelectedCalculatePricePayment
     * Calculate the price (value, tax_id) of the selected method
@@ -714,7 +742,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
     public function getSveaDirectBankHtml($paymentId,$cartTotal) {
         $session = JFactory::getSession();
         $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveadirectbank';
-        $imageRoot = JURI::root(TRUE) . '/images/stories/virtuemart/payment/svea/';
+        $imageRoot = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/';
 
         //box for form
         $html = '<fieldset id="svea_banks_'.$paymentId.'">
