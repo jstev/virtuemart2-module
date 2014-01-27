@@ -1099,8 +1099,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                     // getAddress callback
                                     success: function(data){
 
-                                        console.log( data );
-
                                         var json_$paymentId = JSON.parse(data);
 
                                         jQuery('#svea_getaddress_error_$paymentId').hide();
