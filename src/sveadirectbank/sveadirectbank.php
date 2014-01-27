@@ -154,7 +154,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
             }
-            $html = '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'images/stories/virtuemart/payment/svea/sveaLoader.gif" /></div>';
+            $html = '<html><head><title>'.JText::sprintf("VMPAYMENT_SVEA_TEXT_REDIRECT").'</title></head><body><div style="margin: auto; text-align: center;"><br /><img src="'.JURI::root ().'/plugins/vmpayment/svealib/assets/images/sveaLoader.gif" /></div>';
 
              //form
             $fields = $form->htmlFormFieldsAsArray;
@@ -623,7 +623,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $order['comments'] = '';
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
 
-                $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
+                $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
                 $html =  '<img src="'.$logoImg.'" /><br /><br />';
                 $html .= '<div class="vmorder-done">' . "\n";
 		$html .= '<div class="vmorder-done-payinfo">'.JText::sprintf('VMPAYMENT_SVEA_DIRECTBANK').'</div>';

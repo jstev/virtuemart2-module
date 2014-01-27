@@ -192,7 +192,8 @@
                     $this->storePSPluginInternalData($dbValues);
 
                     //Print html on thank you page. Will also say "thank you for your order!"
-                    $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
+
+                    $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
                     $html =  '<img src="'.$logoImg.'" /><br /><br />';
                     $html .= '<div class="vmorder-done">' . "\n";
                     $html .= '<div class="vmorder-done-payinfo">'.JText::sprintf('VMPAYMENT_SVEA_INVOICE').'</div>';
