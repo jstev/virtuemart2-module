@@ -43,7 +43,7 @@ class SveaHelper {
                 }
             }
              $svea = $svea
-                    ->addOrderRow(Item::orderRow()
+                    ->addOrderRow(WebPayItem::orderRow()
                     ->setQuantity(floatval($product->product_quantity))
                     ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$product->product_item_price,FALSE)))
                     ->setVatPercent(intval($taxPercent))
@@ -53,7 +53,6 @@ class SveaHelper {
                     ->setDescription($product->product_attribute)
             );
         }
-
         return $svea;
     }
 
@@ -73,7 +72,7 @@ class SveaHelper {
 
          if ($customerType == "svea_invoice_customertype_company"){
 
-            $item = Item::companyCustomer();
+            $item = WebPayItem::companyCustomer();
 
             $item = $item->setEmail($order['details']['BT']->email)
                          ->setCompanyName($order['details']['BT']->company)
@@ -90,7 +89,7 @@ class SveaHelper {
             }
             $svea = $svea->addCustomerDetails($item);
         }else{
-            $item = Item::individualCustomer();
+            $item = WebPayItem::individualCustomer();
             //send customer filled address to svea. Svea will use address from getAddress for the invoice.
             $item = $item->setNationalIdNumber( $session->get("svea_ssn"))
                          ->setEmail($order['details']['BT']->email)
