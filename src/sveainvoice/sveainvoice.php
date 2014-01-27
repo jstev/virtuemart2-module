@@ -190,9 +190,12 @@
                     $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
                     $this->storePSPluginInternalData($dbValues);
-                    
-                    //Print html on thank you page. Will also say "thank you for your order!"
+                    //Overwrite billto address
+                    SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                    //Overwrite shipto address?
+                    //SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
 
+                    //Print html on thank you page. Will also say "thank you for your order!"
                     $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
                     $html =  '<img src="'.$logoImg.'" /><br /><br />';
                     $html .= '<div class="vmorder-done">' . "\n";
