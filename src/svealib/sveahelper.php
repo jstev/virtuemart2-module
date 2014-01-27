@@ -59,7 +59,7 @@ class SveaHelper {
 
     public static function formatCustomer($svea, $order,$countryCode) {
         $session = JFactory::getSession();
-
+        $customerType = $session->get("svea_customertype");
         if($countryCode == "DE" || $countryCode == "NL") // split streetname and housenumber
         {
             $addressArr = Svea\Helper::splitStreetAddress( $order['details']['BT']->address_1 );
@@ -70,7 +70,7 @@ class SveaHelper {
             $addressArr[1] =  $order['details']['BT']->address_1;
             $addressArr[2] =  "";
         }
-        
+
          if ($customerType == "svea_invoice_customertype_company"){
 
             $item = Item::companyCustomer();
