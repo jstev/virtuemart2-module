@@ -43,7 +43,7 @@ class SveaHelper {
                 }
             }
              $svea = $svea
-                    ->addOrderRow(Item::orderRow()
+                    ->addOrderRow(WebPayItem::orderRow()
                     ->setQuantity(floatval($product->product_quantity))
                     ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$product->product_item_price,FALSE)))
                     ->setVatPercent(intval($taxPercent))
@@ -53,21 +53,26 @@ class SveaHelper {
                     ->setDescription($product->product_attribute)
             );
         }
-
         return $svea;
     }
 
     public static function formatCustomer($svea, $order,$countryCode) {
         $session = JFactory::getSession();
         $customerType = $session->get("svea_customertype");
-        $pattern = "/^(?:\s)*([0-9]*[A-ZÄÅÆÖØÜßäåæöøüa-z]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]+)(?:\s*)([0-9]*\s*[A-ZÄÅÆÖØÜßäåæöøüa-z]*[^\s])?(?:\s)*$/";
-        preg_match($pattern, $order['details']['BT']->address_1, $addressArr);
-        if( !array_key_exists( 2, $addressArr ) ) { $addressArr[2] = ""; } //fix for addresses w/o housenumber
-        if( !array_key_exists( 1, $addressArr ) ) { $addressArr[1] = $order['details']['BT']->address_1; }  // fallback for cases w/no match at all :(
+        if($countryCode == "DE" || $countryCode == "NL") // split streetname and housenumber
+        {
+            $addressArr = Svea\Helper::splitStreetAddress( $order['details']['BT']->address_1 );
+        }
+        else // just put entire streetaddress in streetname position
+        {
+            $addressArr[0] =  $order['details']['BT']->address_1;
+            $addressArr[1] =  $order['details']['BT']->address_1;
+            $addressArr[2] =  "";
+        }
 
          if ($customerType == "svea_invoice_customertype_company"){
 
-            $item = Item::companyCustomer();
+            $item = WebPayItem::companyCustomer();
 
             $item = $item->setEmail($order['details']['BT']->email)
                          ->setCompanyName($order['details']['BT']->company)
@@ -84,7 +89,7 @@ class SveaHelper {
             }
             $svea = $svea->addCustomerDetails($item);
         }else{
-            $item = Item::individualCustomer();
+            $item = WebPayItem::individualCustomer();
             //send customer filled address to svea. Svea will use address from getAddress for the invoice.
             $item = $item->setNationalIdNumber( $session->get("svea_ssn"))
                          ->setEmail($order['details']['BT']->email)
@@ -242,6 +247,7 @@ class SveaHelper {
             }
             isset($svea->customerIdentity->fullName) ? $sveaAddresses["company"] = $svea->customerIdentity->fullName : "";
             isset($svea->customerIdentity->street) ? $sveaAddresses["address_1"] = $svea->customerIdentity->street : "";
+            isset($svea->customerIdentity->houseNumber) ? $sveaAddresses["house_no"] = $svea->customerIdentity->houseNumber : "";
             isset($svea->customerIdentity->coAddress) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
             isset($svea->customerIdentity->locality) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
             isset($svea->customerIdentity->zipCode) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
@@ -261,6 +267,7 @@ class SveaHelper {
             isset($svea->customerIdentity->firstName) ? $sveaAddresses["first_name"] = $svea->customerIdentity->firstName : "";
             isset($svea->customerIdentity->lastName) ? $sveaAddresses["last_name"] = $svea->customerIdentity->lastName : "";
             isset($svea->customerIdentity->street) ? $sveaAddresses["address_1"] = $svea->customerIdentity->street : "";
+            isset($svea->customerIdentity->houseNumber) ? $sveaAddresses["house_no"] = $svea->customerIdentity->houseNumber : "";
             isset($svea->customerIdentity->coAddress) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
             isset($svea->customerIdentity->locality) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
             isset($svea->customerIdentity->zipCode) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";

@@ -157,8 +157,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
 		$this->storePSPluginInternalData($dbValues);
+                //Overwrite billto address
+                SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                //Overwrite shipto address?
+                //SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+
                   //Print html on thank you page. Will also say "thank you for your order!"
-                 $logoImg = JURI::root(TRUE) . '/images/stories/virtuemart/payment/sveawebpay.png';
+                 $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
 
                 $html =  '<img src="'.$logoImg.'" /><br /><br />';
                 $html .= '<div class="vmorder-done">' . "\n";
@@ -177,7 +182,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		}
 		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
 		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
-		$html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>';
+
+                $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
+                $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);                
+//                    $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>'; // order total
+                $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($totalInPaymentCurrency).'</div>'; // order total in payment currency
+                
            	$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
 		$order['order_status'] = $method->status_success;
@@ -529,6 +539,34 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             return FALSE;
 
         }
+
+        /**
+	 * displays the logos of a VirtueMart plugin
+	 *
+	 * @author Valerie Isaksen
+	 * @author Max Milbers
+	 * @param array $logo_list
+	 * @return html with logos
+	 */
+	protected function displayLogos ($logo_list) {
+
+		$img = "";
+
+		if (!(empty($logo_list))) {
+
+			$url = JURI::root () . 'plugins/vmpayment/svealib/assets/images/';
+
+			//$url = JURI::root () . 'images/stories/virtuemart/' . $this->_psType . '/';
+			if (!is_array ($logo_list)) {
+				$logo_list = (array)$logo_list;
+			}
+			foreach ($logo_list as $logo) {
+				$alt_text = substr ($logo, 0, strpos ($logo, '.'));
+				$img .= '<span class="vmCartPaymentLogo" ><img align="middle" src="' . $url . $logo . '"  alt="' . $alt_text . '" /></span> ';
+			}
+		}
+		return $img;
+	}
 
    /**
     * plgVmonSelectedCalculatePricePayment
@@ -1065,8 +1103,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                                     // getAddress callback
                                     success: function(data){
-
-                                        console.log( data );
 
                                         var json_$paymentId = JSON.parse(data);
 
