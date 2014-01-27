@@ -190,7 +190,7 @@
                     $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
                     $this->storePSPluginInternalData($dbValues);
-
+                    
                     //Print html on thank you page. Will also say "thank you for your order!"
 
                     $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
@@ -571,9 +571,12 @@
                     if ($this->checkConditions ($cart, $method, $cart->pricesUnformatted))
                     {
                         $methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
-                        $method->$method_name = $this->renderPluginName ($method);
-                        $html[] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
+                        //svea convert to paymentmethod currency to display invoicefee instead
+                        $paymentCurrency = CurrencyDisplay::getInstance($method->payment_currency);
+                        $formattedMethodSalesPrice = $paymentCurrency->convertCurrencyTo($method->payment_currency,$methodSalesPrice,FALSE);
 
+                        $method->$method_name = $this->renderPluginName ($method);
+                        $html[] = $this->getPluginHtml ($method, $selected, $formattedMethodSalesPrice);
                         //include svea stuff on editpayment page
                         if(isset( $cart->BT['virtuemart_country_id']))  // BillTo is set, so use country (i.e registered user)
                         {
@@ -599,7 +602,7 @@
                 }
                 return FALSE;
             }
-            
+
 
             /**
 	 * displays the logos of a VirtueMart plugin
@@ -628,7 +631,6 @@
 		}
 		return $img;
 	}
-
 
        /**
         * plgVmonSelectedCalculatePricePayment
