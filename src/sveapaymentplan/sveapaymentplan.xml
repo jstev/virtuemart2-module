@@ -10,6 +10,7 @@
     <description>SveaWebPay PaymentPlan payment plugin for Virtuemart 2</description>
     <files>
 	<filename plugin="sveapaymentplan">sveapaymentplan.php</filename>
+	 <folder>sveapaymentplan</folder>
     </files>
     <params addpath="/administrator/components/com_virtuemart/elements">
 	<param type="vmjpluginwarning" />

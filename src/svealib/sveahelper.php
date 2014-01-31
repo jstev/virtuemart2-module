@@ -274,6 +274,35 @@ class SveaHelper {
         }
         return $sveaAddresses;
     }
+    /**
+     *
+     * @param type $price
+     * @param type $params
+     * @return array
+     */
+    public static function paymentPlanPricePerMonth($price, $params) {
+        $values = array();
+        if (!empty($params)) {
+            foreach ($params->campaignCodes as $key => $value) {
+
+                    $pair = array();
+                    $pair['pricePerMonth'] = $price * $value->monthlyAnnuityFactor + $value->notificationFee;
+                    foreach ($value as $key => $val) {
+                        if ($key == "campaignCode") {
+                            $pair[$key] = $val;
+                        }
+
+                    if($key == "description"){
+                        $pair[$key] = $val;
+                    }
+
+                    }
+                    array_push($values, $pair);
+
+            }
+        }
+        return $values;
+    }
 
     public static function getCurrencyCodeByCountry($countryCode) {
         switch ($countryCode) {
