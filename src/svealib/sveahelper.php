@@ -275,7 +275,7 @@ class SveaHelper {
         return $sveaAddresses;
     }
     /**
-     *
+     * Like SveaLIb WebPay::paymentPlanPricePerMonth but without min and max limits
      * @param type $price
      * @param type $params
      * @return array

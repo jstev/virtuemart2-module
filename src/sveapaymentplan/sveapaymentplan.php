@@ -516,17 +516,28 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
             $objectWithArray['campaignCodes'] = $arrayWithObj;
             //run thru method to get price per month
-            $priceList = WebPay::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray);
-            //load div with lowest
-            //TODO: round up
-            //Svea restrictions: Only one active instance of Svea PaymentplanPayment may exists
+            $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray);
 
-            if(sizeof($this->methods) === 1 && sizeof($priceList->values) > 0){  //and settings from admin says show
-                $viewProduct = array();
-                $viewProduct['price_list'] = $priceList->values;
-                $viewProduct['lowest_price'] =  $priceList->values[0]['pricePerMonth'];
-                $viewProduct['div_end'] = '</div>';
+            //load div with lowest
+            //Svea restrictions: Only one active instance of Svea PaymentplanPayment may exists
+            if(sizeof($this->methods) === 1 && sizeof($priceList) > 0){  //and settings from admin says show
+                $currency = CurrencyDisplay::getInstance ();
+                $prices = array();
+                foreach ($priceList as $value) {
+                    $prices[] = $value['description'] ." ".
+                                $currency->priceDisplay($value['pricePerMonth'], $product->product_currency,1.0) .
+                                "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+                                $currency->priceDisplay($product->product_price, $product->product_currency,1.0);
+                }
                 foreach ($this->methods as $method) {
+                    $viewProduct = array();
+                    $viewProduct['price_list'] = $prices;
+                    $viewProduct['lowest_price'] =  '<img src="'.
+                                                    JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/'.$method->payment_logos[0].
+                                                    '" />'.' '.
+                                                    $currency->priceDisplay($priceList[0]['pricePerMonth'],$product->product_currency,1.0).
+                                                "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+
                     $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, $method->payment_element, 'payment');
                     $productDisplay[] = $sveaString;
                 }
