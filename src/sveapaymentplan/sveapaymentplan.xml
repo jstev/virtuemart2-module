@@ -56,6 +56,11 @@
              <option value="1">COM_VIRTUEMART_YES</option>
          </param>
           <param name="status_shipped" type="vmorderstate" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
-
+          <!-- show price on product display-->
+        <param type="spacer" default="Product display" level="level1"/>
+        <param name="product_display" type="radio" default="0" label="Show lowest price/month on product display" description="Show Svea widget for price per month.">
+             <option value="0">COM_VIRTUEMART_NO</option>
+             <option value="1">COM_VIRTUEMART_YES</option>
+        </param>
     </params>
 </install>

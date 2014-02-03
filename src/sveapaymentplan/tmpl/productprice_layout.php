@@ -17,7 +17,7 @@
 <div id="svea_price_box" style="width: 80%;">
     <div id="svea_product_price_lowest"
          style="display:block;
-                width: 100%;
+                width: 80%;
                 outline: 0,5px solid #B5B5B5;
                 box-shadow: inset 10px 10px 10px -11px #d2d2d2;
                 border-radius: 4px 4px 4px 4px;
@@ -25,10 +25,12 @@
                 -webkit-border-radius: 4px 4px 4px 4px;
                 border: 0.5px solid #bdbdbd;
                 background-color: #ededed;
-                padding: 5px 10px;
                 overflow: hidden;">
-            <div style="width:auto; float: left; "><?php echo $viewData['logo']; ?></div>
-              <div style="width:auto; float: left;"><?php echo $viewData['lowest_price'] ?></div>
+                <div id="svea_arrow" style="width:auto; float: left; margin-top: 18px;"><?php echo $viewData['arrow']; ?></div>
+                <div style="width:auto; float: left; "><?php echo $viewData['logo']; ?></div>
+
+                <div style="width:auto; float: left; margin: 2px 7px;"><?php echo $viewData['lowest_price'] ?></div>
+
 
 
 
@@ -38,7 +40,7 @@
             style="
             display:none;
             float: left;
-            width: 100%;
+            width: 80%;
             max-width: 200px;
             padding: 5px;
             outline: 0,5px solid #B5B5B5;
@@ -66,7 +68,7 @@
         </div>
     </div>
 <script type="text/javascript">
-     jQuery('#svea_price_box').hover(
+     jQuery('#svea_arrow').hover(
      function (){
           jQuery("#svea_product_price_all").slideDown();
     },
