@@ -532,11 +532,11 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 foreach ($this->methods as $method) {
                     $viewProduct = array();
                     $viewProduct['price_list'] = $prices;
-                    $viewProduct['lowest_price'] =  '<img src="'.
-                                                    JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/'.$method->payment_logos[0].
-                                                    '" />'.' '.
-                                                    $currency->priceDisplay($priceList[0]['pricePerMonth'],$product->product_currency,1.0).
+                    $viewProduct['logo'] =  '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/'.$method->payment_logos[0].
+                                                    '" />';
+                    $viewProduct['lowest_price'] = $currency->priceDisplay($priceList[0]['pricePerMonth'],$product->product_currency,1.0).
                                                 "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+                    $viewProduct['arrow'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/green_arrow.png" />';
 
                     $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, $method->payment_element, 'payment');
                     $productDisplay[] = $sveaString;

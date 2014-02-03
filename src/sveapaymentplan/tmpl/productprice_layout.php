@@ -17,22 +17,21 @@
 <div id="svea_price_box" style="width: 80%;">
     <div id="svea_product_price_lowest"
          style="display:block;
-                left: right;
                 width: 100%;
-                padding: 5px;
                 outline: 0,5px solid #B5B5B5;
                 box-shadow: inset 10px 10px 10px -11px #d2d2d2;
                 border-radius: 4px 4px 4px 4px;
                 -moz-border-radius: 4px 4px 4px 4px;
                 -webkit-border-radius: 4px 4px 4px 4px;
                 border: 0.5px solid #bdbdbd;
-                background-color: #ededed">
-        <span style="
-              margin: 6px;
-              overflow: hidden;
-              ">
-                    <?php echo $viewData['lowest_price']; ?>
-            </span>
+                background-color: #ededed;
+                padding: 5px 10px;
+                overflow: hidden;">
+            <div style="width:auto; float: left; "><?php echo $viewData['logo']; ?></div>
+              <div style="width:auto; float: left;"><?php echo $viewData['lowest_price'] ?></div>
+
+
+
     </div>
 
          <div id="svea_product_price_all"
