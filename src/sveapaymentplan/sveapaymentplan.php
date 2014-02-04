@@ -184,10 +184,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
 
                 $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
-                $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);                
+                $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);
 //                    $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>'; // order total
                 $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($totalInPaymentCurrency).'</div>'; // order total in payment currency
-                
+
            	$html .= '</div>' . "\n";
                 $modelOrder = VmModel::getModel ('orders');
 		$order['order_status'] = $method->status_success;
@@ -276,26 +276,26 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 *
 	 */
 	protected function checkConditions($cart, $method, $cart_prices) {
-                $returnValue = FALSE;
-                // check valid country
-                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
+            $returnValue = FALSE;
+            // check valid country
+            $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
-                if( empty($address) ) {  // i.e. user not logged in --
-                    $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
-                }
-                else    // we show payment method if registered customer billto address is in configured list of payment method countries
-                {
-                    $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
-                }
-                //Check min and max amount. Copied from standard payment
-		$amount = $cart_prices['salesPrice'];
-		$amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
-			OR
-			($method->min_amount <= $amount AND ($method->max_amount == 0)));
-		if (!$amount_cond) {
-			$returnValue = FALSE;
-		}
-                return $returnValue;
+            if( empty($address) ) {  // i.e. user not logged in --
+                $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
+            }
+            else    // we show payment method if registered customer billto address is in configured list of payment method countries
+            {
+                $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
+            }
+            //Check min and max amount. Copied from standard payment
+            $amount = $cart_prices['salesPrice'];
+            $amount_cond = ($amount >= $method->min_amount AND $amount <= $method->max_amount
+                    OR
+                    ($method->min_amount <= $amount AND ($method->max_amount == 0)));
+            if (!$amount_cond) {
+                    $returnValue = FALSE;
+            }
+            return $returnValue;
 	}
 
         /**
@@ -330,6 +330,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
         }
 
 	/**
+         * Svea: Update PaymentplanParams in table
+         *
 	 * Create the table for this plugin if it does not yet exist.
 	 * This functions checks if the called plugin is active one.
 	 * When yes it is calling the standard method to create the tables
@@ -337,10 +339,215 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 *
 	 */
 	function plgVmOnStoreInstallPaymentPluginTable($jplugin_id) {
-		return $this->onStoreInstallPluginTable($jplugin_id);
+            //create Svea table if not exists
+            $this->sveaCreateParamsTable();
+            //get paymentplan params
+            $paymentMethodId = JRequest::getVar('virtuemart_paymentmethod_id'); //ex. 54
+            $params = $this->sveaGetPaymentPlanParamsFromServer($paymentMethodId);
+            //insert into db
+            if($params != NULL){
+                try {
+                foreach ($params as $param) {
+                    $db = JFactory::getDbo();
+                    //$query = $db->getQuery(true);
+                    $query = "INSERT INTO `#__svea_params_table`
+                            (   `campaignCode` ,
+                                `description`,
+                                `paymentPlanType`,
+                                `contractLengthInMonths`,
+                                `monthlyAnnuityFactor`,
+                                `initialFee`,
+                                `notificationFee`,
+                                `interestRatePercent`,
+                                `numberOfInterestFreeMonths`,
+                                `numberOfPaymentFreeMonths`,
+                                `fromAmount`,
+                                `toAmount`,
+                                `timestamp`,
+                                `paymentmethodid`,
+                                `jpluginid`)
+                                VALUES(";
+                    foreach ($param as $key => $value)
+                        $query .= "'".$value."',";
+
+                    $query .= time().",";
+                    $query .= $paymentMethodId.",";
+                    $query .= $jplugin_id;
+                    $query .= ")";
+                    $db->setQuery($query);
+                    $db->query();
+
+                }
+
+            } catch (Exception $exc) {
+               echo $exc->getMessage();die;
+                }
+            }
+            //From vm parent
+            return $this->onStoreInstallPluginTable($jplugin_id);
+	}
+        /**
+         * Svea: Create Params table if not exists
+         */
+        protected function sveaCreateParamsTable(){
+            $q  = '
+                    CREATE TABLE IF NOT EXISTS `#__svea_params_table`
+                    (`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+                    `campaignCode` VARCHAR( 100 ) NOT NULL,
+                    `description` VARCHAR( 100 ) NOT NULL ,
+                    `paymentPlanType` VARCHAR( 100 ) NOT NULL ,
+                    `contractLengthInMonths` INT NOT NULL ,
+                    `monthlyAnnuityFactor` DOUBLE NOT NULL ,
+                    `initialFee` DOUBLE NOT NULL ,
+                    `notificationFee` DOUBLE NOT NULL ,
+                    `interestRatePercent` INT NOT NULL ,
+                    `numberOfInterestFreeMonths` INT NOT NULL ,
+                    `numberOfPaymentFreeMonths` INT NOT NULL ,
+                    `fromAmount` DOUBLE NOT NULL ,
+                    `toAmount` DOUBLE NOT NULL ,
+                    `timestamp` INT UNSIGNED NOT NULL,
+                    `paymentmethodid` INT NOT NULL,
+                    `jpluginid` INT NOT NULL
+                ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1
+                ';
+
+            $db = JFactory::getDBO();
+            $db->setQuery($q);
+            $db->query($q);
+        }
+        /**
+         * Svea: Get PaymentPlanParams and format for db
+         * @param type $paymentMethodId
+         * @return array of formatted PaymentPlanParams ready for db insert
+         */
+        protected function sveaGetPaymentPlanParamsFromServer($paymentMethodId){
+            if (!($method = $this->getVmPluginMethod($paymentMethodId))) {
+                    return NULL; // Another method was selected, do nothing
+            }
+            $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+            $svea_params = WebPay::getPaymentPlanParams($sveaConfig);
+            try {
+                 $svea_params = $svea_params->setCountryCode(JRequest::getVar('countrycode'))
+                    ->doRequest();
+            } catch (Exception $e) {
+                 vmError ($e->getMessage (), $e->getMessage ());
+                    return NULL;
+            }
+            if($svea_params == 1){
+                return $this->sveaFormatParams($svea_params);
+            }else{
+                return $svea_params->resultcode . " : " . $svea_params->errormessage;
+            }
+
+
+        }
+        /**
+         * Svea: Format PaymentPlanParams for db insert
+         * @param type $response
+         * @return array of params
+         */
+        protected function sveaFormatParams($response){
+            $result = array();
+            if ($response == null) {
+                return $result;
+            } else {
+                foreach ($response->campaignCodes as $responseResultItem) {
+                    try {
+                        $campaignCode = (isset($responseResultItem->campaignCode)) ? $responseResultItem->campaignCode : "";
+                        $description = (isset($responseResultItem->description)) ? $responseResultItem->description : "";
+                        $paymentplantype = (isset($responseResultItem->paymentPlanType)) ? $responseResultItem->paymentPlanType : "";
+                        $contractlength = (isset($responseResultItem->contractLengthInMonths)) ? $responseResultItem->contractLengthInMonths : "";
+                        $monthlyannuityfactor = (isset($responseResultItem->monthlyAnnuityFactor)) ? $responseResultItem->monthlyAnnuityFactor : "";
+                        $initialfee = (isset($responseResultItem->initialFee)) ? $responseResultItem->initialFee : "";
+                        $notificationfee = (isset($responseResultItem->notificationFee)) ? $responseResultItem->notificationFee : "";
+                        $interestratepercentage = (isset($responseResultItem->interestRatePercent)) ? $responseResultItem->interestRatePercent : "";
+                        $interestfreemonths = (isset($responseResultItem->numberOfInterestFreeMonths)) ? $responseResultItem->numberOfInterestFreeMonths : "";
+                        $paymentfreemonths = (isset($responseResultItem->numberOfPaymentFreeMonths)) ? $responseResultItem->numberOfPaymentFreeMonths : "";
+                        $fromamount = (isset($responseResultItem->fromAmount)) ? $responseResultItem->fromAmount : "";
+                        $toamount = (isset($responseResultItem->toAmount)) ? $responseResultItem->toAmount : "";
+
+                        $result[] = Array(
+                            "campaignCode" => $campaignCode,
+                            "description" => $description,
+                            "paymentPlanType" => $paymentplantype,
+                            "contractLengthInMonths" => $contractlength,
+                            "monthlyAnnuityFactor" => $monthlyannuityfactor,
+                            "initialFee" => $initialfee,
+                            "notificationFee" => $notificationfee,
+                            "interestRatePercent" => $interestratepercentage,
+                            "numberOfInterestFreeMonths" => $interestfreemonths,
+                            "numberOfPaymentFreeMonths" => $paymentfreemonths,
+                            "fromAmount" => $fromamount,
+                            "toAmount" => $toamount
+                        );
+                    } catch (Exception $e) {
+                        Mage::throwException($this->_getHelper()->__($e->getMessage()));
+                    }
+                }
+            }
+            return $result;
+        }
+
+        /**
+         * Svea: Displays "Pay from x /month on product display
+	 * @param $product
+	 * @param $productDisplay
+	 * @return bool
+         *
+         */
+
+	function plgVmOnProductDisplayPayment ($product, &$productDisplay) {
+            $vendorId = 1;
+		if ($this->getPluginMethods ($vendorId) === 0) {
+			return FALSE;
+		}
+            $q = "  SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,`monthlyAnnuityFactor`,`initialFee`,
+                    `notificationFee`,`interestRatePercent`,`numberOfInterestFreeMonths`,`numberOfPaymentFreeMonths`,`fromAmount`,`toAmount`
+                    FROM `#__svea_params_table`
+                    WHERE timestamp=(SELECT MAX(timestamp) from `#__svea_params_table`)
+                    ORDER BY `id` DESC";
+            $db = JFactory::getDBO();
+            $db->setQuery($q);
+            $params = $db->loadAssocList();
+            //rebuild list to fit svea paymentPlanPricePerMonth param type
+            $arrayWithObj = array();
+            foreach ($params as $campaign) {
+                $arrayWithObj[] = (object)$campaign;
+            }
+            $objectWithArray['campaignCodes'] = $arrayWithObj;
+            //run thru method to get price per month
+            foreach ($this->methods as $method) {
+            $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
+                 //Svea restrictions: Only one active instance of Svea PaymentplanPayment may exists
+                   if($method->product_display == "1" && sizeof($priceList) > 0){
+                        $prices = array();
+                        foreach ($priceList as $value) {
+                            $prices[] = $value['description'] ." ".
+                                        round($value['pricePerMonth'],(int)$value['decimal_place']) . " ".$value['symbol'] .
+                                        "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+
+
+                        }
+
+                        $viewProduct = array();
+                        $viewProduct['price_list'] = $prices;
+                        $viewProduct['logo'] =  '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/'.$method->payment_logos[0].
+                                                        '" />';
+                        $viewProduct['lowest_price'] = round($priceList[0]['pricePerMonth'],(int)$value['decimal_place'])." ".$value['symbol'] . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+                        $viewProduct['arrow'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/green_arrow.png" />';
+                        $viewProduct['line'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/grey_line.png" />';
+
+                        $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, $method->payment_element, 'payment');
+                        //loads template in Vm product display
+                        $productDisplay[] = $sveaString;
+
+                    }
+                }
+		return TRUE;
 	}
 
-	/**
+
+        /**
 	 * This event is fired after the payment method has been selected. It can be used to store
 	 * additional payment info in the cart.
 	 *
@@ -866,6 +1073,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
         //Get payment plan params request
         elseif(JRequest::getVar('type') == 'getParams'){
+              if (!class_exists ('CurrencyDisplay')) {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
+		}
             $svea_params = WebPay::getPaymentPlanParams($sveaConfig);
             try {
                  $svea_params = $svea_params->setCountryCode(JRequest::getVar('countrycode'))
@@ -877,20 +1087,21 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             if (isset($svea_params->errormessage)) {
                 $returnArray = array("svea_error" => "Svea error: " .$svea_params->errormessage);
             } else {
-                $formattedPrice = JRequest::getVar('sveacarttotal');
-                $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params);
-                 if (!class_exists ('CurrencyDisplay')) {
-			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
-		}
+                $price = JRequest::getVar('sveacarttotal');
                 $CurrencyCode = SveaHelper::getCurrencyCodeByCountry(JRequest::getVar('countrycode'));
                 $currencyId = ShopFunctions::getCurrencyIDByName($CurrencyCode);
-                $currency = CurrencyDisplay::getInstance ();
+
+                $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
+                $formattedPrice   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
+
+                $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params,$currencyId);
+                $display = SveaHelper::getCurrencySymbols($currencyId);
 
                 if(sizeof($campaigns->values) > 0){
                     foreach ($campaigns->values as $cc){
                     $returnArray[] = array("campaignCode" => $cc['campaignCode'],
                                             "description" => $cc['description'],
-                                            "price_per_month" => $currency->priceDisplay($cc['pricePerMonth'], $currencyId,1.0) . "/",
+                                            "price_per_month" => round($cc['pricePerMonth'],$display[0]->currency_decimal_place) ." ". $display[0]->currency_symbol. "/",
                                             "per_month" => JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
                                         );
 
