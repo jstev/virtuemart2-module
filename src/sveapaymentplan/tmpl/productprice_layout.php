@@ -14,10 +14,10 @@
 //JHTML::stylesheet('style.css', JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/css/', false); //do not work
 //$document = JFactory::getDocument();
 ?>
-<div id="svea_price_box" style="width: 80%;">
+<div id="svea_price_box" style="width: 75%;">
     <div id="svea_product_price_lowest"
          style="display:block;
-                width: 80%;
+                width: 100%;
                 outline: 0,5px solid #B5B5B5;
                 box-shadow: inset 10px 10px 10px -11px #d2d2d2;
                 border-radius: 4px 4px 4px 4px;
@@ -25,11 +25,28 @@
                 -webkit-border-radius: 4px 4px 4px 4px;
                 border: 0.5px solid #bdbdbd;
                 background-color: #ededed;
-                overflow: hidden;">
-                <div id="svea_arrow" style="width:auto; float: left; margin-top: 18px;"><?php echo $viewData['arrow']; ?></div>
-                <div style="width:auto; float: left; "><?php echo $viewData['logo']; ?></div>
-
-                <div style="width:auto; float: left; margin: 2px 7px;"><?php echo $viewData['lowest_price'] ?></div>
+                overflow: hidden;
+                position: relative;">
+               <div style="
+                    width:50%;
+                    margin-left: auto;
+                    margin-right: auto;
+                    "><?php echo $viewData['logo']; ?>
+               </div>
+                <div style="width:auto; float: left;"><?php echo $viewData['line']; ?></div>
+                  <div id="svea_arrow" style="
+                    width:18%;
+                    float: left;
+                    margin: 7px 0px 3px 17px;
+                    "><?php echo $viewData['arrow']; ?>
+                  </div>
+                <div style="
+                    width:auto;
+                    width:50%;
+                    padding: 3px;
+                    margin-left: auto;
+                    margin-right: auto;"><?php echo $viewData['lowest_price'] ?>
+                </div>
 
 
 
@@ -40,7 +57,7 @@
             style="
             display:none;
             float: left;
-            width: 80%;
+            width: 100%;
             max-width: 200px;
             padding: 5px;
             outline: 0,5px solid #B5B5B5;
@@ -71,6 +88,7 @@
      jQuery('#svea_arrow').hover(
      function (){
           jQuery("#svea_product_price_all").slideDown();
+          jQuery(this).css({"cursor" : "pointer"});
     },
      function(){
            jQuery("#svea_product_price_all").css({"display" : "none"});
