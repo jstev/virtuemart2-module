@@ -283,7 +283,7 @@ class SveaHelper {
     public static function paymentPlanPricePerMonth($price, $params,$currencyId) {
          $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
           $price   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
-          $display = $this->getCurrencySymbols($currencyId);
+          $display = SveaHelper::getCurrencySymbols($currencyId);
         $values = array();
         if (!empty($params)) {
             foreach ($params->campaignCodes as $key => $value) {
