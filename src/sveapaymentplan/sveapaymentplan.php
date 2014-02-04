@@ -516,44 +516,33 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
             $objectWithArray['campaignCodes'] = $arrayWithObj;
             //run thru method to get price per month
-            $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray);
+            foreach ($this->methods as $method) {
+            $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
+                 //Svea restrictions: Only one active instance of Svea PaymentplanPayment may exists
+                   if($method->product_display == "1" && sizeof($priceList) > 0){
+                        $prices = array();
+                        foreach ($priceList as $value) {
+                            $prices[] = $value['description'] ." ".
+                                        round($value['pricePerMonth'],(int)$value['decimal_place']) . " ".$value['symbol'] .
+                                        "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
 
-            //load div with lowest
-            //Svea restrictions: Only one active instance of Svea PaymentplanPayment may exists
-            if(sizeof($this->methods) === 1 && sizeof($priceList) > 0){  //and settings from admin says show
-                $currency = CurrencyDisplay::getInstance ();
-                $prices = array();
-                foreach ($priceList as $value) {
-                    $prices[] = $value['description'] ." ".
-                                $currency->priceDisplay($value['pricePerMonth'], $product->product_currency,1.0) .
-                                "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
-                                $currency->priceDisplay($product->product_price, $product->product_currency,1.0);
-                }
-                foreach ($this->methods as $method) {
-                    if($method->product_display == "1"){
-                         $viewProduct = array();
+
+                        }
+
+                        $viewProduct = array();
                         $viewProduct['price_list'] = $prices;
                         $viewProduct['logo'] =  '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/'.$method->payment_logos[0].
                                                         '" />';
-                        $viewProduct['lowest_price'] = $currency->priceDisplay($priceList[0]['pricePerMonth'],$product->product_currency,1.0).
-                                                    "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+                        $viewProduct['lowest_price'] = round($priceList[0]['pricePerMonth'],(int)$value['decimal_place'])." ".$value['symbol'] . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
                         $viewProduct['arrow'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/green_arrow.png" />';
                         $viewProduct['line'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/grey_line.png" />';
 
                         $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, $method->payment_element, 'payment');
+                        //loads template in Vm product display
                         $productDisplay[] = $sveaString;
+
                     }
-
                 }
-            }
-
-
-                //load javascript to hide show on mouse over
-                //pricedisplay
-
-
-
-
 		return TRUE;
 	}
 
@@ -1084,6 +1073,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
         //Get payment plan params request
         elseif(JRequest::getVar('type') == 'getParams'){
+              if (!class_exists ('CurrencyDisplay')) {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
+		}
             $svea_params = WebPay::getPaymentPlanParams($sveaConfig);
             try {
                  $svea_params = $svea_params->setCountryCode(JRequest::getVar('countrycode'))
@@ -1095,20 +1087,21 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             if (isset($svea_params->errormessage)) {
                 $returnArray = array("svea_error" => "Svea error: " .$svea_params->errormessage);
             } else {
-                $formattedPrice = JRequest::getVar('sveacarttotal');
-                $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params);
-                 if (!class_exists ('CurrencyDisplay')) {
-			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
-		}
+                $price = JRequest::getVar('sveacarttotal');
                 $CurrencyCode = SveaHelper::getCurrencyCodeByCountry(JRequest::getVar('countrycode'));
                 $currencyId = ShopFunctions::getCurrencyIDByName($CurrencyCode);
-                $currency = CurrencyDisplay::getInstance ();
+
+                $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
+                $formattedPrice   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
+
+                $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params,$currencyId);
+                $display = SveaHelper::getCurrencySymbols($currencyId);
 
                 if(sizeof($campaigns->values) > 0){
                     foreach ($campaigns->values as $cc){
                     $returnArray[] = array("campaignCode" => $cc['campaignCode'],
                                             "description" => $cc['description'],
-                                            "price_per_month" => $currency->priceDisplay($cc['pricePerMonth'], $currencyId,1.0) . "/",
+                                            "price_per_month" => round($cc['pricePerMonth'],$display[0]->currency_decimal_place) ." ". $display[0]->currency_symbol. "/",
                                             "per_month" => JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
                                         );
 

@@ -280,28 +280,44 @@ class SveaHelper {
      * @param type $params
      * @return array
      */
-    public static function paymentPlanPricePerMonth($price, $params) {
+    public static function paymentPlanPricePerMonth($price, $params,$currencyId) {
+         $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
+          $price   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
+          $display = $this->getCurrencySymbols($currencyId);
         $values = array();
         if (!empty($params)) {
             foreach ($params->campaignCodes as $key => $value) {
-
                     $pair = array();
-                    $pair['pricePerMonth'] = $price * $value->monthlyAnnuityFactor + $value->notificationFee;
+                    $pair['pricePerMonth'] = ($price * $value->monthlyAnnuityFactor) + $value->notificationFee;
                     foreach ($value as $key => $val) {
                         if ($key == "campaignCode") {
                             $pair[$key] = $val;
                         }
-
-                    if($key == "description"){
-                        $pair[$key] = $val;
-                    }
-
+                        if($key == "description"){
+                            $pair[$key] = $val;
+                        }
+                        $pair['symbol'] = $display[0]->currency_symbol;
+                        $pair['decimal_place'] = $display[0]->currency_decimal_place;
                     }
                     array_push($values, $pair);
 
             }
         }
         return $values;
+    }
+
+    public static function getCurrencySymbols($currencyId){
+            //get currency formats
+        $db = JFactory::getDBO();
+
+        $query = $db->getQuery(TRUE);
+        $query->select($db->quoteName(array('currency_symbol','currency_decimal_place')));
+        $query->from($db->quoteName('#__virtuemart_currencies'));
+        $query->where($db->quoteName('virtuemart_currency_id')." = ".$db->quote($currencyId));
+        $db->setQuery($query);
+
+        return $db->loadObjectList();
+
     }
 
     public static function getCurrencyCodeByCountry($countryCode) {
