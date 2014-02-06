@@ -379,8 +379,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                 }
 
-            } catch (Exception $exc) {
-               echo $exc->getMessage();die;
+            } catch (Exception $e) {
+                vmError ($e->getMessage (), $e->getMessage ());
                 }
             }
             //From vm parent
@@ -427,16 +427,18 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             $svea_params = WebPay::getPaymentPlanParams($sveaConfig);
             try {
-                 $svea_params = $svea_params->setCountryCode(JRequest::getVar('countrycode'))
-                    ->doRequest();
+                 $svea_params = $svea_params
+                        ->setCountryCode(JRequest::getVar('countrycode'))
+                            ->doRequest();
             } catch (Exception $e) {
                  vmError ($e->getMessage (), $e->getMessage ());
                     return NULL;
             }
-            if($svea_params == 1){
-                return $this->sveaFormatParams($svea_params);
-            }else{
+            if(isset($svea_params->errormessage)){
                 return $svea_params->resultcode . " : " . $svea_params->errormessage;
+
+            }else{
+                return $this->sveaFormatParams($svea_params);
             }
 
 
@@ -452,7 +454,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 return $result;
             } else {
                 foreach ($response->campaignCodes as $responseResultItem) {
-                    try {
                         $campaignCode = (isset($responseResultItem->campaignCode)) ? $responseResultItem->campaignCode : "";
                         $description = (isset($responseResultItem->description)) ? $responseResultItem->description : "";
                         $paymentplantype = (isset($responseResultItem->paymentPlanType)) ? $responseResultItem->paymentPlanType : "";
@@ -480,9 +481,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                             "fromAmount" => $fromamount,
                             "toAmount" => $toamount
                         );
-                    } catch (Exception $e) {
-                        Mage::throwException($this->_getHelper()->__($e->getMessage()));
-                    }
                 }
             }
             return $result;
