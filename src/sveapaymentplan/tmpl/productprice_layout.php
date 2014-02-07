@@ -60,7 +60,7 @@
             width: 100%;
             max-width: 200px;
             padding: 5px;
-            outline: 0,5px solid #B5B5B5;
+            outline: 0.5px solid #B5B5B5;
             box-shadow: inset 10px 10px 10px -11px #d2d2d2;
             border-radius: 4px 4px 4px 4px;
             -moz-border-radius: 4px 4px 4px 4px;
