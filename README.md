@@ -1,7 +1,7 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
-##Version 2.1.0
-This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments. This module is updated for the latest payment systems at SveaWebPay. 
+##Version 2.1.2
+This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments. This module is updated for the latest payment systems at SveaWebPay.
 
 If you experience technical issues with this module, or you have feature suggestions, please submit an issue on the Github issue list.
 
@@ -13,7 +13,7 @@ The module has been developed and tested using Joomla 2.5.9-17, VirtueMart 2.0.1
 
 These instructions detail how to install the various SveaWebPay payment methods -- SveaWebPay Invoice, SveaWebPay Payment Plan, SveaWebPay Directbank and SveaWebPay Card -- in your Virtuemart 2 shop, as well as how to install and configure individual instances of these payment methods.
 
-We assume that you have a working installation of Joomla and Virtuemart 2 to begin with. 
+We assume that you have a working installation of Joomla and Virtuemart 2 to begin with.
 
 Note: if you have an older version of the module than 2.0.0, please make sure to uninstall the old module before installing the new module.
 
@@ -30,14 +30,14 @@ Before we can configure the individual instances of the payment methods in virtu
 ### Individual Payment Method Installation
 In the joomla administration interface, select components/virtuemart. You should now be in the virtuemart control panel. Select payment methods. You should then see a list of all installed virtuemart payment methods.
 
-To add a new payment method instance, press the "new" icon. You will then be presented with the Information tab of the new payment method instance. 
+To add a new payment method instance, press the "new" icon. You will then be presented with the Information tab of the new payment method instance.
 
 ## SveaWebPay Payment Method Instance Configuration
 
 ### SveaWebPay Invoice
 Install one instance of the SveaWebPay Invoice payment method for each country that you wish to accept invoice payments from. If you plan on accepting invoice payments from customers in several countries, you will need to configure multiple instances of the method, each instance should accept payments from one country only, as each client id is valid for one country only. See further under client id and country settings below.
 
-In payment method selection, for registered users, we present the instance corresponding to the user country, if given. The invoice payment method may also be used by unregistered users -- we then present all method instances, and it is up to the user to select the correct instance corresponding to the customer country. 
+In payment method selection, for registered users, we present the instance corresponding to the user country, if given. The invoice payment method may also be used by unregistered users -- we then present all method instances, and it is up to the user to select the correct instance corresponding to the customer country.
 
 For countries where Get Address functionality is provided, we will also pre-fill the returned address information as a convenience for the user.
 
@@ -61,9 +61,9 @@ For countries where Get Address functionality is provided, we will also pre-fill
 
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your SveaWebPay account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. If you have lost your credentials information, please contact your SveaWebPay account manager.
 
-* Accepted Currency -- currency to accept payments in. The currency setting must match the country corresponding to this instance client id. The following countries & currencies are accepted by the invoice payment method: Sweden (SEK), Norway (NOK), Denmark (DKK), Finland, Germany, Netherlands (EUR). If set to "Default Vendor Currency", the payment method will use the shop global settings. 
+* Accepted Currency -- currency to accept payments in. The currency setting must match the country corresponding to this instance client id. The following countries & currencies are accepted by the invoice payment method: Sweden (SEK), Norway (NOK), Denmark (DKK), Finland, Germany, Netherlands (EUR). If set to "Default Vendor Currency", the payment method will use the shop global settings.
 * Country -- select the country corresponding to this instance client id.
-* Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.  
+* Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.
 
 * Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
 * Status Order Created -- the virtuemart status given to an order after it has been accepted by SveaWebPay.
@@ -74,10 +74,10 @@ For countries where Get Address functionality is provided, we will also pre-fill
 * SveaWebPay invoice fee -- if you charge extra for orders made with this payment method, set the fee, excluding tax, here.
 * Tax -- select the invoice fee tax rate from the dropdown list. See also under Troubleshooting below.
 
-### SveaWebPay Payment Plan 
+### SveaWebPay Payment Plan
 Install one instance of the SveaWebPay Payment Plan payment method for each country that you wish to accept payment plan payments from. If you plan on accepting payment plan payments from customers in several countries, you will need to configure multiple instances of the method, each instance should accept payments from one country only, as each client id is valid for one country only. See further under client id and country settings below.
 
-In payment method selection, for registered users, we present the instance corresponding to the user country, if given. The payment plan payment method may also be used by unregistered users -- we then present all method instances, and it is up to the user to select the correct instance corresponding to the customer country. 
+In payment method selection, for registered users, we present the instance corresponding to the user country, if given. The payment plan payment method may also be used by unregistered users -- we then present all method instances, and it is up to the user to select the correct instance corresponding to the customer country.
 
 For countries where Get Address functionality is provided, we will also pre-fill the returned address information as a convenience for the user.
 
@@ -86,7 +86,7 @@ The following countries & currencies are accepted by the payment plan payment me
 #### Payment Plan instance installation
 In the joomla administration interface, select components/virtuemart. You should now be in the virtuemart control panel. Select payment methods. You should then see a list of all installed virtuemart payment methods.
 
-To add a new payment method instance, press the "new" icon. You will then be presented with the Information tab of the new payment method instance. 
+To add a new payment method instance, press the "new" icon. You will then be presented with the Information tab of the new payment method instance.
 
 #### Payment Plan Information tab settings
 ![SveaWebPay Payment Plan Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Part_Payment_information.PNG "SveaWebPay Payment Plan Information tab")
@@ -107,19 +107,19 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 
 * Client id, username and password -- Fill out the required fields client no, username and password. In an production environment, use your SveaWebPay account credentials for the desired country. For testing purposes, make sure to use the supplied test account credentials. If you have lost your credentials information, please contact your SveaWebPay account manager.
 
-* Accepted Currency -- currency to accept payments in. The currency setting must match the country corresponding to this instance client id. The following countries & currencies are accepted by the invoice payment method: Sweden (SEK), Norway (NOK), Denmark (DKK), Finland, Germany, Netherlands (EUR). If set to "Default Vendor Currency", the payment method will use the shop global settings. 
+* Accepted Currency -- currency to accept payments in. The currency setting must match the country corresponding to this instance client id. The following countries & currencies are accepted by the invoice payment method: Sweden (SEK), Norway (NOK), Denmark (DKK), Finland, Germany, Netherlands (EUR). If set to "Default Vendor Currency", the payment method will use the shop global settings.
 * Country -- select the country corresponding to this instance client id.
-* Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.  
+* Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.
 
 * Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
 * Status Order Created -- the virtuemart status given to an order after it has been accepted by SveaWebPay.
 
 * Autodeliver order -- Set this to "YES" to auto deliver the order. Note that this functionality must first be enabled in the SveaWebPay admin panel. Please contact your SveaWebPay account manager if you have further questions about this.
 * Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to SveaWebPay.
-* Show lowest price/month on product display -- Set to "YES" the Svea widget for lowest price per month will show on product display. 
+* Show lowest price/month on product display -- Set to "YES" the Svea widget for lowest price per month will show on product display.
 
 ### SveaWebPay Card payment
-Install one or more instances of the SveaWebPay Card payment method. The instances will be presented to all users regardless of registration status. 
+Install one or more instances of the SveaWebPay Card payment method. The instances will be presented to all users regardless of registration status.
 
 #### Card Information tab settings
 ![SveaWebPay Card Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Card_information.PNG "SveaWebPay Card Information tab")
@@ -148,7 +148,7 @@ Install one or more instances of the SveaWebPay Card payment method. The instanc
 * Status for successful payment -- the virtuemart status given to an order after it has been accepted.
 
 ### SveaWebPay Direct Bank payment
-Install one or more instances of the SveaWebPay Direct Bank payment method. The instances will be presented to all users regardless of registration status. 
+Install one or more instances of the SveaWebPay Direct Bank payment method. The instances will be presented to all users regardless of registration status.
 
 #### C Information tab settings
 ![SveaWebPay Direct Bank Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Direct_information.PNG "SveaWebPay Direct Bank Information tab")
@@ -192,7 +192,7 @@ If you use the SveaWebPay Invoice payment method and charge your users an invoic
 
 ### Configuration
 #### Configuration submenu/Shop tab
-* Languages Settings -- we provide translations for the following languages in our payment module: Swedish (sv-SE), Norwegian (no-NO), Danish (da-DK), Finnish (fi-FI), English (en-GB), German (de-DE), Dutch (nl-NL). Note that you have to have the language installed for the payment module translations to be included. 
+* Languages Settings -- we provide translations for the following languages in our payment module: Swedish (sv-SE), Norwegian (no-NO), Danish (da-DK), Finnish (fi-FI), English (en-GB), German (de-DE), Dutch (nl-NL). Note that you have to have the language installed for the payment module translations to be included.
 
 If you install a supported language after the module, please copy the language translation files to the corresponding language folder manually, or reinstall the svealib payment module and they will be included.
 

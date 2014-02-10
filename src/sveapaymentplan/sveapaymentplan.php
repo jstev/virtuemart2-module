@@ -520,9 +520,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                    if($method->product_display == "1" && sizeof($priceList) > 0){
                         $prices = array();
                         foreach ($priceList as $value) {
-                            $prices[] = $value['description'] ." ".
+                            $prices[] = "<div style='float:left;'>".
+                                        $value['description'] ."</div><div style='float:right;'><strong>".
                                         round($value['pricePerMonth'],(int)$value['decimal_place']) . " ".$value['symbol'] .
-                                        "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+                                        "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")."</strong></div>";
 
 
                         }
@@ -534,7 +535,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         $viewProduct['lowest_price'] = round($priceList[0]['pricePerMonth'],(int)$value['decimal_place'])." ".$value['symbol'] . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
                         $viewProduct['arrow'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/green_arrow.png" />';
                         $viewProduct['line'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/grey_line.png" />';
-
+                        $viewProduct['text_from'] = JText::sprintf("VMPAYMENT_SVEA_TEXT_FROM")." ";
                         $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, $method->payment_element, 'payment');
                         //loads template in Vm product display
                         $productDisplay[] = $sveaString;

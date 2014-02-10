@@ -1,4 +1,4 @@
-<?phpdefined('_JEXEC') or die('Restricted access');
+<?php defined('_JEXEC') or die('Restricted access');
 /**
  * @version $Id: productprice_layout.php 6510 2012-10-08 11:26:10Z alatak $
  *
@@ -18,7 +18,7 @@
     <div id="svea_product_price_lowest"
          style="display:block;
                 width: 100%;
-                outline: 0,5px solid #B5B5B5;
+                outline: 0.5px solid #B5B5B5;
                 box-shadow: inset 10px 10px 10px -11px #d2d2d2;
                 border-radius: 4px 4px 4px 4px;
                 -moz-border-radius: 4px 4px 4px 4px;
@@ -42,10 +42,10 @@
                   </div>
                 <div style="
                     width:auto;
-                    width:50%;
+                    width:80%;
                     padding: 3px;
                     margin-left: auto;
-                    margin-right: auto;"><?php echo $viewData['lowest_price'] ?>
+                    margin-right: auto;"><?php echo $viewData['text_from']." ".$viewData['lowest_price'] ?>
                 </div>
 
 
@@ -58,9 +58,9 @@
             display:none;
             float: left;
             width: 100%;
-            max-width: 200px;
+            max-width: 206px;
             padding: 5px;
-            outline: 0,5px solid #B5B5B5;
+            outline: 0.5px solid #B5B5B5;
             box-shadow: inset 10px 10px 10px -11px #d2d2d2;
             border-radius: 4px 4px 4px 4px;
             -moz-border-radius: 4px 4px 4px 4px;
@@ -70,18 +70,17 @@
             z-index: 10;
             overflow: hidden;
             position: absolute;
-            padding: 10px;
+            padding: 3px 3px 0px 0px;
             ">
-             <ul style="
-                 list-style-position: inside;
-                 list-style-type: circle;">
+
                <?php
                foreach ($viewData['price_list'] as $value) {
-                    echo '<li class="svea_product_price_item" style="display:block;  margin-bottom: 8px">- '.$value.'</li>';
+                    echo '<div class="svea_product_price_item" style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">'.$value.'</div>';
+                    echo $viewData['line'];
                }
 
                ?>
-             </ul>
+
         </div>
     </div>
 <script type="text/javascript">
