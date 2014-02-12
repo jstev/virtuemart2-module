@@ -499,11 +499,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		if ($this->getPluginMethods ($vendorId) === 0) {
 			return FALSE;
 		}
-            $q = "  SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,`monthlyAnnuityFactor`,`initialFee`,
-                    `notificationFee`,`interestRatePercent`,`numberOfInterestFreeMonths`,`numberOfPaymentFreeMonths`,`fromAmount`,`toAmount`
+            foreach ($this->methods as $method) {
+            $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
+                        `monthlyAnnuityFactor`,`initialFee`, `notificationFee`,`interestRatePercent`,
+                        `numberOfInterestFreeMonths`,`numberOfPaymentFreeMonths`,`fromAmount`,`toAmount`
                     FROM `#__svea_params_table`
-                    WHERE timestamp=(SELECT MAX(timestamp) from `#__svea_params_table`)
-                    ORDER BY `id` DESC";
+                    WHERE `timestamp`=(SELECT MAX(timestamp) FROM `#__svea_params_table` WHERE `paymentmethodid` = '".$method->virtuemart_paymentmethod_id."' )
+                    ORDER BY `monthlyAnnuityFactor`";
+           
             $db = JFactory::getDBO();
             $db->setQuery($q);
             $params = $db->loadAssocList();
@@ -514,7 +517,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
             $objectWithArray['campaignCodes'] = $arrayWithObj;
             //run thru method to get price per month
-            foreach ($this->methods as $method) {
+
             $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
                  //Svea restrictions: Only one active instance of Svea PaymentplanPayment may exists
                    if($method->product_display == "1" && sizeof($priceList) > 0){
