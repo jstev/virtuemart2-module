@@ -117,6 +117,7 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 * Autodeliver order -- Set this to "YES" to auto deliver the order. Note that this functionality must first be enabled in the SveaWebPay admin panel. Please contact your SveaWebPay account manager if you have further questions about this.
 * Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to SveaWebPay.
 * Show lowest price/month on product display -- Set to "YES" the Svea widget for lowest price per month will show on product display.
+..- **Limitations:** You can only have one paymentplan method activated to apply this feature.
 
 ### SveaWebPay Card payment
 Install one or more instances of the SveaWebPay Card payment method. The instances will be presented to all users regardless of registration status.
