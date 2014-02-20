@@ -499,53 +499,117 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		if ($this->getPluginMethods ($vendorId) === 0) {
 			return FALSE;
 		}
-            foreach ($this->methods as $method) {
-            $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
-                        `monthlyAnnuityFactor`,`initialFee`, `notificationFee`,`interestRatePercent`,
-                        `numberOfInterestFreeMonths`,`numberOfPaymentFreeMonths`,`fromAmount`,`toAmount`
-                    FROM `#__svea_params_table`
-                    WHERE `timestamp`=(SELECT MAX(timestamp) FROM `#__svea_params_table` WHERE `paymentmethodid` = '".$method->virtuemart_paymentmethod_id."' )
-                    ORDER BY `monthlyAnnuityFactor`";
-           
-            $db = JFactory::getDBO();
-            $db->setQuery($q);
-            $params = $db->loadAssocList();
-            //rebuild list to fit svea paymentPlanPricePerMonth param type
-            $arrayWithObj = array();
-            foreach ($params as $campaign) {
-                $arrayWithObj[] = (object)$campaign;
-            }
-            $objectWithArray['campaignCodes'] = $arrayWithObj;
-            //run thru method to get price per month
+                $activated = 0;
+                foreach ($this->methods as $method) {
 
-            $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
-                 //Svea restrictions: Only one active instance of Svea PaymentplanPayment may exists
-                   if($method->product_display == "1" && sizeof($priceList) > 0){
+                    if($method->product_display == "1")
+                        $activated++;
+                }
+                //Svea restrictions: Widget can only be active for one instance of Svea Invoice
+                if($activated != 1){
+                    return FALSE;
+                }
+                foreach ($this->methods as $method) {
+                 if($method->product_display == "1"){
+                  $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
+                            `monthlyAnnuityFactor`,`initialFee`, `notificationFee`,`interestRatePercent`,
+                            `numberOfInterestFreeMonths`,`numberOfPaymentFreeMonths`,`fromAmount`,`toAmount`
+                        FROM `#__svea_params_table`
+                        WHERE `timestamp`=(SELECT MAX(timestamp) FROM `#__svea_params_table` WHERE  `paymentmethodid` = '".$method->virtuemart_paymentmethod_id."' )
+                        AND  `paymentmethodid` = '".$method->virtuemart_paymentmethod_id."'
+                        ORDER BY `monthlyAnnuityFactor` ASC";
+
+                $db = JFactory::getDBO();
+                $db->setQuery($q);
+                $params = $db->loadAssocList();
+                //rebuild list to fit svea paymentPlanPricePerMonth param type
+                $arrayWithObj = array();
+                foreach ($params as $campaign) {
+                    $arrayWithObj[] = (object)$campaign;
+                }
+                $objectWithArray['campaignCodes'] = $arrayWithObj;
+                //run thru method to get price per month
+                $currency_decimals = $currency_code_3 == 'EUR' ? 1 : 0;
+                $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
+                    if(sizeof($priceList) > 0){
                         $prices = array();
+                        $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">TRANSLATE ME</h4>';
+
                         foreach ($priceList as $value) {
-                            $prices[] = "<div style='float:left;'>".
-                                        $value['description'] ."</div><div style='float:right;'><strong>".
-                                        round($value['pricePerMonth'],(int)$value['decimal_place']) . " ".$value['symbol'] .
-                                        "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")."</strong></div>";
+                            $prices[] = '<div class="svea_product_price_item" style="display:block; margin: 5px 10px 10px 10px">'.
+                                            "<div style='float:left;'>".
+                                                $value['description'] ."
+                                            </div>
+                                           <div style='color: #002A46;
+                                                    width:90%;
+                                                    margin-left: 80px;
+                                                    margin-right: auto;
+                                                    float:left;'>
+                                                <strong>".
+                                                    round($value['pricePerMonth'],$currency_decimals) . " ".$value['symbol'] .
+                                                    "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH").
+                                                "</strong>
+                                            </div>
+                                        </div>";
 
 
                         }
 
-                        $viewProduct = array();
-                        $viewProduct['price_list'] = $prices;
-                        $viewProduct['logo'] =  '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/'.$method->payment_logos[0].
-                                                        '" />';
-                        $viewProduct['lowest_price'] = round($priceList[0]['pricePerMonth'],(int)$value['decimal_place'])." ".$value['symbol'] . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
-                        $viewProduct['arrow'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/green_arrow.png" />';
-                        $viewProduct['line'] = '<img src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/grey_line.png" />';
-                        $viewProduct['text_from'] = JText::sprintf("VMPAYMENT_SVEA_TEXT_FROM")." ";
-                        $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, $method->payment_element, 'payment');
-                        //loads template in Vm product display
-                        $productDisplay[] = $sveaString;
+                        $view = array();
+                        $view['price_list'] = $prices;
+                         $view['lowest_price'] = round($priceList[0]['pricePerMonth']);
+                        $view['currency_display'] = $value['symbol'] . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
+                        $view['line'] = '<img width="163" height="1" src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/grey_line.png" />';
+                        $view['text_from'] = JText::sprintf("VMPAYMENT_SVEA_TEXT_FROM")." ";
+
+                         //check if paymentplan is activated and if product_display is activated!
+                        $q  = 'SELECT `payment_params` FROM `#__virtuemart_paymentmethods` WHERE `published`=1 AND `payment_element`= "sveainvoice" ';
+                        $db = JFactory::getDBO();
+                        $db->setQuery($q);
+                        $invoiceInfo = $db->loadResult();
+                        $invoiceArray = explode("|", $invoiceInfo);
+                        $paymentPlanProductActive = 0;
+                        foreach ($invoiceArray as $key => $value) {
+                            $pair = explode("=", $value);
+                            if($pair[0] == "product_display" && $pair[1] == '"1"'){
+                                $paymentPlanProductActive = 1;
+                            }
+
+                        }
+
+                        //to load info from both payments in same layout, we use session to store before rendering
+                        $session = JFactory::getSession();
+                        $invoice_view = $session->get('svea_invoice_product_price');
+                        //have not rendered invoice yet
+                        if($invoice_view == NULL){
+                            //is using product display in invoice
+                            if($paymentPlanProductActive == 1){
+                                //fill with paymentplan, but do not publish
+                                 $session->set('svea_paymentplan_product_price',$view);
+                                //only use paymentplan for display
+                            }  else {
+                                $viewProduct['svea_paymentplan'] = $view;
+                                $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, 'svealib', 'payment');
+                                $productDisplay[] = $sveaString;
+                            }
+
+                        }elseif ($invoice_view != NULL) {
+                            $viewProduct['svea_invoice'] = $invoice_view;
+                            $viewProduct['svea_paymentplan'] = $view;
+                            $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, 'svealib', 'payment');
+                            //loads template in Vm product display
+                            $session->clear('svea_invoice_product_price');
+                               $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, 'svealib', 'payment');
+                            //loads template in Vm product display
+                            $productDisplay[] = $sveaString;
+
+                        }
 
                     }
                 }
-		return TRUE;
+
+            }
+            return TRUE;
 	}
 
 

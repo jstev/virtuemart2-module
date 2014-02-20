@@ -60,6 +60,12 @@
         <param type="spacer" default="VMPAYMENT_SVEA_INVOICEFEE" level="level1"/>
         <param name="cost_per_transaction" type="text" default="" label="VMPAYMENT_SVEA_INVOICEFEE" description="VMPAYMENT_SVEA_INVOICEFEE_EXPLAIN" />
         <param name="tax_id" type="vmtaxes" scope="com_virtuemart" label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
+        <param type="spacer" default="Price on product page" level="level1"/>
+        <param name="product_display" type="radio" default="0" label="Activate: Show lowest payment on invoice" description="Show lowest price to pay on invoice. Widget shows on product page.">
+             <option value="0">COM_VIRTUEMART_NO</option>
+             <option value="1">COM_VIRTUEMART_YES</option>
+        </param>
+        <param name="min_amount_product" type="text"  label="Lowest payment on invoice: Min amount" description="The minimum amount to show this widget on product display. Check with your campaign rules. Ask your Svea integration manager if unsure." />
     </params>
 </install>
 

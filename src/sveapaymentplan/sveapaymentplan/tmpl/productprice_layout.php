@@ -17,8 +17,7 @@
 <div id="svea_price_box" style="width: 75%;">
     <div id="svea_product_price_lowest"
          style="display:block;
-                width: 100%;
-                outline: 0.5px solid #B5B5B5;
+                width: 88%;
                 box-shadow: inset 10px 10px 10px -11px #d2d2d2;
                 border-radius: 4px 4px 4px 4px;
                 -moz-border-radius: 4px 4px 4px 4px;
@@ -33,7 +32,11 @@
                     margin-right: auto;
                     "><?php echo $viewData['logo']; ?>
                </div>
-                <div style="width:auto; float: left;"><?php echo $viewData['line']; ?></div>
+                <div style="
+                    width:90%;
+                    margin-left: auto;
+                    margin-right: auto;
+                    "><?php echo $viewData['line']; ?></div>
                   <div id="svea_arrow" style="
                     width:18%;
                     float: left;
@@ -41,16 +44,14 @@
                     "><?php echo $viewData['arrow']; ?>
                   </div>
                 <div style="
+                    font-size: 11px;
+                    color: #0c6b3f;
                     width:auto;
                     width:80%;
                     padding: 3px;
                     margin-left: auto;
                     margin-right: auto;"><?php echo $viewData['text_from']." ".$viewData['lowest_price'] ?>
                 </div>
-
-
-
-
     </div>
 
          <div id="svea_product_price_all"
@@ -60,7 +61,6 @@
             width: 100%;
             max-width: 206px;
             padding: 5px;
-            outline: 0.5px solid #B5B5B5;
             box-shadow: inset 10px 10px 10px -11px #d2d2d2;
             border-radius: 4px 4px 4px 4px;
             -moz-border-radius: 4px 4px 4px 4px;

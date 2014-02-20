@@ -384,6 +384,150 @@
                     return $this->onStoreInstallPluginTable($jplugin_id);
             }
 
+             /**
+         * Svea: Displays "Pay from x /month on product display
+	 * @param $product
+	 * @param $productDisplay
+	 * @return bool
+         *
+         */
+
+	function plgVmOnProductDisplayPayment ($product, &$productDisplay) {
+            $vendorId = 1;
+            if ($this->getPluginMethods ($vendorId) === 0) {
+                    return FALSE;
+            }
+            $activated = 0;
+            foreach ($this->methods as $method) {
+
+                if($method->product_display == "1")
+                    $activated++;
+            }
+            //Svea restrictions: Widget can only be active for one instance of Svea Invoice
+            if($activated != 1){
+                return true;
+            }
+
+            foreach ($this->methods as $method) {
+                 if($method->product_display == "1"){
+
+                $paymentCurrency = CurrencyDisplay::getInstance($method->payment_currency);
+                $price   = $paymentCurrency->convertCurrencyTo($method->payment_currency,$product->prices['salesPrice'],FALSE);
+                $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
+		$db = JFactory::getDBO();
+		$db->setQuery($q);
+		$currency_code_3 = $db->loadResult();
+                $currency_decimals = $currency_code_3 == 'EUR' ? 1 : 0;
+                $display = SveaHelper::getCurrencySymbols($method->payment_currency);
+
+                if($price >= $method->min_amount_product ){
+                    $lowest_to_pay = $this->svea_get_invoice_lowest("SE");//TODO:hämta countrycode med id:$method->countries
+                    $prices = array();
+                    $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">TRANSLATE ME</h4>';
+                    $price = $product->prices['salesPrice'] * 0.03 < $lowest_to_pay ? $lowest_to_pay : $product->prices['salesPrice'] * 0.03;
+
+                    $prices[] = '<div class="svea_product_price_item" style="display:block; margin: 5px 10px 10px 10px">'.
+                                    "<div style='float:left;'>Tranlate me
+
+                                   </div>
+                                    <div style='color: #002A46;
+                                                width:90%;
+                                                margin-left: 80px;
+                                                margin-right: auto;
+                                                float:left;'>
+                                        <strong >".
+                                          round($price,$currency_decimals)." ".$display[0]->currency_symbol.
+                                        "</strong>
+                                    </div>
+                                </div>";
+
+
+                    $view = array();
+
+                    $view['price_list'] = $prices;
+                    $view['lowest_price'] =  round($price,$currency_decimals);
+                    $view['currency_display'] =  $display[0]->currency_symbol;
+                    $view['line'] = '<img width="163" height="1" src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/grey_line.png" />';
+                    $view['text_from'] = JText::sprintf("VMPAYMENT_SVEA_TEXT_FROM")." ";
+
+                 //check if paymentplan is activated and if product_display is activated!
+                    $q  = 'SELECT `payment_params` FROM `#__virtuemart_paymentmethods` WHERE `published`=1 AND `payment_element`= "sveapaymentplan" ';
+                    $db = JFactory::getDBO();
+                    $db->setQuery($q);
+                    $paymentplanInfo = $db->loadResult();
+                    $paymentplanArray = explode("|", $paymentplanInfo);
+                    $paymentPlanProductActive = 0;
+                    foreach ($paymentplanArray as $key => $value) {
+                        $pair = explode("=", $value);
+                        if($pair[0] == "product_display" && $pair[1] == '"1"'){
+                            $paymentPlanProductActive = 1;
+                        }
+
+                    }
+                     $session = JFactory::getSession();
+                     $paymentplan_view = $session->get('svea_paymentplan_product_price');
+                     //have not rendered paymentplan yet
+                     if($paymentplan_view == NULL ){
+                         //is using product display in paymentplan
+                         if($paymentPlanProductActive == 1){
+                             //fill with invoice, but do not publish
+                              $session->set('svea_invoice_product_price',$view);
+                             //only use invoice for display
+                         }  else {
+                             $viewProduct['svea_invoice'] = $view;
+                             $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, 'svealib', 'payment');
+                             $productDisplay[] = $sveaString;
+                         }
+
+
+                     }elseif ($paymentplan_view != NULL) {
+                         $viewProduct['svea_paymentplan'] = $paymentplan_view;
+                         $viewProduct['svea_invoice'] = $view;
+                         $sveaString = $this->renderByLayout('productprice_layout', $viewProduct, 'svealib', 'payment');
+                         //loads template in Vm product display
+                         $session->clear('svea_paymentplan_product_price');
+                         $productDisplay[] = $sveaString;
+
+                     //empty paymentplan
+                     }
+                    }
+
+                }
+
+                //WIP END
+            }
+            return TRUE;
+	}
+
+         private function svea_get_invoice_lowest($svea_country_code) {
+        switch ($svea_country_code) {
+            case "SE":
+                return 100;
+                break;
+            case "NO":
+                return 100;
+                break;
+            case "FI":
+                return 10;
+                break;
+            case "DK":
+                return 100;
+                break;
+            /** not yet available
+            case "NL":
+                return 100;
+                break;
+            case "DE":
+                return 100;
+                break;
+             *
+             */
+
+            default:
+                break;
+        }
+    }
+
             /**
              * This event is fired after the payment method has been selected. It can be used to store
              * additional payment info in the cart.
