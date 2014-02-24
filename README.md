@@ -1,6 +1,6 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
-##Version 2.1.3
+##Version 2.2.0
 This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments. This module is updated for the latest payment systems at SveaWebPay.
 
 If you experience technical issues with this module, or you have feature suggestions, please submit an issue on the Github issue list.
@@ -73,6 +73,9 @@ For countries where Get Address functionality is provided, we will also pre-fill
 
 * SveaWebPay invoice fee -- if you charge extra for orders made with this payment method, set the fee, excluding tax, here.
 * Tax -- select the invoice fee tax rate from the dropdown list. See also under Troubleshooting below.
+* Show Product Price Widget -- If set to true, the Svea Product Price Widget will be shown on product pages, displaying the minimum invoice amount to pay. Note: Only applicable if Svea buys the invoices, and for private customers. Only applies in Sweden, Norway, Finland and the Netherlands (see Product Price Widget threshold below). Please contact your Svea account manager if you have further questions.
+* Product Price Widget threshold -- If Show Product Price Widget is set to true, the Svea Product Price Widget will be displayed if the product price equals or exceeds this amount. If not set, the Product Price Widget will be displayed regardless of product price.
+- **Limitations:** You can only have the widget activated on one Invoice method to apply this feature.
 
 ### SveaWebPay Payment Plan
 Install one instance of the SveaWebPay Payment Plan payment method for each country that you wish to accept payment plan payments from. If you plan on accepting payment plan payments from customers in several countries, you will need to configure multiple instances of the method, each instance should accept payments from one country only, as each client id is valid for one country only. See further under client id and country settings below.
@@ -116,8 +119,8 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 
 * Autodeliver order -- Set this to "YES" to auto deliver the order. Note that this functionality must first be enabled in the SveaWebPay admin panel. Please contact your SveaWebPay account manager if you have further questions about this.
 * Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to SveaWebPay.
-* Show lowest price/month on product display -- Set to "YES" the Svea widget for lowest price per month will show on product display.
-..- **Limitations:** You can only have one paymentplan method activated to apply this feature.
+* Show Product Price Widget -- If set to true, the Svea Product Price Widget will be shown on product pages, displaying the minimum payment plan amount to pay each month. Only applies in Sweden, Norway, Finland and the Netherlands. Please contact your Svea account manager if you have further questions.
+- **Limitations:** You can only have the widget activated on one PaymentPlan method to apply this feature.
 
 ### SveaWebPay Card payment
 Install one or more instances of the SveaWebPay Card payment method. The instances will be presented to all users regardless of registration status.

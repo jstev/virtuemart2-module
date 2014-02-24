@@ -6,7 +6,7 @@
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
-    <version>2.1.3</version>
+    <version>2.2.0</version>
     <description>SveaWebPay Invoice payment plugin for Virtuemart 2</description>
     <files>
 	<filename plugin="sveainvoice">sveainvoice.php</filename>
@@ -61,11 +61,11 @@
         <param name="cost_per_transaction" type="text" default="" label="VMPAYMENT_SVEA_INVOICEFEE" description="VMPAYMENT_SVEA_INVOICEFEE_EXPLAIN" />
         <param name="tax_id" type="vmtaxes" scope="com_virtuemart" label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
         <param type="spacer" default="Price on product page" level="level1"/>
-        <param name="product_display" type="radio" default="0" label="Activate: Show lowest payment on invoice" description="Show lowest price to pay on invoice. Widget shows on product page.">
+        <param name="product_display" type="radio" default="0" label="Show Product Price Widget" description="The Svea Product Price Widget will be shown on product pages, displaying the minimum invoice amount to pay. Note: Only applicable if Svea buys the invoices, and for private customers. Only applies in Sweden, Norway, Finland and the Netherlands">
              <option value="0">COM_VIRTUEMART_NO</option>
              <option value="1">COM_VIRTUEMART_YES</option>
         </param>
-        <param name="min_amount_product" type="text"  label="Lowest payment on invoice: Min amount" description="The minimum amount to show this widget on product display. Check with your campaign rules. Ask your Svea integration manager if unsure." />
+        <param name="min_amount_product" type="text"  label="Product Price Widget threshold" description="If Show Product Price Widget is set to true, the Svea Product Price Widget will be displayed if the product price equals or exceeds this amount. If not set, the Product Price Widget will be displayed regardless of product price. " />
     </params>
 </install>
 

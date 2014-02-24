@@ -423,23 +423,24 @@
                 if($price >= $method->min_amount_product ){
                     $lowest_to_pay = $this->svea_get_invoice_lowest("SE");//TODO:hämta countrycode med id:$method->countries
                     $prices = array();
-                    $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">TRANSLATE ME</h4>';
+                    $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">'.
+                         JText::sprintf("VMPAYMENT_INVOICE").'</h4>';
                     $price = $product->prices['salesPrice'] * 0.03 < $lowest_to_pay ? $lowest_to_pay : $product->prices['salesPrice'] * 0.03;
 
-                    $prices[] = '<div class="svea_product_price_item" style="display:block; margin: 5px 10px 10px 10px">'.
-                                    "<div style='float:left;'>Tranlate me
-
-                                   </div>
-                                    <div style='color: #002A46;
+                    $prices[] = '<div class="svea_product_price_item" style="display:block; margin: 5px 10px 10px 10px">
+                                    <div style="float:left;">'.
+                                    JText::sprintf("VMPAYMENT_SVEA_TEXT_PRODUCT_DESC").
+                                   '</div>
+                                    <div style="color: #002A46;
                                                 width:90%;
                                                 margin-left: 80px;
                                                 margin-right: auto;
-                                                float:left;'>
-                                        <strong >".
+                                                float:left;">
+                                        <strong >'.
                                           round($price,$currency_decimals)." ".$display[0]->currency_symbol.
-                                        "</strong>
+                                        '</strong>
                                     </div>
-                                </div>";
+                                </div>';
 
 
                     $view = array();

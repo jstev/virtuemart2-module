@@ -533,7 +533,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
                     if(sizeof($priceList) > 0){
                         $prices = array();
-                        $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">TRANSLATE ME</h4>';
+                        $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">'.
+                                JText::sprintf("VMPAYMENT_PAYMENTPLAN").
+                                '</h4>';
 
                         foreach ($priceList as $value) {
                             $prices[] = '<div class="svea_product_price_item" style="display:block; margin: 5px 10px 10px 10px">'.
