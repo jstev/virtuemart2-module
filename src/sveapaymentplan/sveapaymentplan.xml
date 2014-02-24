@@ -6,11 +6,10 @@
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
-    <version>2.1.3</version>
+    <version>2.2.0</version>
     <description>SveaWebPay PaymentPlan payment plugin for Virtuemart 2</description>
     <files>
 	<filename plugin="sveapaymentplan">sveapaymentplan.php</filename>
-	 <folder>sveapaymentplan</folder>
     </files>
     <params addpath="/administrator/components/com_virtuemart/elements">
 	<param type="vmjpluginwarning" />
@@ -57,8 +56,8 @@
          </param>
           <param name="status_shipped" type="vmorderstate" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
           <!-- show price on product display-->
-        <param type="spacer" default="Product display" level="level1"/>
-        <param name="product_display" type="radio" default="0" label="Show lowest price/month on product display" description="Show Svea widget for price per month.">
+        <param type="spacer" default="Price on product page" level="level1"/>
+        <param name="product_display" type="radio" default="0" label="Show Product Price Widget" description="The Svea Product Price Widget will be shown on product pages, displaying the minimum payment plan amount to pay each month. Only applies in Sweden, Norway, Finland and the Netherlands.">
              <option value="0">COM_VIRTUEMART_NO</option>
              <option value="1">COM_VIRTUEMART_YES</option>
         </param>
