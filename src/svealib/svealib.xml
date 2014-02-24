@@ -12,7 +12,6 @@
 	<filename plugin="svealib">sveahelper.php</filename>
         <folder>integrationlib</folder>
         <folder>assets</folder>
-        <folder>svealib</folder>
     </files>
     <languages folder="assets">
        <!--all Svea payment methods use the translations from sveainvoice-->
