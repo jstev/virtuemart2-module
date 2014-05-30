@@ -10,7 +10,7 @@
     <description>SveaWebPay library for SweaWebPay payment plugins for Virtuemart 2. Do not use as payment.</description>
     <files>
 	<filename plugin="svealib">sveahelper.php</filename>
-        <folder>integrationLib</folder>
+        <folder>integrationlib</folder>
         <folder>assets</folder>
     </files>
     <languages folder="assets">
