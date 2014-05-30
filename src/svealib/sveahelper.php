@@ -23,7 +23,7 @@ JHtml::_('behavior.framework', true);
  * http://virtuemart.net
  */
 if (!class_exists('Includes.php')) {
-    require (  JPATH_ROOT . DS . 'plugins' . DS . 'vmpayment' . DS . 'svealib' . DS . 'integrationLib'. DS . 'Includes.php');
+    require (  JPATH_ROOT . DS . 'plugins' . DS . 'vmpayment' . DS . 'svealib' . DS . 'integrationlib'. DS . 'Includes.php');
 }
 class SveaHelper {
 
