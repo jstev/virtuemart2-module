@@ -67,6 +67,7 @@ For countries where Get Address functionality is provided, we will also pre-fill
 
 * Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
 * Status Order Created -- the virtuemart status given to an order after it has been accepted by SveaWebPay.
+* Shipping same as billing -- determines whether to use the svea billing address for both shipping and billing. It will ignore if customer tries to change the shipping address. Should be set to true if your contract with Svea does not tell otherwise.
 
 * Autodeliver order -- Set this to "YES" to auto deliver the order. Note that this functionality must first be enabled in the SveaWebPay admin panel. Please contact your SveaWebPay account manager if you have further questions about this.
 * Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to SveaWebPay.
@@ -115,7 +116,8 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 * Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.
 
 * Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
-* Status Order Created -- the virtuemart status given to an order after it has been accepted by SveaWebPay.
+* Status Order Created -- determines whether to use the svea billing address for both shipping and billing. It will ignore if customer tries to change the shipping address. Should be set to true if your contract with Svea does not tell otherwise.
+* Shipping same as billing -- determines whether to use the svea billing address for both shipping and billing. It will ignore if customer tries to change the shipping address. Should be set to true if your contract with Svea does not tell otherwise.
 
 * Autodeliver order -- Set this to "YES" to auto deliver the order. Note that this functionality must first be enabled in the SveaWebPay admin panel. Please contact your SveaWebPay account manager if you have further questions about this.
 * Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to SveaWebPay.
