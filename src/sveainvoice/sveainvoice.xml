@@ -43,7 +43,11 @@
 
         <param type="spacer" default="" level="level1"/>
         <param name="status_success" type="vmorderstate" scope="com_virtuemart" default="C" label="VMPAYMENT_SVEA_STATUS_CREATED" description="VMPAYMENT_SVEA_STATUS_CREATED_EXPLAIN" />
-
+        <!-- shipping billing-->
+        <param name="shipping_billing" type="radio" default="1" label="VMPAYMENT_SVEA_SHIPPING_BILLING" description="VMPAYMENT_SVEA_SHIPPING_BILLING_DESC">
+            <option value="0">COM_VIRTUEMART_NO</option>
+            <option value="1">COM_VIRTUEMART_YES</option>
+        </param>
         <param type="spacer" default="" level="level1"/>
         <!--autodeliver-->
         <param type="spacer" default="VMPAYMENT_SVEA_AUTODELIVER" level="level1"/>
