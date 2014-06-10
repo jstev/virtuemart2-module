@@ -192,8 +192,10 @@
                     $this->storePSPluginInternalData($dbValues);
                     //Overwrite billto address
                     SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
-                    //Overwrite shipto address?
-                    //SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                    //Overwrite shipto address
+                    if($method->shipping_billing == '1'){
+                        SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                    }
 
                     //Print html on thank you page. Will also say "thank you for your order!"
                     $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
@@ -850,7 +852,6 @@
              * @author Max Milbers
              */
             public function plgVmOnCheckoutCheckDataPayment( VirtueMartCart $cart ) {
-
                 $this->populateBillToFromGetAddressesData( $cart );
                 return true;
             }
@@ -865,7 +866,6 @@
             private function populateBillToFromGetAddressesData( VirtueMartCart $cart )
             {
                 $session = JFactory::getSession();
-
                 if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
 
                 if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
@@ -880,8 +880,27 @@
                 $cart->BT['zip'] = $session->get('svea_zipCode', !empty($cart->BT['zip']) ? $cart->BT['zip'] : "");
                 $cart->BT['city'] = $session->get('svea_locality', !empty($cart->BT['city']) ? $cart->BT['city'] : "");
                 $cart->BT['virtuemart_country_id'] =
-                    $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
+                $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
 
+                $method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id);
+                //ship to
+                if($method->shipping_billing == '1'){
+                    if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
+
+                if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
+                {
+                    $cart->ST['company'] = $session->get('svea_fullName', !empty($cart->ST['company']) ? $cart->ST['company'] : "" );
+                }
+
+                $cart->ST['first_name'] = $session->get('svea_firstName', !empty($cart->ST['first_name']) ? $cart->ST['first_name'] : "" );
+                $cart->ST['last_name'] = $session->get('svea_lastName', !empty($cart->ST['last_name']) ? $cart->ST['last_name'] : "" );
+                $cart->ST['address_1'] = $session->get('svea_street', !empty($cart->ST['address_1']) ? $cart->ST['address_1'] : "" );
+                $cart->ST['address_2'] = $session->get('svea_address_2', !empty($cart->ST['address_2']) ? $cart->ST['address_2'] : "");
+                $cart->ST['zip'] = $session->get('svea_zipCode', !empty($cart->ST['zip']) ? $cart->ST['zip'] : "");
+                $cart->ST['city'] = $session->get('svea_locality', !empty($cart->ST['city']) ? $cart->ST['city'] : "");
+                $cart->ST['virtuemart_country_id'] =
+                $session->get('svea_virtuemart_country_id', !empty($cart->ST['virtuemart_country_id']) ? $cart->ST['virtuemart_country_id'] : "");
+                }
                 // keep other cart attributes, if set. also, vm does own validation on checkout.
                 return true;
             }
