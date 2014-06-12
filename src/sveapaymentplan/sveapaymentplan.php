@@ -638,7 +638,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 catch( Exception $e ) {
                     $app = JFactory::getApplication ();
                     $app->enqueueMessage ( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS"),'error');
-                    $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=editpayment'));
+                    $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart&task=editpayment'));                    
                     $msg = $app->getError();
                 }
                 $this->saveDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
@@ -675,7 +675,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
             )
             {
-                if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
+                if( $request["svea_ssn_".$methodId] == "" ) // i.e. field was left blank
                 {
                      throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
@@ -687,9 +687,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $countryCode == 'NL'
             )
             {
-                if( !array_key_exists( "svea_birthday_".$methodId, $request ) ||
-                    !array_key_exists( "svea_birthmonth_".$methodId, $request ) ||
-                    !array_key_exists( "svea_birthyear_".$methodId, $request )
+                if( ( $request["svea_birthday_".$methodId] == "" ) ||
+                    ( $request["svea_birthmonth_".$methodId] == "" ) ||
+                    ( $request["svea_birthyear_".$methodId] == "" )
                 )
                 {
                     throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
@@ -698,7 +698,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             if( $countryCode == 'NL'
             )
             {
-                if( !array_key_exists( "svea_initials_".$methodId, $request )
+                if( ( $request["svea_initials_".$methodId] == "" )
                 )
                 {
                     throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
@@ -966,7 +966,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
 
              //ship to
-            if($method->shipping_billing == '1'){
+            if(isset($method) && $method->shipping_billing == '1'){
                 if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
 
                 if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
