@@ -966,7 +966,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
 
              //ship to
-            if($method->shipping_billing == '1'){
+            if(isset($method) && $method->shipping_billing == '1'){
                 if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
 
                 if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )

@@ -884,7 +884,7 @@
 
                 $method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id);
                 //ship to
-                if($method->shipping_billing == '1'){
+                if(isset($method) && $method->shipping_billing == '1'){
                     if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
 
                 if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
