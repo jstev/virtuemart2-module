@@ -675,7 +675,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
             )
             {
-                if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
+                if( $request["svea_ssn_".$methodId] == "" ) // i.e. field was left blank
                 {
                      throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
