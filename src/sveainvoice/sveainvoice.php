@@ -553,7 +553,7 @@
                     catch( Exception $e ) {
                         $app = JFactory::getApplication ();
                         $app->enqueueMessage ( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS"),'error');
-                        $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=editpayment'));
+                        $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart&task=editpayment'));
                         $msg = $app->getError();
                         return FALSE;
                     }
