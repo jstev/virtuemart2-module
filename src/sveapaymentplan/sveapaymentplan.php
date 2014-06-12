@@ -675,7 +675,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
             )
             {
-                if( !array_key_exists( "svea_ssn_".$methodId, $request ) )
+                if( $request["svea_ssn_".$methodId] == "" ) // i.e. field was left blank
                 {
                      throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
@@ -687,9 +687,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $countryCode == 'NL'
             )
             {
-                if( !array_key_exists( "svea_birthday_".$methodId, $request ) ||
-                    !array_key_exists( "svea_birthmonth_".$methodId, $request ) ||
-                    !array_key_exists( "svea_birthyear_".$methodId, $request )
+                if( ( $request["svea_birthday_".$methodId] == "" ) ||
+                    ( $request["svea_birthmonth_".$methodId] == "" ) ||
+                    ( $request["svea_birthyear_".$methodId] == "" )
                 )
                 {
                     throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
@@ -698,7 +698,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             if( $countryCode == 'NL'
             )
             {
-                if( !array_key_exists( "svea_initials_".$methodId, $request )
+                if( ( $request["svea_initials_".$methodId] == "" )
                 )
                 {
                     throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
