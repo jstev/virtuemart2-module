@@ -43,10 +43,10 @@
         <param name="tax_id" type="hidden" default="" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
         <param name="status_pending" type="hidden" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
         <param name="status_denied" type="hidden" scope="com_virtuemart" default="X" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
-        <param name="status_shipped" type="hidden" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
 
         <param type="spacer" default="" level="level1"/>
         <param name="status_success" type="vmorderstate" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_ACCEPTED" description="VMPAYMENT_SVEA_STATUS_ACCEPTED_EXPLAIN" />
+        <param name="status_shipped" type="vmorderstate" scope="com_virtuemart" default="C" label="VMPAYMENT_SVEA_STATUS_CONFIRMED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
         <param type="spacer" default="" level="level1"/>
     </params>
 </install>

@@ -575,7 +575,7 @@
 
                 $countryCode = $request['svea_countryCode_'.$methodId];
                 $customerType = $request['svea_customertype_'.$methodId];
-                
+
                 //prepare errormessage
                 // getAddress countries need the addressSelector
                 if( $countryCode == 'SE' ||
@@ -934,8 +934,12 @@
              * @return mixed, True on success, false on failures (the rest of the save-process will be
              * skipped!), or null when this method is not actived.
              * @author Oscar van Eijk
-             *
+             */
             public function plgVmOnUpdateOrderPayment(  $_formData) {
+                  if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
+                            return NULL;
+                    }
+                var_dump($paymentTable);die;
             return null;
             }
 
