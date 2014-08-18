@@ -137,7 +137,7 @@
                     $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
                     $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);
                     $cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
-
+                    $session =& JFactory::getSession();
                 //Svea Create order
                 $sveaConfig = "";
                 try {
@@ -160,7 +160,6 @@
                     return;
                 }
                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                $session = JFactory::getSession();
                 //add customer
                 $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
                 try {
@@ -467,7 +466,7 @@
                         }
 
                     }
-                     $session = JFactory::getSession();
+                     $session =& JFactory::getSession();
                      $paymentplan_view = $session->get('svea_paymentplan_product_price');
                      //have not rendered paymentplan yet
                      if($paymentplan_view == NULL ){
@@ -557,7 +556,8 @@
                         $msg = $app->getError();
                         return FALSE;
                     }
-                    $this->saveDataFromSelectPayment( JRequest::get(), JFactory::getSession() );  // store passed credentials in session
+                    $session =& JFactory::getSession();
+                    $this->saveDataFromSelectPayment( JRequest::get(), $session );  // store passed credentials in session
                     $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
                 }
                 return $onSelectCheck;
@@ -648,7 +648,6 @@
                 $customerType = $request['svea_customertype_'.$methodId];
 
                 $svea_prefix = "svea";
-
                 foreach ($request as $key => $value) {
                     $svea_key = "";
                     if(substr($key, 0, strlen( $svea_prefix ) ) == $svea_prefix)     // store keys in the format "svea_xxx"
@@ -674,10 +673,11 @@
                             }
                         }
                     }
-//                    print_r( $svea_key );
+
                     $session->set($svea_key, $value);
                 }
-//                die;
+                   // var_dump($session->get('svea_ssn'));
+                //die;
             }
 
             /**
@@ -864,7 +864,7 @@
              */
             private function populateBillToFromGetAddressesData( VirtueMartCart $cart )
             {
-                $session = JFactory::getSession();
+                $session =& JFactory::getSession();
                 if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
 
                 if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
@@ -936,11 +936,39 @@
              * @author Oscar van Eijk
              */
             public function plgVmOnUpdateOrderPayment(  $_formData) {
-                  if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
+                if (!$this->selectedThisByMethodId ($_formData->virtuemart_paymentmethod_id)) {
+			return NULL; // Another method was selected, do nothing
+		}
+                if (!($method = $this->getVmPluginMethod ($_formData->virtuemart_paymentmethod_id))) {
+			return NULL; // Another method was selected, do nothing
+		}
+
+                if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
                             return NULL;
+                }
+               // var_dump($paymentTable);die;
+                //Deliver order
+                if($_formData->order_status == $method->status_shipped){
+                    $country = $this->getCountryCodeByOrderId ($_formData->virtuemart_order_id);
+                    try {
+                    $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                    $svea = WebPay::deliverOrder($sveaConfig)
+                                    ->setOrderId($paymentTable->svea_order_id)
+                                    ->setOrderDate(date('c'))
+                                    ->setCountryCode($country)
+                                    ->setInvoiceDistributionType($method->distributiontype)
+                                            ->deliverInvoiceOrder()
+                                                ->doRequest();
+                     var_dump($svea);die;
+                    } catch (Exception $e) {
+                        $app = JFactory::getApplication ();
+                        $app->enqueueMessage ( $e->getMessage(),'error');
+                        //TODO: ERROR handling
+//                        $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart&task=editpayment'));
+//                        $msg = $app->getError();
                     }
-                var_dump($paymentTable);die;
-            return null;
+
+                }
             }
 
             /**
@@ -1086,7 +1114,7 @@
          * @return string
          */
         public function getSveaGetAddressHtml($paymentId,$countryCode) {
-            $session = JFactory::getSession();
+            $session =& JFactory::getSession();
             $inputFields = '';
             $getAddressButton = '';
             $checkedCompany = "";
