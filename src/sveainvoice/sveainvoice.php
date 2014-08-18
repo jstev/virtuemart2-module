@@ -946,10 +946,18 @@
                 if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
                             return NULL;
                 }
-               // var_dump($paymentTable);die;
+                //get countrycode
+                    $q = 'SELECT `virtuemart_country_id` FROM #__virtuemart_order_userinfos  WHERE virtuemart_order_id=' . $_formData->virtuemart_order_id;
+                    $db = JFactory::getDBO();
+                    $db->setQuery($q);
+                    $country_id = $db->loadResult();
+                    $country = ShopFunctions::getCountryByID($country_id, 'country_2_code');
                 //Deliver order
                 if($_formData->order_status == $method->status_shipped){
-                    $country = $this->getCountryCodeByOrderId ($_formData->virtuemart_order_id);
+
+
+                   // $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
+                    //$country = $this->getCountryCodeByOrderId ($_formData->virtuemart_order_id);
                     try {
                     $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                     $svea = WebPay::deliverOrder($sveaConfig)
