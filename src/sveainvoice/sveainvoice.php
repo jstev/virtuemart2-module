@@ -137,7 +137,7 @@
                     $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
                     $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);
                     $cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
-                    $session =& JFactory::getSession();
+
                 //Svea Create order
                 $sveaConfig = "";
                 try {
@@ -162,6 +162,7 @@
                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
                 //add customer
                 $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
+
                 try {
                     $svea = $svea
                           ->setCountryCode($countryCode)
@@ -323,14 +324,13 @@
             protected function checkConditions($cart, $method, $cart_prices) {
                      $returnValue = FALSE;
                     // check valid country
-                    $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
-                    if( empty($address) ) {  // i.e. user not logged in --
+                    if( empty($cart->BT) ) {  // i.e. user not logged in --
                         $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
                     }
                     else    // we show payment method if registered customer billto address is in configured list of payment method countries
                     {
-                        $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
+                        $returnValue = $this->addressInAcceptedCountry( $cart->BT, $method->countries );
                     }
                     //Check min and max amount. Copied from standard payment
                     $amount = $cart_prices['salesPrice'];
@@ -351,16 +351,15 @@
              * @return boolean
              */
             function addressInAcceptedCountry( $address, $countries )
-            {
-                // sanity check on address
+            {   //is there not a billto country, set to 0
+                if (strlen($address['virtuemart_country_id'] == 0)) {
+                   $address['virtuemart_country_id'] = 0;
+                }
+                //is address not an array, create array with country 0
                 if (!is_array($address)) {
                     $address = array();
                     $address['virtuemart_country_id'] = 0;
                 }
-                if (!isset($address['virtuemart_country_id'])) {
-                    $address['virtuemart_country_id'] = 0;
-                }
-
                 // sanity check on countries
                 $countriesArray = array();
                 if( !empty($countries) ) {
@@ -370,7 +369,6 @@
                             $countriesArray = $countries;
                     }
                 }
-
                 return (count($countriesArray) == 0 || in_array($address['virtuemart_country_id'], $countriesArray)); // ==0 means all countries
             }
 
@@ -466,7 +464,7 @@
                         }
 
                     }
-                     $session =& JFactory::getSession();
+                     $session = JFactory::getSession();
                      $paymentplan_view = $session->get('svea_paymentplan_product_price');
                      //have not rendered paymentplan yet
                      if($paymentplan_view == NULL ){
@@ -556,9 +554,9 @@
                         $msg = $app->getError();
                         return FALSE;
                     }
-                    $session =& JFactory::getSession();
+                    $session = JFactory::getSession();
                     $this->saveDataFromSelectPayment( JRequest::get(), $session );  // store passed credentials in session
-                    $this->populateBillToFromGetAddressesData( $cart ); // set BT address with passed data
+                    $this->populateBillToFromGetAddressesData( $cart,$session ); // set BT address with passed data
                 }
                 return $onSelectCheck;
             }
@@ -646,38 +644,32 @@
                 $methodId = $request['virtuemart_paymentmethod_id'];
                 $countryCode = $request['svea_countryCode_'.$methodId];
                 $customerType = $request['svea_customertype_'.$methodId];
-
                 $svea_prefix = "svea";
                 foreach ($request as $key => $value) {
                     $svea_key = "";
-                    if(substr($key, 0, strlen( $svea_prefix ) ) == $svea_prefix)     // store keys in the format "svea_xxx"
+                    $request_explode = explode('_', $key);
+                    //if this is svea's and it is the selected method
+                    if(( $request_explode[0] == $svea_prefix) && $methodId == $request_explode[2])     // store keys in the format "svea_xxx"
                     {
                         // trim addressSelector, methodId
+                        $svea_attribute = $request_explode[1]; //substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx
+                        $svea_prefix = $request_explode[0]; //$svea_prefix."_".$svea_attribute;
 
-                        $svea_attribute = substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx
-                        $svea_key = $svea_prefix."_".$svea_attribute;
 
-                        // getAddress countries have the addressSelector address fields set
+                    //methodId wasn't the last param, therefore probably an addresselector
+                    }  elseif (( $request_explode[0] == $svea_prefix) && $methodId == $request_explode[3]) {
+                                                // getAddress countries have the addressSelector address fields set
                         if( $countryCode == 'SE' ||
                             $countryCode == 'DK' ||
                             ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_company')
                         )
                         {
-                            $svea_addressSelector_prefix = $request["svea_addressSelector_".$methodId];
-                            // svea_addressSelector_?
-                            if(substr($svea_attribute, 0, strlen($svea_addressSelector_prefix)) == $svea_addressSelector_prefix)
-                            {
-                                $svea_address = substr($svea_attribute, strlen($svea_addressSelector_prefix)+3 ); // addressselector_address => address
-
-                                $svea_key = $svea_prefix."_".$svea_address;
-                            }
+                            $svea_attribute = $request_explode[2];
                         }
-                    }
 
-                    $session->set($svea_key, $value);
+                    }
+                     $session->set($svea_prefix."_".$svea_attribute, $value);
                 }
-                   // var_dump($session->get('svea_ssn'));
-                //die;
             }
 
             /**
@@ -851,20 +843,21 @@
              * @author Max Milbers
              */
             public function plgVmOnCheckoutCheckDataPayment( VirtueMartCart $cart ) {
-                $this->populateBillToFromGetAddressesData( $cart );
+                $session = JFactory::getSession();
+                $this->populateBillToFromGetAddressesData( $cart,$session );
                 return true;
             }
 
 
             /**
              * Fills in cart billto address from  getAddresses data stored in the session
-             *
              * @param VirtueMartCart $cart
+             * @param JSession $session
              * @return boolean
              */
-            private function populateBillToFromGetAddressesData( VirtueMartCart $cart )
+            private function populateBillToFromGetAddressesData( VirtueMartCart $cart,$session )
             {
-                $session =& JFactory::getSession();
+                //$session = JFactory::getSession();
                 if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
 
                 if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
@@ -1122,7 +1115,7 @@
          * @return string
          */
         public function getSveaGetAddressHtml($paymentId,$countryCode) {
-            $session =& JFactory::getSession();
+            $session = JFactory::getSession();
             $inputFields = '';
             $getAddressButton = '';
             $checkedCompany = "";
