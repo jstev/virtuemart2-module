@@ -51,10 +51,40 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	}
 
 	/**
+         * Create the table for this plugin if it does not yet exist.
 	 * Create the table for this plugin if it does not yet exist.
 	 * @author Val?rie Isaksen
 	 */
 	public function getVmPluginCreateTableSQL() {
+            //is there already a svea table for this payment?
+            $q = 'SHOW TABLES LIKE "%sveapaymentplan%"';
+            $db = JFactory::getDBO();
+            $db->setQuery($q);
+            $table_exists = $db->loadResult();
+            //if there is add columns
+            if(is_string($table_exists) && strpos($table_exists, 'sveapaymentplan') != FALSE){
+                //get all columns and check for the new ones
+                $q = 'SHOW COLUMNS FROM '.$table_exists;
+                $db->setQuery($q);
+                $columns = $db->loadAssocList();
+               $svea_order_id = FALSE;
+               $svea_contract_number = FALSE;
+                foreach ($columns as $column) {
+                    if(in_array( 'svea_order_id',$column)){
+                        $svea_order_id = TRUE;
+                    }  elseif (in_array( 'svea_contract_number',$column)) {
+                        $svea_contract_number = TRUE;
+                    }
+                }
+                $q1 = $svea_order_id ? '' : ' ADD svea_order_id INT(1) UNSIGNED';
+                $q2 = $svea_contract_number ? '' : 'ADD svea_contract_number INT(1) UNSIGNED';
+
+                $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveapaymentplan " .
+                        $q1 . ($q1 != '' ? ',' : '') .
+                        $q2;
+                $db->setQuery($query);
+                $db->query();
+                }
 		return $this->createTableSQL('Payment Svea Paymentplan Table');
 	}
 
@@ -71,9 +101,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)',
-                        'svea_order_id'                 => 'int(1) UNSIGNED',
-                        'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
-                        'svea_expiration_date'          => 'datetime',
+                        'cost_per_transaction'        => 'decimal(10,2)',
+                        'tax_id'                      => 'smallint(1)',
+
+                        'svea_order_id'               => 'int(1) UNSIGNED',
+                        'svea_contract_number'        => 'int(1) UNSIGNED',
+                        'svea_approved_amount'        => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
+                        'svea_expiration_date'        => 'datetime',
 		);
 
 		return $SQLfields;

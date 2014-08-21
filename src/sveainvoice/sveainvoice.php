@@ -80,11 +80,41 @@
             }
 
             /**
-             * Create the table for this plugin if it does not yet exist.
+
+             * Svea adds new columns if table already exists
              * @author Val?rie Isaksen
              */
             public function getVmPluginCreateTableSQL() {
-                    return $this->createTableSQL('Payment Svea Invoice Table');
+                //is there already a svea table for this payment?
+                $q = 'SHOW TABLES LIKE "%sveainvoice%"';
+                $db = JFactory::getDBO();
+                $db->setQuery($q);
+                $table_exists = $db->loadResult();
+                //if there is add columns
+                if(is_string($table_exists) && strpos($table_exists, 'sveainvoice') != FALSE){
+                    //get all columns and check for the new ones
+                    $q = 'SHOW COLUMNS FROM '.$table_exists;
+                    $db->setQuery($q);
+                    $columns = $db->loadAssocList();
+                   $svea_order_id = FALSE;
+                   $svea_invoice_id = FALSE;
+                    foreach ($columns as $column) {
+                        if(in_array( 'svea_order_id',$column)){
+                            $svea_order_id = TRUE;
+                        }  elseif (in_array( 'svea_invoice_id',$column)) {
+                            $svea_invoice_id = TRUE;
+                        }
+                    }
+                    $q1 = $svea_order_id ? '' : ' ADD svea_order_id INT(1) UNSIGNED';
+                    $q2 = $svea_invoice_id ? '' : 'ADD svea_invoice_id INT(1) UNSIGNED';
+
+                    $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveainvoice " .
+                            $q1 . ($q1 != '' ? ',' : '') .
+                            $q2;
+                    $db->setQuery($query);
+                    $db->query();
+                }
+                return $this->createTableSQL('Payment Svea Invoice Table');
             }
 
             /**
@@ -102,10 +132,12 @@
                             'payment_currency'              => 'char(3)',
                             'cost_per_transaction'          => 'decimal(10,2)',
                             'tax_id'                        => 'smallint(1)',
+
                             'svea_order_id'                 => 'int(1) UNSIGNED',
+                            'svea_invoice_id'               => 'int(1) UNSIGNED',
                             'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
                             'svea_expiration_date'          => 'datetime',
-                            //TODO add: customerinfo, sveaorderid,
+                            //TODO add: customerinfo, invoiceId
                     );
 
                     return $SQLfields;
@@ -960,15 +992,16 @@
                                     ->setInvoiceDistributionType($method->distributiontype)
                                             ->deliverInvoiceOrder()
                                                 ->doRequest();
-                     var_dump($svea);die;
                     } catch (Exception $e) {
-                        $app = JFactory::getApplication ();
-                        $app->enqueueMessage ( $e->getMessage(),'error');
-                        //TODO: ERROR handling
-//                        $app->redirect (JRoute::_ ('index.php?option=com_virtuemart&view=cart&task=editpayment'));
-//                        $msg = $app->getError();
+                        vmError ($e->getMessage (), $e->getMessage ());
+                        return NULL;
                     }
+                     if($svea->accepted == 0){
+                        vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
 
+                     } else {
+                         //TODO: save $svea->invoiceId
+                     }
                 }
             }
 
