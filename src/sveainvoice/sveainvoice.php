@@ -106,7 +106,7 @@
                         }
                     }
                     $q1 = $svea_order_id ? '' : ' ADD svea_order_id INT(1) UNSIGNED';
-                    $q2 = $svea_invoice_id ? '' : 'ADD svea_invoice_id INT(1) UNSIGNED';
+                    $q2 = $svea_invoice_id ? '' : 'ADD svea_invoice_id VARCHAR(64)';
 
                     $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveainvoice " .
                             $q1 . ($q1 != '' ? ',' : '') .
@@ -134,7 +134,7 @@
                             'tax_id'                        => 'smallint(1)',
 
                             'svea_order_id'                 => 'int(1) UNSIGNED',
-                            'svea_invoice_id'               => 'int(1) UNSIGNED',
+                            'svea_invoice_id'               => 'varchar(64)',
                             'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
                             'svea_expiration_date'          => 'datetime',
                             //TODO add: customerinfo, invoiceId
@@ -326,7 +326,8 @@
                     $html .= '<tr class="row2"><td>' . JText::sprintf('VMPAYMENT_SVEA_INVOICEFEE').'</td><td align="left">'. $paymentTable->cost_per_transaction.'</td></tr>';
                     $html .= '<tr class="row2"><td>Approved amount</td><td align="left">'. $paymentTable->svea_approved_amount.'</td></tr>';
                     $html .= '<tr class="row2"><td>Expiration date</td><td align="left">'. $paymentTable->svea_expiration_date.'</td></tr>';
-                    $html .= '<tr class="row3"><td>Svea orderId</td><td align="left">'. $paymentTable->svea_order_id.'</td></tr>';
+                    $html .= '<tr class="row3"><td>Svea order Id</td><td align="left">'. $paymentTable->svea_order_id.'</td></tr>';
+                    $html .= '<tr class="row3"><td>Svea invoice Id</td><td align="left">'. $paymentTable->svea_invoice_id.'</td></tr>';
 
                     $html .= '</table>' . "\n";
                     return $html;
@@ -996,14 +997,35 @@
                         vmError ($e->getMessage (), $e->getMessage ());
                         return NULL;
                     }
-                     if($svea->accepted == 0){
-                        vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
+                     if($svea->accepted == 1){
+
+//                        $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
+//                        $dbValues['order_number']                = $paymentTable->order_number;
+//                        $dbValues['virtuemart_paymentmethod_id'] = $paymentTable->virtuemart_paymentmethod_id;
+//                        $dbValues['cost_per_transaction']        = $paymentTable->cost_per_transaction;
+//                        $dbValues['payment_currency']            = $paymentTable->payment_currency;
+//                        $dbValues['payment_order_total']         = $paymentTable->payment_order_total;
+//                        $dbValues['tax_id']                      = $paymentTable->tax_id;
+//                        $dbValues['svea_order_id']               = $paymentTable->svea_order_id;
+//                        $dbValues['svea_invoice_id']             = $svea->invoiceId;
+//                        $dbValues['svea_approved_amount']        = $paymentTable->svea_approved_amount;
+//                        $dbValues['svea_expiration_date']        = $paymentTable->svea_expiration_date;
+
+                        $query = 'UPDATE #__virtuemart_payment_plg_sveainvoice
+                                SET `svea_invoice_id` = "' . $svea->invoiceId . '"' .
+                                'WHERE `order_number` = "' . $paymentTable->order_number.'"';
+
+                        $db->setQuery($query);
+                        $db->query();
 
                      } else {
-                         //TODO: save $svea->invoiceId
+                        vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
+
                      }
                 }
             }
+
+
 
             /**
              * Save updated orderline data to the method specific table

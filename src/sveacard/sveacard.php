@@ -71,7 +71,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)',
-			'svea_transaction_id'         => 'int(1) UNSIGNED'
+			'svea_transaction_id'         => 'varchar(64)'
 		);
 
 		return $SQLfields;

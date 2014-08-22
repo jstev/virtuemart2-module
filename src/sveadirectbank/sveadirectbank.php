@@ -72,7 +72,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                         $svea_transaction_id = TRUE;
                     }
                 }
-                $q1 = $svea_transaction_id ? '' : ' ADD svea_transaction_id INT(1) UNSIGNED';
+                $q1 = $svea_transaction_id ? '' : ' ADD svea_transaction_id VARCHAR(64)';
                 $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveadirectbank " .
                         $q1;
                 $db->setQuery($query);
@@ -94,7 +94,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)',
-			'svea_transaction_id'         => 'int(1) UNSIGNED'
+			'svea_transaction_id'         => 'varchar(64)'
 
 		);
 

@@ -77,7 +77,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     }
                 }
                 $q1 = $svea_order_id ? '' : ' ADD svea_order_id INT(1) UNSIGNED';
-                $q2 = $svea_contract_number ? '' : 'ADD svea_contract_number INT(1) UNSIGNED';
+                $q2 = $svea_contract_number ? '' : 'ADD svea_contract_number VARCHAR(64)';
 
                 $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveapaymentplan " .
                         $q1 . ($q1 != '' ? ',' : '') .
@@ -105,7 +105,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         'tax_id'                      => 'smallint(1)',
 
                         'svea_order_id'               => 'int(1) UNSIGNED',
-                        'svea_contract_number'        => 'int(1) UNSIGNED',
+                        'svea_contract_number'        => 'varchar(64)',
                         'svea_approved_amount'        => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
                         'svea_expiration_date'        => 'datetime',
 		);
@@ -282,7 +282,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 //                $html .= '<tr class="row2"><td>' . JText::sprintf('VMPAYMENT_SVEA_INVOICEFEE').'</td><td align="left">'. $paymentTable->cost_per_transaction.'</td></tr>';
                 $html .= '<tr class="row2"><td>Approved amount</td><td align="left">'. $paymentTable->svea_approved_amount.'</td></tr>';
                 $html .= '<tr class="row2"><td>Expiration date</td><td align="left">'. $paymentTable->svea_expiration_date.'</td></tr>';
-                $html .= '<tr class="row3"><td>Svea orderId</td><td align="left">'. $paymentTable->svea_order_id.'</td></tr>';
+                $html .= '<tr class="row3"><td>Svea order id</td><td align="left">'. $paymentTable->svea_order_id.'</td></tr>';
+                $html .= '<tr class="row3"><td>Svea contract number</td><td align="left">'. $paymentTable->svea_contract_number.'</td></tr>';
 
 		$html .= '</table>' . "\n";
 		return $html;
