@@ -178,14 +178,13 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 return NULL;
            }
             if ($svea->accepted == 1) {
-                //override billing address
-                SveaHelper::updateBTAddress($svea,$order['details']['BT']->virtuemart_order_id);
-
 		$dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
 		$dbValues['order_number']                = $order['details']['BT']->order_number;
 		$dbValues['virtuemart_paymentmethod_id'] = $order['details']['BT']->virtuemart_paymentmethod_id;
+                $dbValues['cost_per_transaction']        = $method->cost_per_transaction;
 		$dbValues['payment_currency']            = $currency_code_3;
 		$dbValues['payment_order_total']         = $totalInPaymentCurrency;
+                $dbValues['tax_id']                      = $method->tax_id;
                 $dbValues['svea_order_id']               = $svea->sveaOrderId;
                 $dbValues['svea_approved_amount']        = $svea->amount;
                 $dbValues['svea_expiration_date']        = $svea->expirationDate;
@@ -1046,9 +1045,53 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 * @return mixed, True on success, false on failures (the rest of the save-process will be
 	 * skipped!), or null when this method is not actived.
 	 * @author Oscar van Eijk
-	 *
+         */
 	public function plgVmOnUpdateOrderPayment(  $_formData) {
-	return null;
+            if (!$this->selectedThisByMethodId ($_formData->virtuemart_paymentmethod_id)) {
+                return NULL; // Another method was selected, do nothing
+            }
+            if (!($method = $this->getVmPluginMethod ($_formData->virtuemart_paymentmethod_id))) {
+                return NULL; // Another method was selected, do nothing
+            }
+
+            if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
+                return NULL;
+            }
+            //get countrycode
+                $q = 'SELECT `virtuemart_country_id` FROM #__virtuemart_order_userinfos  WHERE virtuemart_order_id=' . $_formData->virtuemart_order_id;
+                $db = JFactory::getDBO();
+                $db->setQuery($q);
+                $country_id = $db->loadResult();
+                $country = ShopFunctions::getCountryByID($country_id, 'country_2_code');
+            //Deliver order
+            if($_formData->order_status == $method->status_shipped){
+                try {
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                $svea = WebPay::deliverOrder($sveaConfig)
+                                ->setOrderId($paymentTable->svea_order_id)
+                                ->setOrderDate(date('c'))
+                                ->setCountryCode($country)
+                                ->setInvoiceDistributionType(DistributionType::POST)
+                                        ->deliverPaymentPlanOrder()
+                                            ->doRequest();
+                } catch (Exception $e) {
+                    vmError ($e->getMessage (), $e->getMessage ());
+                    return NULL;
+                }
+                 if($svea->accepted == 1){
+
+                    $query = 'UPDATE #__virtuemart_payment_plg_sveapaymentplan
+                            SET `svea_contract_number` = "' . $svea->contractNumber . '"' .
+                            'WHERE `order_number` = "' . $paymentTable->order_number.'"';
+
+                    $db->setQuery($query);
+                    $db->query();
+
+                 } else {
+                    vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
+
+                 }
+            }
 	}
 
 	/**

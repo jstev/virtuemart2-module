@@ -137,7 +137,6 @@
                             'svea_invoice_id'               => 'varchar(64)',
                             'svea_approved_amount'          => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
                             'svea_expiration_date'          => 'datetime',
-                            //TODO add: customerinfo, invoiceId
                     );
 
                     return $SQLfields;
@@ -980,10 +979,6 @@
                     $country = ShopFunctions::getCountryByID($country_id, 'country_2_code');
                 //Deliver order
                 if($_formData->order_status == $method->status_shipped){
-
-
-                   // $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                    //$country = $this->getCountryCodeByOrderId ($_formData->virtuemart_order_id);
                     try {
                     $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                     $svea = WebPay::deliverOrder($sveaConfig)
@@ -998,18 +993,6 @@
                         return NULL;
                     }
                      if($svea->accepted == 1){
-
-//                        $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
-//                        $dbValues['order_number']                = $paymentTable->order_number;
-//                        $dbValues['virtuemart_paymentmethod_id'] = $paymentTable->virtuemart_paymentmethod_id;
-//                        $dbValues['cost_per_transaction']        = $paymentTable->cost_per_transaction;
-//                        $dbValues['payment_currency']            = $paymentTable->payment_currency;
-//                        $dbValues['payment_order_total']         = $paymentTable->payment_order_total;
-//                        $dbValues['tax_id']                      = $paymentTable->tax_id;
-//                        $dbValues['svea_order_id']               = $paymentTable->svea_order_id;
-//                        $dbValues['svea_invoice_id']             = $svea->invoiceId;
-//                        $dbValues['svea_approved_amount']        = $paymentTable->svea_approved_amount;
-//                        $dbValues['svea_expiration_date']        = $paymentTable->svea_expiration_date;
 
                         $query = 'UPDATE #__virtuemart_payment_plg_sveainvoice
                                 SET `svea_invoice_id` = "' . $svea->invoiceId . '"' .
