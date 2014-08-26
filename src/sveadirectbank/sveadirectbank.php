@@ -66,18 +66,29 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $q = 'SHOW COLUMNS FROM '.$table_exists;
                 $db->setQuery($q);
                 $columns = $db->loadAssocList();
+               $cost_per_transaction = FALSE;
+               $tax_id = FALSE;
                $svea_transaction_id = FALSE;
                 foreach ($columns as $column) {
-                    if(in_array( 'svea_transaction_id',$column)){
+                    if(in_array( 'cost_per_transaction',$column)){
+                        $cost_per_transaction = TRUE;
+                    }  elseif (in_array( 'tax_id',$column)) {
+                        $tax_id = TRUE;
+                    }  elseif (in_array( 'svea_transaction_id',$column)) {
                         $svea_transaction_id = TRUE;
                     }
                 }
-                $q1 = $svea_transaction_id ? '' : ' ADD svea_transaction_id VARCHAR(64)';
+                $q1 = $cost_per_transaction ? '' : ' ADD cost_per_transaction DECIMAL(10,2)';
+                $q2 = $tax_id ? '' : 'ADD tax_id SMALLINT(1)';
+                $q3 = $svea_transaction_id ? '' : 'ADD svea_transaction_id VARCHAR(64)';
+
                 $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveadirectbank " .
-                        $q1;
+                        $q1 . ($q1 != '' ? ',' : '') .
+                        $q2 . ($q2 != '' ? ',' : '') .
+                        $q3;
                 $db->setQuery($query);
                 $db->query();
-                }
+            }
             return $this->createTableSQL('Payment Svea Directbank Table');
 	}
 
@@ -94,6 +105,9 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)',
+                        'cost_per_transaction'          => 'decimal(10,2)',
+                        'tax_id'                        => 'smallint(1)',
+
 			'svea_transaction_id'         => 'varchar(64)'
 
 		);
@@ -108,27 +122,25 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 */
 	function plgVmConfirmedOrder($cart, $order) {
 
-		if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
-			return NULL; // Another method was selected, do nothing
-		}
-		if (!$this->selectedThisElement($method->payment_element)) {
-			return false;
-		}
+            if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
+                    return NULL; // Another method was selected, do nothing
+            }
+            if (!$this->selectedThisElement($method->payment_element)) {
+                    return false;
+            }
 
-		$lang     = JFactory::getLanguage();
-		$filename = 'com_virtuemart';
-		$lang->load($filename, JPATH_ADMINISTRATOR);
-		$vendorId = 0;
-		$this->getPaymentCurrency($method);
+            $lang     = JFactory::getLanguage();
+            $filename = 'com_virtuemart';
+            $lang->load($filename, JPATH_ADMINISTRATOR);
+            $this->getPaymentCurrency($method);
 
-                $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
-		$db = JFactory::getDBO();
-		$db->setQuery($q);
-		$currency_code_3        = $db->loadResult();
-		$paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
-		$totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
-		$cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
-
+            $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
+            $db = JFactory::getDBO();
+            $db->setQuery($q);
+            $currency_code_3        = $db->loadResult();
+            $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
+            $totalInPaymentCurrency = round($paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false), 2);
+            $cd                     = CurrencyDisplay::getInstance($cart->pricesCurrency);
 
             $dbValues['payment_name']                = $this->renderPluginName($method) . '<br />' . $method->payment_info;
             $dbValues['order_number']                = $order['details']['BT']->order_number;
@@ -248,7 +260,7 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		$html .= $this->getHtmlHeaderBE();
                 $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
                 $html .= '<tr class="row2"><td>Amount</td><td align="left">'. $paymentTable->payment_order_total.'</td></tr>';
-
+                $html .= '<tr class="row2"><td>Transaction id</td><td align="left">'. $paymentTable->svea_transaction_id.'</td></tr>';
 		$html .= '</table>' . "\n";
 		return $html;
 	}
@@ -670,6 +682,12 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $resp = new SveaResponse($_REQUEST, $countryCode, $sveaConfig);
             //orderstatusen sätts inte över
             if($resp->response->accepted == 1){
+                $query = 'UPDATE #__virtuemart_payment_plg_sveadirectbank
+                            SET `svea_transaction_id` = "' . $resp->response->transactionId . '"' .
+                            'WHERE `order_number` = "' . $order['details']['BT']->order_number.'"';
+                $db = JFactory::getDBO();
+                $db->setQuery($query);
+                $db->query();
                 $order['order_status'] = $method->status_success;
                 $order['customer_notified'] = 1;
                 $order['comments'] = '';

@@ -55,7 +55,41 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	 * @author Val?rie Isaksen
 	 */
 	public function getVmPluginCreateTableSQL() {
-		return $this->createTableSQL('Payment Svea Card Table');
+            //is there already a svea table for this payment?
+            $q = 'SHOW TABLES LIKE "%sveacard%"';
+            $db = JFactory::getDBO();
+            $db->setQuery($q);
+            $table_exists = $db->loadResult();
+            //if there is add columns
+            if(is_string($table_exists) && strpos($table_exists, 'sveacard') != FALSE){
+                //get all columns and check for the new ones
+                $q = 'SHOW COLUMNS FROM '.$table_exists;
+                $db->setQuery($q);
+                $columns = $db->loadAssocList();
+               $cost_per_transaction = FALSE;
+               $tax_id = FALSE;
+               $svea_transaction_id = FALSE;
+                foreach ($columns as $column) {
+                    if(in_array( 'cost_per_transaction',$column)){
+                        $cost_per_transaction = TRUE;
+                    }  elseif (in_array( 'tax_id',$column)) {
+                        $tax_id = TRUE;
+                    }  elseif (in_array( 'svea_transaction_id',$column)) {
+                        $svea_transaction_id = TRUE;
+                    }
+                }
+                $q1 = $cost_per_transaction ? '' : ' ADD cost_per_transaction DECIMAL(10,2)';
+                $q2 = $tax_id ? '' : 'ADD tax_id SMALLINT(1)';
+                $q3 = $svea_transaction_id ? '' : 'ADD svea_transaction_id VARCHAR(64)';
+
+                $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveacard " .
+                        $q1 . ($q1 != '' ? ',' : '') .
+                        $q2 . ($q2 != '' ? ',' : '') .
+                        $q3;
+                $db->setQuery($query);
+                $db->query();
+            }
+            return $this->createTableSQL('Payment Svea Card Table');
 	}
 
 	/**
@@ -71,6 +105,9 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
 			'payment_currency'            => 'char(3)',
+                        'cost_per_transaction'          => 'decimal(10,2)',
+                        'tax_id'                        => 'smallint(1)',
+
 			'svea_transaction_id'         => 'varchar(64)'
 		);
 
@@ -94,7 +131,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		$lang     = JFactory::getLanguage();
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
-		$vendorId = 0;
 		$this->getPaymentCurrency($method);
 
                 $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
@@ -228,6 +264,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		$html .= $this->getHtmlHeaderBE();
                 $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
                 $html .= '<tr class="row2"><td>Amount</td><td align="left">'. $paymentTable->payment_order_total.'</td></tr>';
+                $html .= '<tr class="row2"><td>Transaction id</td><td align="left">'. $paymentTable->svea_transaction_id.'</td></tr>';
 
 		$html .= '</table>' . "\n";
 		return $html;
@@ -638,6 +675,13 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $resp = new SveaResponse($_REQUEST, $countryCode, $sveaConfig);
 
             if($resp->response->accepted == 1){
+                $query = 'UPDATE #__virtuemart_payment_plg_sveacard
+                                SET `svea_transaction_id` = "' . $resp->response->transactionId . '"' .
+                                'WHERE `order_number` = "' . $order['details']['BT']->order_number.'"';
+                $db = JFactory::getDBO();
+                $db->setQuery($query);
+                $db->query();
+
                 $order['order_status'] = $method->status_success;
                 $order['customer_notified'] = 1;
                 $order['comments'] = '';
@@ -661,10 +705,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		}
 		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
 		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
-
-                $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
-                $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);
-//                    $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>'; // order total
+                $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>'; // order total
                 $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($totalInPaymentCurrency).'</div>'; // order total in payment currency
            	$html .= '</div>' . "\n";
 
