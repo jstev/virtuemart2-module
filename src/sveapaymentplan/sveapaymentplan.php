@@ -1055,7 +1055,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             }
 
             if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
-                return NULL;
+                return FALSE;
             }
             //get countrycode
                 $q = 'SELECT `virtuemart_country_id` FROM #__virtuemart_order_userinfos  WHERE virtuemart_order_id=' . $_formData->virtuemart_order_id;
@@ -1076,7 +1076,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                             ->doRequest();
                 } catch (Exception $e) {
                     vmError ($e->getMessage (), $e->getMessage ());
-                    return NULL;
+                    return FALSE;
                 }
                  if($svea->accepted == 1){
 
@@ -1089,9 +1089,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                  } else {
                     vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
-
+                     return FALSE;
                  }
             }
+            return TRUE;
 	}
 
 	/**

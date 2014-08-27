@@ -286,15 +286,14 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	protected function checkConditions($cart, $method, $cart_prices) {
                 $returnValue = FALSE;
                 // check valid country
-                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
-                if( empty($address) )   // i.e. user not logged in -- card payment may still be ok to select (i.e. in case of non-physical products)
+                if( empty($cart->BT) )   // i.e. user not logged in -- card payment may still be ok to select (i.e. in case of non-physical products)
                 {
                     $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
                 }
                 else    // we show payment method if registered customer billto address is in configured list of payment method countries
                 {
-                    $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
+                    $returnValue = $this->addressInAcceptedCountry( $cart->BT, $method->countries );
                 }
                  //Check min and max amount. Copied from standard payment
                 // We come from the calculator, the $cart->pricesUnformatted does not exist yet
@@ -317,15 +316,15 @@ class plgVmPaymentSveacard extends vmPSPlugin {
          */
         function addressInAcceptedCountry( $address, $countries )
         {
+            //is there not a billto country, set to 0
+            if (strlen($address['virtuemart_country_id'] == 0)) {
+               $address['virtuemart_country_id'] = 0;
+            }
             // sanity check on address
             if (!is_array($address)) {
                 $address = array();
                 $address['virtuemart_country_id'] = 0;
             }
-            if (!isset($address['virtuemart_country_id'])) {
-                $address['virtuemart_country_id'] = 0;
-            }
-
             // sanity check on countries
             $countriesArray = array();
             if( !empty($countries) ) {
@@ -335,7 +334,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                         $countriesArray = $countries;
                 }
             }
-
             return (count($countriesArray) == 0 || in_array($address['virtuemart_country_id'], $countriesArray)); // ==0 means all countries
         }
 
