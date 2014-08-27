@@ -566,9 +566,45 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	 * @return mixed, True on success, false on failures (the rest of the save-process will be
 	 * skipped!), or null when this method is not actived.
 	 * @author Oscar van Eijk
-	 *
+	 */
 	public function plgVmOnUpdateOrderPayment(  $_formData) {
-	return null;
+            if (!$this->selectedThisByMethodId ($_formData->virtuemart_paymentmethod_id)) {
+			return NULL; // Another method was selected, do nothing
+            }
+            if (!($method = $this->getVmPluginMethod ($_formData->virtuemart_paymentmethod_id))) {
+                    return NULL; // Another method was selected, do nothing
+            }
+
+            if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
+                        return FALSE;
+            }
+            //get countrycode
+                $q = 'SELECT `virtuemart_country_id` FROM #__virtuemart_order_userinfos  WHERE virtuemart_order_id=' . $_formData->virtuemart_order_id;
+                $db = JFactory::getDBO();
+                $db->setQuery($q);
+                $country_id = $db->loadResult();
+                $country = ShopFunctions::getCountryByID($country_id, 'country_2_code');
+            //Deliver order
+            if($_formData->order_status == $method->status_shipped){
+                try {
+                    $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                    $svea = WebPay::deliverOrder($sveaConfig)
+                                ->setOrderId($paymentTable->svea_transaction_id)
+                                ->setOrderDate(date('c'))
+                                ->setCountryCode($country)
+                                        ->deliverCardOrder()
+                                            ->doRequest();
+                } catch (Exception $e) {
+                    vmError ($e->getMessage (), $e->getMessage ());
+                    return FALSE;
+                }
+                 if($svea->accepted == 1){
+                       return TRUE;
+                 } else {
+                    vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
+                     return FALSE;
+                 }
+            }
 	}
 
 	/**
@@ -660,6 +696,9 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             if (!class_exists ('VirtueMartModelOrders')) {
 		require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
             }
+            if (!class_exists ('CurrencyDisplay')) {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
+            }
             $modelOrder = VmModel::getModel ('orders');
             $order_number = JRequest::getString ('on', '');
 
@@ -703,7 +742,10 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		}
 		$currency = CurrencyDisplay::getInstance ('', $order['details']['BT']->virtuemart_vendor_id);
 		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
-                $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>'; // order total
+
+                $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
+                $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);
+//                    $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>'; // order total
                 $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($totalInPaymentCurrency).'</div>'; // order total in payment currency
            	$html .= '</div>' . "\n";
 

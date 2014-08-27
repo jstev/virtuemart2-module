@@ -1086,13 +1086,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                     $db->setQuery($query);
                     $db->query();
-
+                    return TRUE;
                  } else {
                     vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
-                     return FALSE;
+                    return FALSE;
                  }
             }
-            return TRUE;
 	}
 
 	/**

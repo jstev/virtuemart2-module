@@ -669,6 +669,10 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             if (!class_exists ('VirtueMartModelOrders')) {
 		require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
             }
+            if (!class_exists ('CurrencyDisplay')) {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
+            }
+
             $modelOrder = VmModel::getModel ('orders');
             $order_number = JRequest::getString ('on', '');
 

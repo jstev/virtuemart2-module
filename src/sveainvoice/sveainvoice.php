@@ -993,20 +993,19 @@
                         return FALSE;
                     }
                      if($svea->accepted == 1){
-
+                        $order = $modelOrder->getOrder ($virtuemart_order_id);
                         $query = 'UPDATE #__virtuemart_payment_plg_sveainvoice
                                 SET `svea_invoice_id` = "' . $svea->invoiceId . '"' .
                                 'WHERE `order_number` = "' . $paymentTable->order_number.'"';
 
                         $db->setQuery($query);
                         $db->query();
-
+                         return TRUE;
                      } else {
                         vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
                          return FALSE;
                      }
                 }
-                return TRUE;
             }
 
 
