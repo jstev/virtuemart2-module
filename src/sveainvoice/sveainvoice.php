@@ -989,11 +989,10 @@
                                             ->deliverInvoiceOrder()
                                                 ->doRequest();
                     } catch (Exception $e) {
-                        vmError ($e->getMessage (), $e->getMessage ());
+                        vmError ('Svea error: '.$e->getMessage () . ' Order was not delivered.','Svea error: '.$e->getMessage () . ' Order was not delivered.');
                         return FALSE;
                     }
                      if($svea->accepted == 1){
-                        $order = $modelOrder->getOrder ($virtuemart_order_id);
                         $query = 'UPDATE #__virtuemart_payment_plg_sveainvoice
                                 SET `svea_invoice_id` = "' . $svea->invoiceId . '"' .
                                 'WHERE `order_number` = "' . $paymentTable->order_number.'"';
@@ -1002,8 +1001,34 @@
                         $db->query();
                          return TRUE;
                      } else {
-                        vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
+                        vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
                          return FALSE;
+                     }
+                //Cancel order
+                } elseif ($_formData->order_status == $method->status_denied) {
+                    try {
+                        $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                        $svea = WebPayAdmin::cancelOrder($sveaConfig)
+                                ->setOrderId($paymentTable->svea_order_id)
+                                ->setCountryCode($country)
+                                ->cancelInvoiceOrder()
+                                    ->doRequest();
+
+                    } catch (Exception $e) {
+                        vmError ('Svea error: '.$e->getMessage () . ' Order was not cancelled.', 'Svea error: '.$e->getMessage () . ' Order was not cancelled.');
+                        return FALSE;
+                    }
+                     if($svea->accepted == 1){
+                        $query = 'UPDATE #__virtuemart_payment_plg_sveainvoice
+                                SET `svea_invoice_id` = "' . $svea->invoiceId . '"' .
+                                'WHERE `order_number` = "' . $paymentTable->order_number.'"';
+
+                        $db->setQuery($query);
+                        $db->query();
+                         return TRUE;
+                     } else {
+                        vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
+                        return FALSE;
                      }
                 }
             }
