@@ -1091,7 +1091,26 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
                     return FALSE;
                  }
-            }
+            } elseif ($_formData->order_status == $method->status_denied) {
+                    try {
+                        $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+                        $svea = WebPayAdmin::cancelOrder($sveaConfig)
+                                ->setOrderId($paymentTable->svea_order_id)
+                                ->setCountryCode($country)
+                                ->cancelPaymentPlanOrder()
+                                    ->doRequest();
+
+                    } catch (Exception $e) {
+                        vmError ('Svea error: '.$e->getMessage () . ' Order was not cancelled.', 'Svea error: '.$e->getMessage () . ' Order was not cancelled.');
+                        return FALSE;
+                    }
+                     if($svea->accepted == 1){
+                        return TRUE;
+                     } else {
+                        vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
+                        return FALSE;
+                     }
+                }
 	}
 
 	/**

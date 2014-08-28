@@ -999,10 +999,10 @@
 
                         $db->setQuery($query);
                         $db->query();
-                         return TRUE;
+                        return TRUE;
                      } else {
                         vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
-                         return FALSE;
+                        return FALSE;
                      }
                 //Cancel order
                 } elseif ($_formData->order_status == $method->status_denied) {
@@ -1019,13 +1019,7 @@
                         return FALSE;
                     }
                      if($svea->accepted == 1){
-                        $query = 'UPDATE #__virtuemart_payment_plg_sveainvoice
-                                SET `svea_invoice_id` = "' . $svea->invoiceId . '"' .
-                                'WHERE `order_number` = "' . $paymentTable->order_number.'"';
-
-                        $db->setQuery($query);
-                        $db->query();
-                         return TRUE;
+                        return TRUE;
                      } else {
                         vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
                         return FALSE;
