@@ -575,9 +575,64 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 * @return mixed, True on success, false on failures (the rest of the save-process will be
 	 * skipped!), or null when this method is not actived.
 	 * @author Oscar van Eijk
-	 *
+	 */
 	public function plgVmOnUpdateOrderPayment(  $_formData) {
-	return null;
+            if (!$this->selectedThisByMethodId ($_formData->virtuemart_paymentmethod_id)) {
+                return NULL; // Another method was selected, do nothing
+            }
+            if (!($method = $this->getVmPluginMethod ($_formData->virtuemart_paymentmethod_id))) {
+                return NULL; // Another method was selected, do nothing
+            }
+            if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
+                return FALSE;
+            }
+            //get countrycode
+            $q = 'SELECT `virtuemart_country_id` FROM #__virtuemart_order_userinfos  WHERE virtuemart_order_id=' . $_formData->virtuemart_order_id;
+            $db = JFactory::getDBO();
+            $db->setQuery($q);
+            $country_id = $db->loadResult();
+            $country = ShopFunctions::getCountryByID($country_id, 'country_2_code');
+            $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+            //Credit order
+            if ($_formData->order_status == 'R') {
+                try {
+                    $svea_query = WebPayAdmin::queryOrder($sveaConfig)
+                                 ->setOrderId($paymentTable->svea_transaction_id)
+                                 ->setCountryCode($country)
+                                 ->queryCardOrder()
+                                     ->doRequest();
+                 } catch (Exception $e) {
+                    vmError ('Svea error: '.$e->getMessage () . ' Order was not refunded.', 'Svea error: '.$e->getMessage () . ' Order was not refunded.');
+                    return FALSE;
+                }
+                if($svea_query->accepted == FALSE){
+                    vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.', 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.');
+                    return FALSE;
+                }
+                $row_numbers = array();
+                foreach ($svea_query->numberedOrderRows as $value) {
+                    $row_numbers[] = $value->rowNumber;
+                }
+                try {
+                    $svea = WebPayAdmin::creditOrderRows($sveaConfig)
+                            ->setOrderId($paymentTable->svea_transaction_id)//transaction id
+                            ->setCountryCode($country)
+                            ->setRowsToCredit($row_numbers)
+                            ->addNumberedOrderRows($svea_query->numberedOrderRows)
+                             ->creditDirectBankOrderRows()
+                                ->doRequest();
+                } catch (Exception $e) {
+                    vmError ('Svea error: '.$e->getMessage () . ' Order was not refunded.', 'Svea error: '.$e->getMessage () . ' Order was not refunded.');
+                    return FALSE;
+                }
+                if($svea->accepted == TRUE) {
+                    return TRUE;
+                }  else {
+                    vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.', 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.');
+                    return FALSE;
+
+                }
+            }
 	}
 
 	/**

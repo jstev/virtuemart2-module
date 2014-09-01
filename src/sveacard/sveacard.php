@@ -623,7 +623,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                     vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
                     return FALSE;
                  }
-            //Refund
+            //Refund order
             } elseif ($_formData->order_status == 'R') {
                 try {
                     $svea_query = WebPayAdmin::queryOrder($sveaConfig)
