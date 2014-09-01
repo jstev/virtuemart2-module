@@ -584,10 +584,10 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 $db->setQuery($q);
                 $country_id = $db->loadResult();
                 $country = ShopFunctions::getCountryByID($country_id, 'country_2_code');
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             //Deliver order
             if($_formData->order_status == $method->status_shipped){
                 try {
-                    $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                     $svea = WebPay::deliverOrder($sveaConfig)
                                 ->setOrderId($paymentTable->svea_transaction_id)
                                 ->setOrderDate(date('c'))
@@ -607,7 +607,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             //Cancel order
             } elseif ($_formData->order_status == $method->status_denied) {
                 try {
-                    $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                     $svea = WebPayAdmin::cancelOrder($sveaConfig)
                             ->setOrderId($paymentTable->svea_transaction_id)
                             ->setCountryCode($country)
@@ -624,6 +623,45 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                     vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
                     return FALSE;
                  }
+            //Refund
+            } elseif ($_formData->order_status == 'R') {
+                try {
+                    $svea_query = WebPayAdmin::queryOrder($sveaConfig)
+                                 ->setOrderId($paymentTable->svea_transaction_id)
+                                 ->setCountryCode($country)
+                                 ->queryCardOrder()
+                                     ->doRequest();
+                 } catch (Exception $e) {
+                    vmError ('Svea error: '.$e->getMessage () . ' Order was not refunded.', 'Svea error: '.$e->getMessage () . ' Order was not refunded.');
+                    return FALSE;
+                }
+                if($svea_query->accepted == FALSE){
+                    vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.', 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.');
+                    return FALSE;
+                }
+                $row_numbers = array();
+                foreach ($svea_query->numberedOrderRows as $value) {
+                    $row_numbers[] = $value->rowNumber;
+                }
+                try {
+                    $svea = WebPayAdmin::creditOrderRows($sveaConfig)
+                            ->setOrderId($paymentTable->svea_transaction_id)//transaction id
+                            ->setCountryCode($country)
+                            ->setRowsToCredit($row_numbers)
+                            ->addNumberedOrderRows($svea_query->numberedOrderRows)
+                             ->creditCardOrderRows()
+                                ->doRequest();
+                } catch (Exception $e) {
+                    vmError ('Svea error: '.$e->getMessage () . ' Order was not refunded.', 'Svea error: '.$e->getMessage () . ' Order was not refunded.');
+                    return FALSE;
+                }
+                if($svea->accepted == TRUE) {
+                    return TRUE;
+                }  else {
+                    vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.', 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.');
+                    return FALSE;
+
+                }
             }
 	}
 
