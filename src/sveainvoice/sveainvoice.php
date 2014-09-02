@@ -190,7 +190,7 @@
                 $svea = SveaHelper::formatInvoiceFee($svea,$order,$method->payment_currency);
                 //set shipping
                 $svea = SveaHelper::formatShippingRows($svea,$order,$method->payment_currency);
-                //add coupons TODO: kolla checkbetween to rates i opencart
+                //add coupons
                 $svea = SveaHelper::formatCoupon($svea,$order,$method->payment_currency);
                 $countryId = $order['details']['BT']->virtuemart_country_id;
                 if(isset($countryId) == FALSE){
@@ -228,8 +228,10 @@
 
                     $this->storePSPluginInternalData($dbValues);
                     //Overwrite billto address
-                    SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                //    SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
                     //Overwrite shipto address
+                   var_dump($cart->STsameAsBT);die;
+
                     if($method->shipping_billing == '1'){
                         SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
                     }
@@ -276,7 +278,7 @@
                         $deliverObj = SveaHelper::formatInvoiceFee($deliverObj,$order,$method->payment_currency);
                          //add shipping
                         $deliverObj = SveaHelper::formatShippingRows($deliverObj,$order,$method->payment_currency);
-                         //add coupons TODO: kolla checkbetween to rates i opencart
+                         //add coupons
                         $deliverObj = SveaHelper::formatCoupon($deliverObj,$order,$method->payment_currency);
 
                         try {
@@ -913,23 +915,28 @@
                 $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
 
                 $method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id);
-                //ship to
-                if(isset($method) && $method->shipping_billing == '1'){
+                //ship to if module setup says so if Vm-customer setting not already will do that for us
+                if(isset($method) && $method->shipping_billing == '1' && $cart->STsameAsBT == 0){
                     if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
 
-                if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
-                {
-                    $cart->ST['company'] = $session->get('svea_fullName', !empty($cart->ST['company']) ? $cart->ST['company'] : "" );
-                }
+                    if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
+                    {
+                        $cart->ST['company'] = $session->get('svea_fullName', !empty($cart->ST['company']) ? $cart->ST['company'] : "" );
+                    }
+                    $countryId = "";
+                    if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
+                    {
+                        $countryId = $method->countries[0];
+                    }
 
-                $cart->ST['first_name'] = $session->get('svea_firstName', !empty($cart->ST['first_name']) ? $cart->ST['first_name'] : "" );
-                $cart->ST['last_name'] = $session->get('svea_lastName', !empty($cart->ST['last_name']) ? $cart->ST['last_name'] : "" );
-                $cart->ST['address_1'] = $session->get('svea_street', !empty($cart->ST['address_1']) ? $cart->ST['address_1'] : "" );
-                $cart->ST['address_2'] = $session->get('svea_address_2', !empty($cart->ST['address_2']) ? $cart->ST['address_2'] : "");
-                $cart->ST['zip'] = $session->get('svea_zipCode', !empty($cart->ST['zip']) ? $cart->ST['zip'] : "");
-                $cart->ST['city'] = $session->get('svea_locality', !empty($cart->ST['city']) ? $cart->ST['city'] : "");
-                $cart->ST['virtuemart_country_id'] =
-                $session->get('svea_virtuemart_country_id', !empty($cart->ST['virtuemart_country_id']) ? $cart->ST['virtuemart_country_id'] : "");
+                    $cart->ST['first_name'] = $session->get('svea_firstName', !empty($cart->ST['first_name']) ? $cart->ST['first_name'] : "" );
+                    $cart->ST['last_name'] = $session->get('svea_lastName', !empty($cart->ST['last_name']) ? $cart->ST['last_name'] : "" );
+                    $cart->ST['address_1'] = $session->get('svea_street', !empty($cart->ST['address_1']) ? $cart->ST['address_1'] : "" );
+                    $cart->ST['address_2'] = $session->get('svea_address_2', !empty($cart->ST['address_2']) ? $cart->ST['address_2'] : "");
+                    $cart->ST['zip'] = $session->get('svea_zipCode', !empty($cart->ST['zip']) ? $cart->ST['zip'] : "");
+                    $cart->ST['city'] = $session->get('svea_locality', !empty($cart->ST['city']) ? $cart->ST['city'] : "");
+                    $cart->ST['virtuemart_country_id'] =
+                    $session->get('svea_virtuemart_country_id', !empty($cart->ST['virtuemart_country_id']) ? $cart->ST['virtuemart_country_id'] : $countryId);
                 }
                 // keep other cart attributes, if set. also, vm does own validation on checkout.
                 return true;

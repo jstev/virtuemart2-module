@@ -992,15 +992,20 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $cart->BT['virtuemart_country_id'] =
                 $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
 
+            $method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id);
              //ship to
-            if(isset($method) && $method->shipping_billing == '1'){
+                if(isset($method) && $method->shipping_billing == '1' && $cart->STsameAsBT == 0){
                 if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
 
                 if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
                 {
                     $cart->ST['company'] = $session->get('svea_fullName', !empty($cart->ST['company']) ? $cart->ST['company'] : "" );
                 }
-
+                $countryId = "";
+                if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
+                {
+                    $countryId = $method->countries[0];
+                }
                 $cart->ST['first_name'] = $session->get('svea_firstName', !empty($cart->ST['first_name']) ? $cart->ST['first_name'] : "" );
                 $cart->ST['last_name'] = $session->get('svea_lastName', !empty($cart->ST['last_name']) ? $cart->ST['last_name'] : "" );
                 $cart->ST['address_1'] = $session->get('svea_street', !empty($cart->ST['address_1']) ? $cart->ST['address_1'] : "" );
@@ -1008,7 +1013,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $cart->ST['zip'] = $session->get('svea_zipCode', !empty($cart->ST['zip']) ? $cart->ST['zip'] : "");
                 $cart->ST['city'] = $session->get('svea_locality', !empty($cart->ST['city']) ? $cart->ST['city'] : "");
                 $cart->ST['virtuemart_country_id'] =
-                $session->get('svea_virtuemart_country_id', !empty($cart->ST['virtuemart_country_id']) ? $cart->ST['virtuemart_country_id'] : "");
+                $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : $countryId);
             }
             // keep other cart attributes, if set. also, vm does own validation on checkout.
             return true;

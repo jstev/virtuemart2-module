@@ -207,13 +207,6 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             $cart->_confirmDone = FALSE;
             $cart->_dataValidated = FALSE;
 
-//            $modelOrder = VmModel::getModel ('orders');
-//
-//            $order['order_status'] = $method->status_denied;//sets to cancel until returned to shop, cause we don't want to save a cancelled order
-//            $order['customer_notified'] = 0;
-//            $order['comments'] = '';
-//            $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-//
             JRequest::setVar ('html', $html);
 
 	}
