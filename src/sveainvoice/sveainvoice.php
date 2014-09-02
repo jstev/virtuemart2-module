@@ -459,9 +459,14 @@
 		$currency_code_3 = $db->loadResult();
                 $currency_decimals = $currency_code_3 == 'EUR' ? 1 : 0;
                 $display = SveaHelper::getCurrencySymbols($method->payment_currency);
-
+                if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
+                {
+                    $country = ShopFunctions::getCountryByID($method->countries[0],'country_2_code');
+                } else {
+                    return;
+                }
                 if($price >= $method->min_amount_product ){
-                    $lowest_to_pay = $this->svea_get_invoice_lowest("SE");//TODO:hämta countrycode med id:$method->countries
+                    $lowest_to_pay = $this->svea_get_invoice_lowest($country);//TODO:hämta countrycode med id:$method->countries
                     $prices = array();
                     $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">'.
                          JText::sprintf("VMPAYMENT_INVOICE").'</h4>';
