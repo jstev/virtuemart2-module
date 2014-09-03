@@ -225,7 +225,7 @@
                     $dbValues['svea_order_id']               = $svea->sveaOrderId;
                     $dbValues['svea_approved_amount']        = $svea->amount;
                     $dbValues['svea_expiration_date']        = $svea->expirationDate;
-                    
+
                     //Print html on thank you page. Will also say "thank you for your order!"
                     $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
                     $html =  '<img src="'.$logoImg.'" /><br /><br />';
@@ -869,6 +869,14 @@
              */
             private function populateBillToFromGetAddressesData( VirtueMartCart $cart,$session )
             {
+                if (!($method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id))) {
+                    return NULL; // Another method was selected, do nothing
+                }
+                $countryId = "";
+                if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
+                {
+                    $countryId = $method->countries[0];
+                }
                 //$session = JFactory::getSession();
                 if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
 
@@ -884,9 +892,8 @@
                 $cart->BT['zip'] = $session->get('svea_zipCode', !empty($cart->BT['zip']) ? $cart->BT['zip'] : "");
                 $cart->BT['city'] = $session->get('svea_locality', !empty($cart->BT['city']) ? $cart->BT['city'] : "");
                 $cart->BT['virtuemart_country_id'] =
-                $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
+                $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : $countryId);
 
-                $method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id);
                 //ship to if module setup says so if Vm-customer setting not already will do that for us
                 if(isset($method) && $method->shipping_billing == '1' && $cart->STsameAsBT == 0){
                     if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
@@ -895,11 +902,7 @@
                     {
                         $cart->ST['company'] = $session->get('svea_fullName', !empty($cart->ST['company']) ? $cart->ST['company'] : "" );
                     }
-                    $countryId = "";
-                    if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
-                    {
-                        $countryId = $method->countries[0];
-                    }
+
 
                     $cart->ST['first_name'] = $session->get('svea_firstName', !empty($cart->ST['first_name']) ? $cart->ST['first_name'] : "" );
                     $cart->ST['last_name'] = $session->get('svea_lastName', !empty($cart->ST['last_name']) ? $cart->ST['last_name'] : "" );

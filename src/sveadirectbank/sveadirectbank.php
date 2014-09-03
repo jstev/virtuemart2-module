@@ -273,10 +273,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 	 */
 	protected function checkConditions($cart, $method, $cart_prices) {
             $returnValue = FALSE;
-                // check valid country
-            $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
-            if( empty($address) )   // i.e. user not logged in --
+            if( empty($cart->BT) )   // i.e. user not logged in --
             {
                 $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
                 //$returnValue = false;       // need billto address for this payment method
