@@ -225,17 +225,7 @@
                     $dbValues['svea_order_id']               = $svea->sveaOrderId;
                     $dbValues['svea_approved_amount']        = $svea->amount;
                     $dbValues['svea_expiration_date']        = $svea->expirationDate;
-
-                    $this->storePSPluginInternalData($dbValues);
-                    //Overwrite billto address
-                //    SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
-                    //Overwrite shipto address
-                   var_dump($cart->STsameAsBT);die;
-
-                    if($method->shipping_billing == '1'){
-                        SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
-                    }
-
+                    
                     //Print html on thank you page. Will also say "thank you for your order!"
                     $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
                     $html =  '<img src="'.$logoImg.'" /><br /><br />';
@@ -263,51 +253,28 @@
 
                     $html .= '</div>' . "\n";
                     $modelOrder = VmModel::getModel ('orders');
-
                     $order['order_status'] = $method->status_success;
-
-                    $order['comments'] = 'Order created at Svea. Svea orderId: '.$svea->sveaOrderId;
-
-                    // autodeliver order if set
-                    if($method->autodeliver == TRUE){
-                        // reconstruct order rows, in autodeliver, so == original order rows
-                        $deliverObj = WebPay::deliverOrder($sveaConfig);
-                         //order items
-                        $deliverObj = SveaHelper::formatOrderRows($deliverObj, $order,$method->payment_currency);
-                        //invoice fee
-                        $deliverObj = SveaHelper::formatInvoiceFee($deliverObj,$order,$method->payment_currency);
-                         //add shipping
-                        $deliverObj = SveaHelper::formatShippingRows($deliverObj,$order,$method->payment_currency);
-                         //add coupons
-                        $deliverObj = SveaHelper::formatCoupon($deliverObj,$order,$method->payment_currency);
-
-                        try {
-                            $deliverObj = $deliverObj->setCountryCode($countryCode)
-                                                ->setOrderId($svea->sveaOrderId)
-                                                ->setInvoiceDistributionType($method->distributiontype)
-                                                ->deliverInvoiceOrder()
-                                                    ->doRequest();
-                        } catch (Exception $e) {
-                            $html = SveaHelper::errorResponse('',$e->getMessage ());
-                            vmError ($e->getMessage (), $e->getMessage ());
-                            return NULL;
-                        }
-
-                        if($deliverObj->accepted == 1){
-                            $order['comments'] = 'Order delivered at Svea. Svea orderId: '.$svea->sveaOrderId;
-                            $order['order_status'] = $method->status_shipped;
-                        }
+                    $order['comments'] = 'Order Created at Svea. Svea orderId: '.$svea->sveaOrderId;
+                    // autodeliver order if set. Will trigger plgVmOnUpdateOrderPayment()
+                    if($method->autodeliver == '1'){
+                        $order['order_status'] = $method->status_shipped;
                     }
+                    $this->storePSPluginInternalData($dbValues);
                     $order['customer_notified'] = 1;
                     $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-                }  else {
 
+                     //Overwrite billto address
+                    SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                    //Overwrite shipto address but not if Vm will do it for us
+                    if($method->shipping_billing == '1' && $cart->STsameAsBT == 0){
+                        SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                    }
+                }  else {
                     $order['customer_notified'] = 0;
                     $order['order_status'] = $method->status_denied;
                     $html = SveaHelper::errorResponse($svea->resultcode,$svea->errormessage);
                     $order['comments'] = $html;
                 }
-
                 //We delete the old stuff
                 $cart->emptyCart ();
                 JRequest::setVar ('html', $html);

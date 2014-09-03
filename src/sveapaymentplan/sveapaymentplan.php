@@ -189,13 +189,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $dbValues['svea_approved_amount']        = $svea->amount;
                 $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
-		$this->storePSPluginInternalData($dbValues);
-                //Overwrite billto address
-                SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
-                //Overwrite shipto address
-                if($method->shipping_billing == '1'){
-                    SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
-                }
                   //Print html on thank you page. Will also say "thank you for your order!"
                  $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
 
@@ -228,27 +221,20 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
 		$order['comments'] = 'Order created at Svea. Svea orderId: '.$svea->sveaOrderId;
 
-                // autodeliver order if set
-                if($method->autodeliver == TRUE){
-                    try {
-                        $deliverObj = WebPay::deliverOrder($sveaConfig)
-                                            ->setCountryCode($countryCode)
-                                            ->setOrderId($svea->sveaOrderId)
-                                            ->deliverPaymentPlanOrder()
-                                                ->doRequest();
-                    } catch (Exception $e) {
-                        $html = SveaHelper::errorResponse('',$e->getMessage ());
-                        vmError ($e->getMessage (), $e->getMessage ());
-                        return NULL;
-                    }
-
-                    if($deliverObj->accepted == 1){
-                        $order['comments'] = 'Order delivered at Svea. Svea orderId: '.$svea->sveaOrderId;
-                        $order['order_status'] = $method->status_shipped;
-                    }
+                // autodeliver order if set. Will trigger plgVmOnUpdateOrderPayment()
+                if($method->autodeliver == '1'){
+                    $order['order_status'] = $method->status_shipped;
                 }
+                $this->storePSPluginInternalData($dbValues);
                 $order['customer_notified'] = 1;
                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
+
+                  //Overwrite billto address
+                SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                   //Overwrite shipto address but not if Vm will do it for us
+                if($method->shipping_billing == '1' && $cart->STsameAsBT == 0){
+                    SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
+                }
             }
             else {
                 $order['customer_notified'] = 0;
@@ -542,8 +528,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     return FALSE;
                 }
                 foreach ($this->methods as $method) {
-                 if($method->product_display == "1"){
-                  $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
+                    if($method->product_display == "1"){
+                    $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
                             `monthlyAnnuityFactor`,`initialFee`, `notificationFee`,`interestRatePercent`,
                             `numberOfInterestFreeMonths`,`numberOfPaymentFreeMonths`,`fromAmount`,`toAmount`
                         FROM `#__svea_params_table`
@@ -993,7 +979,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : "");
 
             $method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id);
-             //ship to
+               //Overwrite shipto address but not if Vm will do it for us
                 if(isset($method) && $method->shipping_billing == '1' && $cart->STsameAsBT == 0){
                 if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
 
@@ -1068,10 +1054,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $db->setQuery($q);
                 $country_id = $db->loadResult();
                 $country = ShopFunctions::getCountryByID($country_id, 'country_2_code');
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
             //Deliver order
             if($_formData->order_status == $method->status_shipped){
                 try {
-                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
                 $svea = WebPay::deliverOrder($sveaConfig)
                                 ->setOrderId($paymentTable->svea_order_id)
                                 ->setOrderDate(date('c'))
@@ -1096,6 +1082,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
                     return FALSE;
                  }
+            //Cancel order
             } elseif ($_formData->order_status == $method->status_denied) {
                     try {
                         $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
