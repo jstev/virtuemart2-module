@@ -1,7 +1,9 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
-##Version 2.3.1
-This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments. This module is updated for the latest payment systems at SveaWebPay.
+##Version 2.4.0
+This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments.
+Admin functions such as Deliver, Confirm, Credit and Cancel orders is implemented into Virtuemarts admin functions.
+This module is updated for the latest payment systems at SveaWebPay.
 
 If you experience technical issues with this module, or you have feature suggestions, please submit an issue on the Github issue list.
 
@@ -15,7 +17,8 @@ These instructions detail how to install the various SveaWebPay payment methods 
 
 We assume that you have a working installation of Joomla and Virtuemart 2 to begin with.
 
-Note: if you have an older version of the module than 2.0.0, please make sure to uninstall the old module before installing the new module.
+Note: if you are upgrading from an older version of the module, make sure to delete the paymentmethod before installing the new module.
+You then need to create a new paymentmethod and refill in the form with your credentials.
 
 ### Installing the SveaWebPay Payment Methods in VirtueMart 2
 
@@ -181,6 +184,22 @@ Install one or more instances of the SveaWebPay Direct Bank payment method. The 
 
 * Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
 * Status for successful payment -- the virtuemart status given to an order after it has been accepted.
+
+## Administrating orders
+The module is integrated with the Virtuemart admin functions. This means that when you change a status on an order and the status matches the status for an action,
+a request will be sent to Svea and perform the action. The actions available per paymentmethod is:
+
+| Method        | Deliver order | Cancel order  |   Credit order    | Auto Deliver order  |
+|---------------|:-------------:|:-------------:|:-----------------:|:-------------------:|
+| Invoice       |   *           |   *           |   *               |   *                 |
+| Paymentplan   |   *           |   *           |                   |   *                 |
+| Card          |   *           |   *           |   *               |                     |
+| Direct bank   |               |               |   *               |                     |
+
+The Virtuemart _Cancel_ and _Refund_ status will perform corresponding _cancel/annul_ and _Credit order_ in Svea systems. To _Deliver/Confirm_
+to Svea systmes, the status first have to set in the module configuration.
+
+![Deliver order status configuration] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Deliver_status_configuration.PNG "SveaWebPay Order status Configuration")
 
 ## Additional VirtueMart configurations
 
