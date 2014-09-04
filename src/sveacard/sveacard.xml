@@ -6,7 +6,7 @@
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
-    <version>2.3.1</version>
+    <version>2.4.0</version>
     <description>SveaWebPay Card payment plugin for Virtuemart 2</description>
     <files>
 	<filename plugin="sveacard">sveacard.php</filename>
@@ -43,10 +43,10 @@
         <param name="tax_id" type="hidden" default="" scope="com_virtuemart"  label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
         <param name="status_pending" type="hidden" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
         <param name="status_denied" type="hidden" scope="com_virtuemart" default="X" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
-        <param name="status_shipped" type="hidden" scope="com_virtuemart" default="S" label="VMPAYMENT_SVEA_STATUS_DELIVERED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
 
         <param type="spacer" default="" level="level1"/>
         <param name="status_success" type="vmorderstate" scope="com_virtuemart" default="P" label="VMPAYMENT_SVEA_STATUS_ACCEPTED" description="VMPAYMENT_SVEA_STATUS_ACCEPTED_EXPLAIN" />
+        <param name="status_shipped" type="vmorderstate" scope="com_virtuemart" default="C" label="VMPAYMENT_SVEA_STATUS_CONFIRMED" description="VMPAYMENT_SVEA_STATUS_DELIVERED_EXPLAIN" />
         <param type="spacer" default="" level="level1"/>
     </params>
 </install>

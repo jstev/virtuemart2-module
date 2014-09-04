@@ -55,7 +55,41 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	 * @author Val?rie Isaksen
 	 */
 	public function getVmPluginCreateTableSQL() {
-		return $this->createTableSQL('Payment Svea Card Table');
+            //is there already a svea table for this payment?
+            $q = 'SHOW TABLES LIKE "%sveacard%"';
+            $db = JFactory::getDBO();
+            $db->setQuery($q);
+            $table_exists = $db->loadResult();
+            //if there is add columns
+            if(is_string($table_exists) && strpos($table_exists, 'sveacard') != FALSE){
+                //get all columns and check for the new ones
+                $q = 'SHOW COLUMNS FROM '.$table_exists;
+                $db->setQuery($q);
+                $columns = $db->loadAssocList();
+               $cost_per_transaction = FALSE;
+               $tax_id = FALSE;
+               $svea_transaction_id = FALSE;
+                foreach ($columns as $column) {
+                    if(in_array( 'cost_per_transaction',$column)){
+                        $cost_per_transaction = TRUE;
+                    }  elseif (in_array( 'tax_id',$column)) {
+                        $tax_id = TRUE;
+                    }  elseif (in_array( 'svea_transaction_id',$column)) {
+                        $svea_transaction_id = TRUE;
+                    }
+                }
+                $q1 = $cost_per_transaction ? '' : ' ADD cost_per_transaction DECIMAL(10,2)';
+                $q2 = $tax_id ? '' : 'ADD tax_id SMALLINT(1)';
+                $q3 = $svea_transaction_id ? '' : 'ADD svea_transaction_id VARCHAR(64)';
+
+                $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveacard " .
+                        $q1 . ($q1 != '' ? ',' : '') .
+                        $q2 . ($q2 != '' ? ',' : '') .
+                        $q3;
+                $db->setQuery($query);
+                $db->query();
+            }
+            return $this->createTableSQL('Payment Svea Card Table');
 	}
 
 	/**
@@ -70,7 +104,11 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 			'virtuemart_paymentmethod_id' => 'mediumint(1) UNSIGNED',
 			'payment_name'                => 'varchar(5000)',
 			'payment_order_total'         => 'decimal(15,5) NOT NULL DEFAULT \'0.00000\'',
-			'payment_currency'            => 'char(3)'
+			'payment_currency'            => 'char(3)',
+                        'cost_per_transaction'          => 'decimal(10,2)',
+                        'tax_id'                        => 'smallint(1)',
+
+			'svea_transaction_id'         => 'varchar(64)'
 		);
 
 		return $SQLfields;
@@ -93,7 +131,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		$lang     = JFactory::getLanguage();
 		$filename = 'com_virtuemart';
 		$lang->load($filename, JPATH_ADMINISTRATOR);
-		$vendorId = 0;
 		$this->getPaymentCurrency($method);
 
                 $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
@@ -173,13 +210,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $cart->_confirmDone = FALSE;
             $cart->_dataValidated = FALSE;
 
-            $modelOrder = VmModel::getModel ('orders');
-
-            $order['order_status'] = $method->status_denied;//sets to cancel until returned to shop, cause we don't want to save a cancelled order
-            $order['customer_notified'] = 0;
-            $order['comments'] = '';
-            $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
-
             JRequest::setVar ('html', $html);
 
 	}
@@ -227,6 +257,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		$html .= $this->getHtmlHeaderBE();
                 $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
                 $html .= '<tr class="row2"><td>Amount</td><td align="left">'. $paymentTable->payment_order_total.'</td></tr>';
+                $html .= '<tr class="row2"><td>Transaction id</td><td align="left">'. $paymentTable->svea_transaction_id.'</td></tr>';
 
 		$html .= '</table>' . "\n";
 		return $html;
@@ -248,15 +279,14 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	protected function checkConditions($cart, $method, $cart_prices) {
                 $returnValue = FALSE;
                 // check valid country
-                $address = (($cart->ST == 0) ? $cart->BT : $cart->ST);  // use billing address unless shipping defined
 
-                if( empty($address) )   // i.e. user not logged in -- card payment may still be ok to select (i.e. in case of non-physical products)
+                if( empty($cart->BT) )   // i.e. user not logged in -- card payment may still be ok to select (i.e. in case of non-physical products)
                 {
                     $returnValue = VmConfig::get('oncheckout_only_registered',0) ? false : true; // return true iff we allow non-registered users to checkout
                 }
                 else    // we show payment method if registered customer billto address is in configured list of payment method countries
                 {
-                    $returnValue = $this->addressInAcceptedCountry( $address, $method->countries );
+                    $returnValue = $this->addressInAcceptedCountry( $cart->BT, $method->countries );
                 }
                  //Check min and max amount. Copied from standard payment
                 // We come from the calculator, the $cart->pricesUnformatted does not exist yet
@@ -279,15 +309,15 @@ class plgVmPaymentSveacard extends vmPSPlugin {
          */
         function addressInAcceptedCountry( $address, $countries )
         {
+            //is there not a billto country, set to 0
+            if (strlen($address['virtuemart_country_id'] == 0)) {
+               $address['virtuemart_country_id'] = 0;
+            }
             // sanity check on address
             if (!is_array($address)) {
                 $address = array();
                 $address['virtuemart_country_id'] = 0;
             }
-            if (!isset($address['virtuemart_country_id'])) {
-                $address['virtuemart_country_id'] = 0;
-            }
-
             // sanity check on countries
             $countriesArray = array();
             if( !empty($countries) ) {
@@ -297,7 +327,6 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                         $countriesArray = $countries;
                 }
             }
-
             return (count($countriesArray) == 0 || in_array($address['virtuemart_country_id'], $countriesArray)); // ==0 means all countries
         }
 
@@ -530,9 +559,103 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 	 * @return mixed, True on success, false on failures (the rest of the save-process will be
 	 * skipped!), or null when this method is not actived.
 	 * @author Oscar van Eijk
-	 *
+	 */
 	public function plgVmOnUpdateOrderPayment(  $_formData) {
-	return null;
+            if (!$this->selectedThisByMethodId ($_formData->virtuemart_paymentmethod_id)) {
+			return NULL; // Another method was selected, do nothing
+            }
+            if (!($method = $this->getVmPluginMethod ($_formData->virtuemart_paymentmethod_id))) {
+                    return NULL; // Another method was selected, do nothing
+            }
+
+            if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
+                        return FALSE;
+            }
+            //get countrycode
+                $q = 'SELECT `virtuemart_country_id` FROM #__virtuemart_order_userinfos  WHERE virtuemart_order_id=' . $_formData->virtuemart_order_id;
+                $db = JFactory::getDBO();
+                $db->setQuery($q);
+                $country_id = $db->loadResult();
+                $country = ShopFunctions::getCountryByID($country_id, 'country_2_code');
+                $sveaConfig = $method->testmode == TRUE ? new SveaVmConfigurationProviderTest($method) : new SveaVmConfigurationProviderProd($method);
+            //Deliver order
+            if($_formData->order_status == $method->status_shipped){
+                try {
+                    $svea = WebPay::deliverOrder($sveaConfig)
+                                ->setOrderId($paymentTable->svea_transaction_id)
+                                ->setOrderDate(date('c'))
+                                ->setCountryCode($country)
+                                        ->deliverCardOrder()
+                                            ->doRequest();
+                } catch (Exception $e) {
+                    vmError ($e->getMessage (), $e->getMessage ());
+                    return FALSE;
+                }
+                 if($svea->accepted == 1){
+                       return TRUE;
+                 } else {
+                    vmError ('Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error '. $svea->resultcode . ' : ' .$svea->errormessage);
+                     return FALSE;
+                 }
+            //Cancel order
+            } elseif ($_formData->order_status == $method->status_denied) {
+                try {
+                    $svea = WebPayAdmin::cancelOrder($sveaConfig)
+                            ->setOrderId($paymentTable->svea_transaction_id)
+                            ->setCountryCode($country)
+                            ->cancelCardOrder()
+                                ->doRequest();
+
+                } catch (Exception $e) {
+                    vmError ('Svea error: '.$e->getMessage () . ' Order was not cancelled.', 'Svea error: '.$e->getMessage () . ' Order was not cancelled.');
+                    return FALSE;
+                }
+                 if($svea->accepted == 1){
+                    return TRUE;
+                 } else {
+                    vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
+                    return FALSE;
+                 }
+            //Refund order
+            } elseif ($_formData->order_status == 'R') {
+                try {
+                    $svea_query = WebPayAdmin::queryOrder($sveaConfig)
+                                 ->setOrderId($paymentTable->svea_transaction_id)
+                                 ->setCountryCode($country)
+                                 ->queryCardOrder()
+                                     ->doRequest();
+                 } catch (Exception $e) {
+                    vmError ('Svea error: '.$e->getMessage () . ' Order was not refunded.', 'Svea error: '.$e->getMessage () . ' Order was not refunded.');
+                    return FALSE;
+                }
+                if($svea_query->accepted == FALSE){
+                    vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.', 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.');
+                    return FALSE;
+                }
+                $row_numbers = array();
+                foreach ($svea_query->numberedOrderRows as $value) {
+                    $row_numbers[] = $value->rowNumber;
+                }
+                try {
+                    $svea = WebPayAdmin::creditOrderRows($sveaConfig)
+                            ->setOrderId($paymentTable->svea_transaction_id)//transaction id
+                            ->setCountryCode($country)
+                            ->setRowsToCredit($row_numbers)
+                            ->addNumberedOrderRows($svea_query->numberedOrderRows)
+                             ->creditCardOrderRows()
+                                ->doRequest();
+                } catch (Exception $e) {
+                    vmError ('Svea error: '.$e->getMessage () . ' Order was not refunded.', 'Svea error: '.$e->getMessage () . ' Order was not refunded.');
+                    return FALSE;
+                }
+                if($svea->accepted == TRUE) {
+                    return TRUE;
+                }  else {
+                    vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.', 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.');
+                    return FALSE;
+
+                }
+            }
 	}
 
 	/**
@@ -624,6 +747,9 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             if (!class_exists ('VirtueMartModelOrders')) {
 		require(JPATH_VM_ADMINISTRATOR . DS . 'models' . DS . 'orders.php');
             }
+            if (!class_exists ('CurrencyDisplay')) {
+			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
+            }
             $modelOrder = VmModel::getModel ('orders');
             $order_number = JRequest::getString ('on', '');
 
@@ -637,6 +763,13 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $resp = new SveaResponse($_REQUEST, $countryCode, $sveaConfig);
 
             if($resp->response->accepted == 1){
+                $query = 'UPDATE #__virtuemart_payment_plg_sveacard
+                                SET `svea_transaction_id` = "' . $resp->response->transactionId . '"' .
+                                'WHERE `order_number` = "' . $order['details']['BT']->order_number.'"';
+                $db = JFactory::getDBO();
+                $db->setQuery($query);
+                $db->query();
+
                 $order['order_status'] = $method->status_success;
                 $order['customer_notified'] = 1;
                 $order['comments'] = '';
@@ -662,9 +795,9 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 		$html .= '<div class="vmorder-done-nr">'.JText::sprintf('VMPAYMENT_SVEA_ORDERNUMBER').': '. $order['details']['BT']->order_number."</div>";
 
                 $paymentCurrency        = CurrencyDisplay::getInstance($method->payment_currency);
-                $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);                
+                $totalInPaymentCurrency = $paymentCurrency->convertCurrencyTo($method->payment_currency, $order['details']['BT']->order_total, false);
 //                    $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($order['details']['BT']->order_total).'</div>'; // order total
-                $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($totalInPaymentCurrency).'</div>'; // order total in payment currency                
+                $html .= '<div class="vmorder-done-amount">'.JText::sprintf('VMPAYMENT_SVEA_ORDER_TOTAL').': '. $currency->priceDisplay($totalInPaymentCurrency).'</div>'; // order total in payment currency
            	$html .= '</div>' . "\n";
 
 
