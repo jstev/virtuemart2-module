@@ -79,7 +79,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $q1 = $svea_order_id ? '' : ' ADD svea_order_id INT(1) UNSIGNED';
                 $q2 = $svea_contract_number ? '' : 'ADD svea_contract_number VARCHAR(64)';
 
-                $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveapaymentplan " .
+                $query = "ALTER TABLE `" . $this->_tablename . "`" .
                         $q1 . ($q1 != '' ? ',' : '') .
                         $q2;
                 $db->setQuery($query);
@@ -1116,7 +1116,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 * @author Oscar van Eijk
 	 *
 	public function plgVmOnUpdateOrderLine(  $_formData) {
-	return null;
+	 print_r('inne i uppdatera linje');die;
+//            return null;
 	}
 
 	/**
@@ -1130,10 +1131,15 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 * @author Oscar van Eijk
 	 *
 	public function plgVmOnEditOrderLineBEPayment(  $_orderId, $_lineId) {
-	return null;
+	  print_r('inne i linje FE');die;
+//            return null;
 	}
 
-	/**
+        public function plgVmOnUpdateSingleItem ($table,&$orderdata) {
+             print_r('inne i single ');die;
+        }
+
+        /**
 	 * This method is fired when showing the order details in the frontend, for every orderline.
 	 * It can be used to display line specific package codes, e.g. with a link to external tracking and
 	 * tracing systems
@@ -1144,7 +1150,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 * @author Oscar van Eijk
 	 *
 	public function plgVmOnShowOrderLineFE(  $_orderId, $_lineId) {
-	return null;
+            return null;
 	}
 
 	/**
