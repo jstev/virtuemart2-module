@@ -82,7 +82,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 $q2 = $tax_id ? '' : 'ADD tax_id SMALLINT(1)';
                 $q3 = $svea_transaction_id ? '' : 'ADD svea_transaction_id VARCHAR(64)';
 
-                $query = "ALTER TABLE vm2_virtuemart_payment_plg_sveacard " .
+                $query = "ALTER TABLE `" . $this->_tablename . "`" .
                         $q1 . ($q1 != '' ? ',' : '') .
                         $q2 . ($q2 != '' ? ',' : '') .
                         $q3;
