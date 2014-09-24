@@ -108,8 +108,8 @@
                         }
                     }
                     $q1 = $svea_order_id ? '' : ' ADD svea_order_id INT(1) UNSIGNED';
-                    $q2 = $svea_invoice_id ? '' : 'ADD svea_invoice_id VARCHAR(64)';
-                    $q3 = $svea_creditinvoice_id ? '' : 'ADD svea_creditinvoice_id VARCHAR(64)';
+                    $q2 = $svea_invoice_id ? '' : ' ADD svea_invoice_id VARCHAR(64)';
+                    $q3 = $svea_creditinvoice_id ? '' : ' ADD svea_creditinvoice_id VARCHAR(64)';
                      $query = "ALTER TABLE `" . $this->_tablename . "`" .
                             $q1 . (($q1 != '' || $q2 != '') ? ',' : '') .
                             $q2 . (($q2 != '' && $q3 != '') ? ',' : '') .
@@ -285,71 +285,27 @@
              *
              */
             function plgVmOnShowOrderBEPayment($virtuemart_order_id, $virtuemart_payment_id) {
-                 $destination = "svea_error_log.txt";
-//                error_log('inne i plgVmOnShowOrderBEPayment', 3, $destination);
                 if (!$this->selectedThisByMethodId ($virtuemart_payment_id)) {
-                      error_log('passerade ej selectedThisByMethodId. ', 3, $destination);
 			return NULL;
 		} // Another method was selected, do nothing
                 if (!($paymentTable = $this->_getInternalData ($virtuemart_order_id))) {
-                      error_log(' passerade ej _getInternalData ', 3, $destination);
 			return '';
 		}
-
-//                    if (!$this->selectedThisByMethodId($virtuemart_payment_id)) {
-//                            return NULL; // Another method was selected, do nothing
-//                    }
-//
-//                    if (!($paymentTable = $this->getDataByOrderId($virtuemart_order_id))) {
-//                            return NULL;
-//                    }
                     $html = '<table class="adminlist">' . "\n";
                     $html .= $this->getHtmlHeaderBE();
-                    	$html .= $this->getHtmlRowBE( 'VMPAYMENT_SVEA_PAYMENTMETHOD',$paymentTable->payment_name);
-                    	$html .= $this->getHtmlRowBE('VMPAYMENT_SVEA_INVOICEFEE',$paymentTable->cost_per_transaction);
-                    	$html .= $this->getHtmlRowBE('Approved amount',$paymentTable->svea_approved_amount);
-                    	$html .= $this->getHtmlRowBE('Expiration date',$paymentTable->svea_expiration_date);
-                    	$html .= $this->getHtmlRowBE('Svea order id',$paymentTable->svea_order_id);
-                    	$html .= $this->getHtmlRowBE('Svea invoice id',$paymentTable->svea_invoice_id);
-                    	$html .= $this->getHtmlRowBE('Svea credit invoice id',$paymentTable->svea_creditinvoice_id);
-//                    $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
-//                    $html .= '<tr class="row2"><td>' . JText::sprintf('VMPAYMENT_SVEA_INVOICEFEE').'</td><td align="left">'. $paymentTable->cost_per_transaction.'</td></tr>';
-//                    $html .= '<tr class="row2"><td>Approved amount</td><td align="left">'. $paymentTable->svea_approved_amount.'</td></tr>';
-//                    $html .= '<tr class="row2"><td>Expiration date</td><td align="left">'. $paymentTable->svea_expiration_date.'</td></tr>';
-//                    $html .= '<tr class="row3"><td>Svea order id</td><td align="left">'. $paymentTable->svea_order_id.'</td></tr>';
-//                    $html .= '<tr class="row3"><td>Svea invoice id</td><td align="left">'. $paymentTable->svea_invoice_id.'</td></tr>';
-//                    $html .= '<tr class="row3"><td>Svea credit invoice id</td><td align="left">'. $paymentTable->svea_creditinvoice_id.'</td></tr>';
-//
-
+                    $html .= $this->getHtmlRowBE( 'VMPAYMENT_SVEA_PAYMENTMETHOD',$paymentTable->payment_name);
+                    $html .= $this->getHtmlRowBE('VMPAYMENT_SVEA_INVOICEFEE',$paymentTable->cost_per_transaction);
+                    $html .= $this->getHtmlRowBE('Approved amount',$paymentTable->svea_approved_amount);
+                    $html .= $this->getHtmlRowBE('Expiration date',$paymentTable->svea_expiration_date);
+                    $html .= $this->getHtmlRowBE('Svea order id',$paymentTable->svea_order_id);
+                    $html .= $this->getHtmlRowBE('Svea invoice id',$paymentTable->svea_invoice_id);
+                    $html .= $this->getHtmlRowBE('Svea credit invoice id',$paymentTable->svea_creditinvoice_id);
                     $html .= '</table>' . "\n";
-//                      error_log('inne i plgVmOnShowOrderBEPayment. tabell genererad. ', 3, $destination);
-//                      error_log($html, 3, $destination);
                     return $html;
 
-
-
-//                    if (!$this->selectedThisByMethodId($virtuemart_payment_id)) {
-//                            return NULL; // Another method was selected, do nothing
-//                    }
-//
-//                    if (!($paymentTable = $this->getDataByOrderId($virtuemart_order_id))) {
-//                            return NULL;
-//                    }
-//                    $html = '<table class="adminlist">' . "\n";
-//                    $html .= $this->getHtmlHeaderBE();
-//                    $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
-//                    $html .= '<tr class="row2"><td>' . JText::sprintf('VMPAYMENT_SVEA_INVOICEFEE').'</td><td align="left">'. $paymentTable->cost_per_transaction.'</td></tr>';
-//                    $html .= '<tr class="row2"><td>Approved amount</td><td align="left">'. $paymentTable->svea_approved_amount.'</td></tr>';
-//                    $html .= '<tr class="row2"><td>Expiration date</td><td align="left">'. $paymentTable->svea_expiration_date.'</td></tr>';
-//                    $html .= '<tr class="row3"><td>Svea order id</td><td align="left">'. $paymentTable->svea_order_id.'</td></tr>';
-//                    $html .= '<tr class="row3"><td>Svea invoice id</td><td align="left">'. $paymentTable->svea_invoice_id.'</td></tr>';
-//                    $html .= '<tr class="row3"><td>Svea credit invoice id</td><td align="left">'. $paymentTable->svea_creditinvoice_id.'</td></tr>';
-//
-//                    $html .= '</table>' . "\n";
-//                    return $html;
             }
 
-                        function _getInternalData ($virtuemart_order_id, $order_number = '') {
+            function _getInternalData ($virtuemart_order_id, $order_number = '') {
 		$db = JFactory::getDBO ();
 		$q = 'SELECT * FROM `' . $this->_tablename . '` WHERE ';
 		if ($order_number) {
@@ -1016,10 +972,9 @@
                 if (!($method = $this->getVmPluginMethod ($_formData->virtuemart_paymentmethod_id))) {
 			return NULL; // Another method was selected, do nothing
 		}
-
-                if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
-                            return FALSE;
-                }
+                if (!($paymentTable = $this->_getInternalData ($_formData->virtuemart_order_id))) {
+			return '';
+		}
                 //get countrycode
                     $q = 'SELECT `virtuemart_country_id` FROM #__virtuemart_order_userinfos  WHERE virtuemart_order_id=' . $_formData->virtuemart_order_id;
                     $db = JFactory::getDBO();
