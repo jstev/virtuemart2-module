@@ -1,4 +1,6 @@
 updated 2014-08-18
+Hotfix in module version of package 2014-09-24,
+in file AdminService/admin_soap/Authentication
 
 version
 2.1.0
