@@ -245,17 +245,34 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
 		if (!$this->selectedThisByMethodId($virtuemart_payment_id)) {
 			return NULL; // Another method was selected, do nothing
 		}
-
-		if (!($paymentTable = $this->getDataByOrderId($virtuemart_order_id))) {
-			return NULL;
+                if (!($paymentTable = $this->_getInternalData ($virtuemart_order_id))) {
+			return '';
 		}
                 $html = '<table class="adminlist">' . "\n";
 		$html .= $this->getHtmlHeaderBE();
-                $html .= '<tr class="row1"><td>' . JText::sprintf('VMPAYMENT_SVEA_PAYMENTMETHOD').'</td><td align="left">'. $paymentTable->payment_name.'</td></tr>';
-                $html .= '<tr class="row2"><td>Amount</td><td align="left">'. $paymentTable->payment_order_total.'</td></tr>';
-                $html .= '<tr class="row2"><td>Transaction id</td><td align="left">'. $paymentTable->svea_transaction_id.'</td></tr>';
+                $html .= plgVmOnShowOrderBEPayment('VMPAYMENT_SVEA_PAYMENTMETHOD', $paymentTable->payment_name);
+                $html .= plgVmOnShowOrderBEPayment('Amount', $paymentTable->payment_order_total);
+                $html .= plgVmOnShowOrderBEPayment('Transaction id', $paymentTable->svea_transaction_id);
 		$html .= '</table>' . "\n";
 		return $html;
+	}
+
+        function _getInternalData ($virtuemart_order_id, $order_number = '') {
+		$db = JFactory::getDBO ();
+		$q = 'SELECT * FROM `' . $this->_tablename . '` WHERE ';
+		if ($order_number) {
+			$q .= " `order_number` = '" . $order_number . "'";
+		} else {
+			$q .= ' `virtuemart_order_id` = ' . $virtuemart_order_id;
+		}
+
+		$db->setQuery ($q);
+		if (!($paymentTable = $db->loadObject ())) {
+                    return '';
+		}
+
+		return $paymentTable;
+
 	}
 
 	function getCosts(VirtueMartCart $cart, $method, $cart_prices) {
@@ -574,8 +591,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
             if (!($method = $this->getVmPluginMethod ($_formData->virtuemart_paymentmethod_id))) {
                 return NULL; // Another method was selected, do nothing
             }
-            if (!($paymentTable = $this->getDataByOrderId($_formData->virtuemart_order_id))) {
-                return FALSE;
+            if (!($paymentTable = $this->_getInternalData ($_formData->virtuemart_order_id))) {
+                return '';
             }
             //get countrycode
             $q = 'SELECT `virtuemart_country_id` FROM #__virtuemart_order_userinfos  WHERE virtuemart_order_id=' . $_formData->virtuemart_order_id;
