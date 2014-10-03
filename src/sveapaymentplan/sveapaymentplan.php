@@ -979,9 +979,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
          */
         private function populateBillToFromGetAddressesData( VirtueMartCart $cart, $session )
         {
-            if (!($method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id))) {
-                return NULL; // Another method was selected, do nothing
-            }
+             if (!($method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id))) {
+                    return NULL; // Another method was selected, do nothing
+                }
+                if (!$this->selectedThisElement($method->payment_element)) {
+                    return false;
+                }
             $countryId = "";
             if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
             {
