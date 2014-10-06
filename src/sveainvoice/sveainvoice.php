@@ -558,6 +558,7 @@
     }
 
             /**
+             *
              * This event is fired after the payment method has been selected. It can be used to store
              * additional payment info in the cart.
              *
@@ -671,12 +672,12 @@
             private function saveDataFromSelectPayment( $request, $session )
             {
                 $methodId = $request['virtuemart_paymentmethod_id'];
-                $countryCode = $request['svea_countryCode_'.$methodId];
-                $customerType = $request['svea_customertype_'.$methodId];
+                $countryCode = $request['svea__countryCode__'.$methodId];
+                $customerType = $request['svea__customertype__'.$methodId];
                 $svea_prefix = "svea";
                 foreach ($request as $key => $value) {
                     $svea_key = "";
-                    $request_explode = explode('_', $key);
+                    $request_explode = explode('__', $key);
                     //if this is svea's and it is the selected method
                     if(( $request_explode[0] == $svea_prefix) && $methodId == $request_explode[2])     // store keys in the format "svea_xxx"
                     {
@@ -684,7 +685,7 @@
                         $svea_attribute = $request_explode[1]; //substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx
                         $svea_prefix = $request_explode[0]; //$svea_prefix."_".$svea_attribute;
 
-
+                     $session->set($svea_prefix."_".$svea_attribute, $value);
                     //methodId wasn't the last param, therefore probably an addresselector
                     }  elseif (( $request_explode[0] == $svea_prefix) && $methodId == $request_explode[3]) {
                                                 // getAddress countries have the addressSelector address fields set
@@ -695,9 +696,9 @@
                         {
                             $svea_attribute = $request_explode[2];
                         }
-
-                    }
                      $session->set($svea_prefix."_".$svea_attribute, $value);
+                    }
+
                 }
             }
 
@@ -870,7 +871,8 @@
              *
              * @return boolean True when the data was valid, false otherwise. If the plugin is not activated, it should return null.
              * @author Max Milbers
-             */
+
+
             public function plgVmOnCheckoutCheckDataPayment( VirtueMartCart $cart ) {
                 $session = JFactory::getSession();
                 $this->populateBillToFromGetAddressesData( $cart,$session );
@@ -889,48 +891,51 @@
                 if (!($method = $this->getVmPluginMethod($cart->virtuemart_paymentmethod_id))) {
                     return NULL; // Another method was selected, do nothing
                 }
+                if (!$this->selectedThisElement($method->payment_element)) {
+                    return false;
+                }
                 $countryId = "";
                 if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
                 {
                     $countryId = $method->countries[0];
                 }
-                //$session = JFactory::getSession();
                 if( $cart->BT == 0 ) $cart->BT = array(); // fix for "uninitialised" BT
 
                 if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
                 {
-                    $cart->BT['company'] = $session->get('svea_fullName', !empty($cart->BT['company']) ? $cart->BT['company'] : "" );
+                    if($session->get('svea_fullName') != '' && $session->get('svea_fullName') != NULL) { $cart->BT['company'] = $session->get('svea_fullName'); }
                 }
 
-                $cart->BT['first_name'] = $session->get('svea_firstName', !empty($cart->BT['first_name']) ? $cart->BT['first_name'] : "" );
-                $cart->BT['last_name'] = $session->get('svea_lastName', !empty($cart->BT['last_name']) ? $cart->BT['last_name'] : "" );
-                $cart->BT['address_1'] = $session->get('svea_street', !empty($cart->BT['address_1']) ? $cart->BT['address_1'] : "" );
-                $cart->BT['address_2'] = $session->get('svea_address_2', !empty($cart->BT['address_2']) ? $cart->BT['address_2'] : "");
-                $cart->BT['zip'] = $session->get('svea_zipCode', !empty($cart->BT['zip']) ? $cart->BT['zip'] : "");
-                $cart->BT['city'] = $session->get('svea_locality', !empty($cart->BT['city']) ? $cart->BT['city'] : "");
+                if($session->get('svea_firstName') != '' && $session->get('svea_firstName') != NULL) { $cart->BT['first_name'] = $session->get('svea_firstName'); }
+                if($session->get('svea_lastName') != '' && $session->get('svea_lastName') != NULL) { $cart->BT['last_name'] = $session->get('svea_lastName'); }
+                if($session->get('svea_street') != '' && $session->get('svea_street') != NULL) { $cart->BT['address_1'] = $session->get('svea_street'); }
+                if($session->get('svea_address_2') != '' && $session->get('svea_address_2') != NULL) { $cart->BT['address_2'] = $session->get('svea_address_2'); }
+                if($session->get('svea_zipCode') != '' && $session->get('svea_zipCode') != NULL) { $cart->BT['zip'] = $session->get('svea_zipCode'); }
+                if($session->get('svea_locality') != '' && $session->get('svea_locality') != NULL) { $cart->BT['city'] = $session->get('svea_locality'); }
+
                 $cart->BT['virtuemart_country_id'] =
                 $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : $countryId);
-
-                //ship to if module setup says so if Vm-customer setting not already will do that for us
+               //ship to if module setup says so if Vm-customer setting not already will do that for us
                 if(isset($method) && $method->shipping_billing == '1' && $cart->STsameAsBT == 0){
                     if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
 
                     if( $session->get('svea_customertype') == 'svea_invoice_customertype_company' )
                     {
-                        $cart->ST['company'] = $session->get('svea_fullName', !empty($cart->ST['company']) ? $cart->ST['company'] : "" );
+                        if($session->get('svea_fullName') != '' && $session->get('svea_fullName') != NULL) { $cart->ST['company'] = $session->get('svea_fullName'); }
+
                     }
 
+                    if($session->get('svea_firstName') != '' && $session->get('svea_firstName') != NULL) { $cart->ST['first_name'] = $session->get('svea_firstName'); }
+                    if($session->get('svea_lastName') != '' && $session->get('svea_lastName') != NULL) { $cart->ST['last_name'] = $session->get('svea_lastName'); }
+                    if($session->get('svea_street') != '' && $session->get('svea_street') != NULL) { $cart->ST['address_1'] = $session->get('svea_street'); }
+                    if($session->get('svea_address_2') != '' && $session->get('svea_address_2') != NULL) { $cart->ST['address_2'] = $session->get('svea_address_2'); }
+                    if($session->get('svea_zipCode') != '' && $session->get('svea_zipCode') != NULL) { $cart->ST['zip'] = $session->get('svea_zipCode'); }
+                    if($session->get('svea_locality') != '' && $session->get('svea_locality') != NULL) { $cart->ST['city'] = $session->get('svea_locality'); }
 
-                    $cart->ST['first_name'] = $session->get('svea_firstName', !empty($cart->ST['first_name']) ? $cart->ST['first_name'] : "" );
-                    $cart->ST['last_name'] = $session->get('svea_lastName', !empty($cart->ST['last_name']) ? $cart->ST['last_name'] : "" );
-                    $cart->ST['address_1'] = $session->get('svea_street', !empty($cart->ST['address_1']) ? $cart->ST['address_1'] : "" );
-                    $cart->ST['address_2'] = $session->get('svea_address_2', !empty($cart->ST['address_2']) ? $cart->ST['address_2'] : "");
-                    $cart->ST['zip'] = $session->get('svea_zipCode', !empty($cart->ST['zip']) ? $cart->ST['zip'] : "");
-                    $cart->ST['city'] = $session->get('svea_locality', !empty($cart->ST['city']) ? $cart->ST['city'] : "");
                     $cart->ST['virtuemart_country_id'] =
                     $session->get('svea_virtuemart_country_id', !empty($cart->ST['virtuemart_country_id']) ? $cart->ST['virtuemart_country_id'] : $countryId);
                 }
-                // keep other cart attributes, if set. also, vm does own validation on checkout.
+//                // keep other cart attributes, if set. also, vm does own validation on checkout.
                 return true;
             }
 
@@ -1226,16 +1231,16 @@
             $getAddressButton = '';
             $checkedCompany = "";
             $checkedPrivate = "checked";
-            if($session->get("svea_customertype_$paymentId")== "svea_invoice_customertype_company"){
+            if($session->get("svea__customertype_$paymentId")== "svea_invoice_customertype_company"){
                 $checkedCompany = "checked";
                 $checkedPrivate = "";
             }
             //show customerype for all
             $inputFields .= '
                 <fieldset id="svea_customertype_div_'.$paymentId.'">
-                    <input type="radio" value="svea_invoice_customertype_private" name="svea_customertype_'.
+                    <input type="radio" value="svea_invoice_customertype_private" name="svea__customertype__'.
                         $paymentId.'"'.$checkedPrivate.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_PRIVATE").'
-                    <input type="radio" value="svea_invoice_customertype_company" name="svea_customertype_'.
+                    <input type="radio" value="svea_invoice_customertype_company" name="svea__customertype__'.
                         $paymentId.'"'.$checkedCompany.'>'.JText::sprintf ("VMPAYMENT_SVEA_FORM_TEXT_COMPANY").'
                 </fieldset>';
 
@@ -1251,8 +1256,8 @@
                     <fieldset id="svea_ssn_div_'.$paymentId.'">
                         <label id="svea_ssn_fieldset'.$paymentId.'" for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_SS_NO").'</label>
                         <label id="svea_vat_fieldset'.$paymentId.'" for="svea_ssn_'.$paymentId.'" style="display:none" >'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_VATNO").'</label>
-                        <input type="text" id="svea_ssn_'.$paymentId.'" name="svea_ssn_'.$paymentId.
-                            '" value="'.$session->get("svea_ssn_$paymentId").'" class="required" />
+                        <input type="text" id="svea_ssn_'.$paymentId.'" name="svea__ssn__'.$paymentId.
+                            '" value="'.$session->get("svea__ssn_$paymentId").'" class="required" />
                         <span id="svea_getaddress_starred_'.$paymentId.'" style="color: red; "> * </span>
                     </fieldset>
                ';
@@ -1271,12 +1276,12 @@
                     $val = $d;
                     if($d < 10)
                         $val = "$d";
-                    if($session->get("svea_birthday_$paymentId") == $val)
+                    if($session->get("svea__birthday_$paymentId") == $val)
                         $selected = "selected";
 
                     $days .= "<option value='$val' $selected>$d</option>";
                 }
-                $birthDay = "<select name='svea_birthday_".$paymentId."' id='birthDay_".$paymentId."'>$days</select>";
+                $birthDay = "<select name='svea__birthday__".$paymentId."' id='birthDay_".$paymentId."'>$days</select>";
 
                 //Months to 12
                 $months = "";
@@ -1286,24 +1291,24 @@
                     if($m < 10)
                         $val = "$m";
 
-                    if($session->get("svea_birthmonth_$paymentId") == $val)
+                    if($session->get("svea__birthmonth_$paymentId") == $val)
                       $selected = "selected";
 
                     $months .= "<option value='$val' $selected>$m</option>";
                 }
-                $birthMonth = "<select name='svea_birthmonth_".$paymentId."' id='birthMonth_".$paymentId."'>$months</select>";
+                $birthMonth = "<select name='svea__birthmonth__".$paymentId."' id='birthMonth_".$paymentId."'>$months</select>";
 
                 //Years from 1913 to date('Y')
                 $years = '';
 
                 for($y = 1913; $y <= date('Y'); $y++){
                     $selected = "";
-                     if($session->get("svea_birthyear_$paymentId") == $y)
+                     if($session->get("svea__birthyear_$paymentId") == $y)
                         $selected = "selected";
 
                     $years .= "<option value='$y' $selected>$y</option>";
                 }
-                $birthYear = "<select name='svea_birthyear_".$paymentId."' id='birthYear_".$paymentId."'>$years</select>";
+                $birthYear = "<select name='svea__birthyear__".$paymentId."' id='birthYear_".$paymentId."'>$years</select>";
 
                 $inputFields .=
                 '
@@ -1318,7 +1323,7 @@
                     $inputFields .=
                       '<fieldset id="svea_nl_initials_fieldset_'.$paymentId.'">'.
                         JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_INITIALS").': <input type="text" id="svea_initials_'.$paymentId.'" value="'.
-                            $session->get("svea_initials_$paymentId").'" name="svea_initials_'.$paymentId.'" class="required" /><span style="color: red; "> * </span>
+                            $session->get("svea__initials_$paymentId").'" name="svea__initials__'.$paymentId.'" class="required" /><span style="color: red; "> * </span>
                         </fieldset>';
 
                 }
@@ -1326,8 +1331,8 @@
                     $inputFields .=
                     '<fieldset id="svea_nl_de_vat_fieldset_'.$paymentId.'">
                         <label id="svea_nl_de_vat_label'.$paymentId.'" for="svea_ssn_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_VATNO").'</label>
-                        <input type="text" id="svea_nl_de_vat_'.$paymentId.'" name="svea_ssn_'.$paymentId.
-                            '" value="'.$session->get("svea_ssn_$paymentId").'" class="required" />
+                        <input type="text" id="svea_nl_de_vat_'.$paymentId.'" name="svea__ssn__'.$paymentId.
+                            '" value="'.$session->get("svea__ssn_$paymentId").'" class="required" />
                         <span style="color: red; "> * </span>
                     </fieldset>';
                 }
@@ -1335,7 +1340,7 @@
 
             // pass along the selected method country (used in plgVmOnSelectCheckPayment when checking that all required fields are set)
             $inputFields .=
-                '<input type="hidden" id="svea_countryCode_'.$paymentId.'" value="'.$countryCode.'" name="svea_countryCode_'.$paymentId.'" />
+                '<input type="hidden" id="svea_countryCode_'.$paymentId.'" value="'.$countryCode.'" name="svea__countryCode__'.$paymentId.'" />
             ';
 
             // show getAddressButton, if applicable
@@ -1397,8 +1402,8 @@
                 $('#svea_vat_fieldset".$paymentId."').hide();
                 $('#svea_nl_de_vat_fieldset_".$paymentId."').hide();
 
-               jQuery(\"input:radio[name='svea_customertype_".$paymentId."']\").click(function(){
-                   var checked_customertype_$paymentId =  jQuery(\"input:radio[name='svea_customertype_".$paymentId."']:checked\").val();
+               jQuery(\"input:radio[name='svea__customertype__".$paymentId."']\").click(function(){
+                   var checked_customertype_$paymentId =  jQuery(\"input:radio[name='svea__customertype__".$paymentId."']:checked\").val();
                     if (checked_customertype_$paymentId == 'svea_invoice_customertype_private'){
 
                          $('#svea_ssn_fieldset".$paymentId."').show();
@@ -1464,7 +1469,7 @@
                                 else // handle response address data
                                 {
                                         jQuery('#svea_address_div_$paymentId').empty().append(
-                                            '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea_addressSelector_$paymentId\"></select>'
+                                            '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea__addressSelector__$paymentId\"></select>'
                                         );
 
                                         jQuery.each(json_$paymentId,function(key,value){
@@ -1477,28 +1482,28 @@
 
                                             // for each addressSelector, also store hidden address fields to pass on to next step
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_firstName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_firstName_".$paymentId."\" value=\"'+value.firstName+'\" />'
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_firstName\" name=\"svea__'+value.addressSelector+'__firstName__".$paymentId."\" value=\"'+value.firstName+'\" />'
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_lastName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_lastName_".$paymentId."\" value=\"'+value.lastName+'\" />'
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_lastName\" name=\"svea__'+value.addressSelector+'__lastName__".$paymentId."\" value=\"'+value.lastName+'\" />'
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_fullName\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_fullName_".$paymentId."\" value=\"'+value.fullName+'\" />'
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_fullName\" name=\"svea__'+value.addressSelector+'__fullName__".$paymentId."\" value=\"'+value.fullName+'\" />'
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_street\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_street_".$paymentId."\" value=\"'+value.street+'\" />'
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_street\" name=\"svea__'+value.addressSelector+'__street__".$paymentId."\" value=\"'+value.street+'\" />'
                                             );
                                            jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_address_2\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_address_2_".$paymentId."\" value=\"'+value.address_2+'\" />'
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_address_2\" name=\"svea__'+value.addressSelector+'__address_2__".$paymentId."\" value=\"'+value.address_2+'\" />'
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_zipCode\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_zipCode_".$paymentId."\" value=\"'+value.zipCode+'\" />'
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_zipCode\" name=\"svea__'+value.addressSelector+'__zipCode__".$paymentId."\" value=\"'+value.zipCode+'\" />'
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_locality\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_locality_".$paymentId."\" value=\"'+value.locality+'\" />'
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_locality\" name=\"svea__'+value.addressSelector+'__locality__".$paymentId."\" value=\"'+value.locality+'\" />'
                                             );
                                             jQuery('#sveaAddressDiv_$paymentId').append(
-                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_virtuemart_country_id\" name=\"svea_'+value.addressSelector+'".$paymentId."'+'_virtuemart_country_id_".$paymentId."\" value=\"'+value.virtuemart_country_id+'\" />'
+                                                '<input type=\"text\" id=\"svea_'+value.addressSelector+'_virtuemart_country_id\" name=\"svea__'+value.addressSelector+'__virtuemart_country_id__".$paymentId."\" value=\"'+value.virtuemart_country_id+'\" />'
                                             );
                                         });
                                     if(customertype_$paymentId == 'svea_invoice_customertype_company') // company, may get several addresses
@@ -1553,9 +1558,9 @@
                 "
                     jQuery(document).ready(function() {
 
-                        jQuery(\"input[type=radio][name='svea_customertype_".$paymentId."']\").click( function() {
+                        jQuery(\"input[type=radio][name='svea__customertype__".$paymentId."']\").click( function() {
 
-                            var checked_payment = jQuery(\"input:radio[name='svea_customertype_".$paymentId."']:checked\").val();
+                            var checked_payment = jQuery(\"input:radio[name='svea__customertype__".$paymentId."']:checked\").val();
                             switch( checked_payment )
                             {
 
