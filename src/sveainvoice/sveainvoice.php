@@ -601,8 +601,8 @@
             {
                 $methodId = $request['virtuemart_paymentmethod_id'];
 
-                $countryCode = $request['svea_countryCode_'.$methodId];
-                $customerType = $request['svea_customertype_'.$methodId];
+                $countryCode = $request['svea__countryCode__'.$methodId];
+                $customerType = $request['svea__customertype__'.$methodId];
 
                 //prepare errormessage
                 // getAddress countries need the addressSelector
@@ -611,7 +611,7 @@
                     ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_company')
                 )
                 {
-                    if( !array_key_exists( "svea_addressSelector_".$methodId, $request ) )    // no addresselector => did not press getAddress
+                    if( !array_key_exists( "svea__addressSelector__".$methodId, $request ) )    // no addresselector => did not press getAddress
                     {
                         throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                     }
@@ -622,7 +622,7 @@
                     ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_private')
                 )
                 {
-                    if( $request["svea_ssn_".$methodId] == "" ) // i.e. field was left blank
+                    if( $request["svea__ssn__".$methodId] == "" ) // i.e. field was left blank
                     {
                         throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                     }
@@ -634,9 +634,9 @@
                     ($countryCode == 'NL' && $customerType == 'svea_invoice_customertype_private')
                 )
                 {
-                    if( ( $request["svea_birthday_".$methodId] == "" ) ||
-                        ( $request["svea_birthmonth_".$methodId] == "" ) ||
-                        ( $request["svea_birthyear_".$methodId] == "" )
+                    if( ( $request["svea__birthday__".$methodId] == "" ) ||
+                        ( $request["svea__birthmonth__".$methodId] == "" ) ||
+                        ( $request["svea__birthyear__".$methodId] == "" )
                     )
                     {
                         throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
@@ -645,7 +645,7 @@
                 if( ($countryCode == 'NL' && $customerType == 'svea_invoice_customertype_private')
                 )
                 {
-                    if( ( $request["svea_initials_".$methodId] == "" )
+                    if( ( $request["svea__initials__".$methodId] == "" )
                     )
                     {
                         throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS"));
@@ -654,7 +654,7 @@
                 if( ($countryCode == 'NL' && $customerType == 'svea_invoice_customertype_company')
                 )
                 {
-                    if( ( $request["svea_ssn_".$methodId] == "" )
+                    if( ( $request["svea__ssn__".$methodId] == "" )
                     )
                     {
                        throw new Exception(JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );

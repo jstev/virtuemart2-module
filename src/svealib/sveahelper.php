@@ -71,7 +71,6 @@ class SveaHelper {
         }
 
          if ($customerType == "svea_invoice_customertype_company"){
-
             $item = WebPayItem::companyCustomer();
 
             $item = $item->setEmail($order['details']['BT']->email)
