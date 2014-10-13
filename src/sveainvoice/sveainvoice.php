@@ -111,7 +111,7 @@
                     $q2 = $svea_invoice_id ? '' : ' ADD svea_invoice_id VARCHAR(64)';
                     $q3 = $svea_creditinvoice_id ? '' : ' ADD svea_creditinvoice_id VARCHAR(64)';
                      $query = "ALTER TABLE `" . $this->_tablename . "`" .
-                            $q1 . (($q1 != '' || $q2 != '') ? ',' : '') .
+                            $q1 . (($q1 != '' && $q2 != '') ? ',' : '') .
                             $q2 . (($q2 != '' && $q3 != '') ? ',' : '') .
                             $q3;
                     $db->setQuery($query);
