@@ -104,18 +104,23 @@
                         }  elseif (in_array( 'svea_invoice_id',$column)) {
                             $svea_invoice_id = TRUE;
                         }  elseif (in_array( 'svea_creditinvoice_id',$column)) {
-                            $svea_invoice_id = TRUE;
+                            $svea_creditinvoice_id = TRUE;
                         }
                     }
+
                     $q1 = $svea_order_id ? '' : ' ADD svea_order_id INT(1) UNSIGNED';
                     $q2 = $svea_invoice_id ? '' : ' ADD svea_invoice_id VARCHAR(64)';
                     $q3 = $svea_creditinvoice_id ? '' : ' ADD svea_creditinvoice_id VARCHAR(64)';
-                     $query = "ALTER TABLE `" . $this->_tablename . "`" .
-                            $q1 . (($q1 != '' && $q2 != '') ? ',' : '') .
-                            $q2 . (($q2 != '' && $q3 != '') ? ',' : '') .
-                            $q3;
-                    $db->setQuery($query);
-                    $db->query();
+                    //run if anything needs to be added
+                    if($svea_order_id || $svea_invoice_id || $svea_creditinvoice_id ){
+                        $query = "ALTER TABLE `" . $this->_tablename . "`" .
+                        $q1 . (($q1 != '' && $q2 != '') ? ',' : '') .
+                        $q2 . (($q2 != '' && $q3 != '') ? ',' : '') .
+                        $q3;
+                        $db->setQuery($query);
+                        $db->query();
+                    }
+
                 }
                 return $this->createTableSQL('Payment Svea Invoice Table');
             }

@@ -78,14 +78,17 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 }
                 $q1 = $svea_order_id ? '' : ' ADD svea_order_id INT(1) UNSIGNED';
                 $q2 = $svea_contract_number ? '' : 'ADD svea_contract_number VARCHAR(64)';
-
-                $query = "ALTER TABLE `" . $this->_tablename . "`" .
+                //run if anything needs to be added
+                if($svea_order_id || $svea_contract_number){
+                     $query = "ALTER TABLE `" . $this->_tablename . "`" .
                         $q1 . ($q1 != '' ? ',' : '') .
                         $q2;
-                $db->setQuery($query);
-                $db->query();
+                    $db->setQuery($query);
+                    $db->query();
                 }
-		return $this->createTableSQL('Payment Svea Paymentplan Table');
+
+            }
+            return $this->createTableSQL('Payment Svea Paymentplan Table');
 	}
 
 	/**

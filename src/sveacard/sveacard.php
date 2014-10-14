@@ -81,13 +81,15 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 $q1 = $cost_per_transaction ? '' : ' ADD cost_per_transaction DECIMAL(10,2)';
                 $q2 = $tax_id ? '' : 'ADD tax_id SMALLINT(1)';
                 $q3 = $svea_transaction_id ? '' : 'ADD svea_transaction_id VARCHAR(64)';
-
-                $query = "ALTER TABLE `" . $this->_tablename . "`" .
-                        $q1 . ($q1 != '' ? ',' : '') .
-                        $q2 . ($q2 != '' ? ',' : '') .
-                        $q3;
-                $db->setQuery($query);
-                $db->query();
+                //run if anything needs to be added
+                if($cost_per_transaction || $tax_id || $svea_transaction_id){
+                    $query = "ALTER TABLE `" . $this->_tablename . "`" .
+                            $q1 . ($q1 != '' ? ',' : '') .
+                            $q2 . ($q2 != '' ? ',' : '') .
+                            $q3;
+                    $db->setQuery($query);
+                    $db->query();
+                }
             }
             return $this->createTableSQL('Payment Svea Card Table');
 	}
