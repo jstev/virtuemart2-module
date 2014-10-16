@@ -1,6 +1,6 @@
-updated 2014-08-18
-Hotfix in module version of package 2014-09-24,
-in file AdminService/admin_soap/Authentication
+updated 2014-10-16
+
+Changes in ConfigurationProvider, needs changes in implementation.
 
 version
-2.1.0
+2.2.3
