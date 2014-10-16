@@ -1415,6 +1415,7 @@
              */
             $javascript .= '
                 function rupostel_autofill_address(data,customer_type){
+                console.log(data);
                     //if only one address in data
                     if(customer_type == "svea_invoice_customertype_company") {
                         if(data[0].fullName.length > 0) {
