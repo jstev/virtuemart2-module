@@ -42,11 +42,13 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider
         $type = strtoupper($type);
         if($type == "HOSTED"){
             return   Svea\SveaConfig::SWP_TEST_URL;;
-        }elseif($type == "INVOICE" || $type == "PAYMENTPLAN"){
+        } elseif($type == "INVOICE" || $type == "PAYMENTPLAN"){
              return Svea\SveaConfig::SWP_TEST_WS_URL;
-         }elseif($type == "HOSTED_ADMIN"){
+        } elseif($type == "HOSTED_ADMIN"){
              return Svea\SveaConfig::SWP_TEST_HOSTED_ADMIN_URL;
-        }  else {
+        } elseif ($type == "ADMIN") {
+              return Svea\SveaConfig::SWP_TEST_ADMIN_URL;
+        } else {
            throw new Exception('Invalid type. Accepted values: INVOICE, PAYMENTPLAN, HOSTED_ADMIN or HOSTED');
         }
     }

@@ -46,7 +46,9 @@ class SveaVmConfigurationProviderProd implements ConfigurationProvider
              return Svea\SveaConfig::SWP_PROD_WS_URL;
          }elseif($type == "HOSTED_ADMIN"){
              return Svea\SveaConfig::SWP_PROD_HOSTED_ADMIN_URL;
-        }  else {
+        }elseif ($type == "ADMIN") {
+              return Svea\SveaConfig::SWP_PROD_ADMIN_URL;
+        }   else {
            throw new Exception('Invalid type. Accepted values: INVOICE, PAYMENTPLAN, HOSTED_ADMIN or HOSTED');
         }
     }
