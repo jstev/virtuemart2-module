@@ -1,6 +1,6 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
-##Version 2.4.5
+##Version 2.4.6
 This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments.
 Admin functions such as Deliver, Confirm, Credit and Cancel orders is implemented into Virtuemarts admin functions.
 This module is updated for the latest payment systems at SveaWebPay.
