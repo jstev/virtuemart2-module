@@ -1,6 +1,7 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
-##Version 2.4.6
+
+##Version 2.4.7
 This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments.
 Admin functions such as Deliver, Confirm, Credit and Cancel orders is implemented into Virtuemarts admin functions.
 This module is updated for the latest payment systems at SveaWebPay.
@@ -10,6 +11,8 @@ If you experience technical issues with this module, or you have feature suggest
 ## Requirements
 Joomla 2.5, VirtueMart 2.0+, PHP 5.3+
 The module has been developed and tested using Joomla 2.5.9-17, VirtueMart 2.0.17-26a.
+
+The module is tested Rupostel One Page Checkout 2.0 on Joomla 2.5.11 and Virtuemart 2.0.26d
 
 ## Installation Instructions
 
