@@ -232,6 +232,10 @@ class SveaHelper {
      * @return array
      */
     public static function buildAddressArray($svea) {
+        $q = 'SHOW FULL COLUMNS FROM #__virtuemart_order_userinfos';
+        $db = JFactory::getDBO();
+        $db->setQuery($q);
+        $existing_columns = $db->loadResultArray();
         $sveaAddresses = array();
         if ($svea->customerIdentity->customerType == 'Company') // Company customer
         {
@@ -244,16 +248,16 @@ class SveaHelper {
                 $sveaAddresses["first_name"] = $svea->customerIdentity->fullName;
                 $sveaAddresses["last_name"] = "";
             }
-            isset($svea->customerIdentity->fullName) ? $sveaAddresses["company"] = $svea->customerIdentity->fullName : "";
-            isset($svea->customerIdentity->street) ? $sveaAddresses["address_1"] = $svea->customerIdentity->street : "";
-            isset($svea->customerIdentity->houseNumber) ? $sveaAddresses["house_no"] = $svea->customerIdentity->houseNumber : "";
-            isset($svea->customerIdentity->coAddress) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
-            isset($svea->customerIdentity->locality) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
-            isset($svea->customerIdentity->zipCode) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
+            isset($svea->customerIdentity->fullName) && in_array("company", $existing_columns) ? $sveaAddresses["company"] = $svea->customerIdentity->fullName : "";
+            isset($svea->customerIdentity->street) && in_array("address_1", $existing_columns) ? $sveaAddresses["address_1"] = $svea->customerIdentity->street : "";
+            isset($svea->customerIdentity->houseNumber) && in_array("house_no", $existing_columns) ? $sveaAddresses["house_no"] = $svea->customerIdentity->houseNumber : "";
+            isset($svea->customerIdentity->coAddress) && in_array("address_2", $existing_columns) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
+            isset($svea->customerIdentity->locality) && in_array("city", $existing_columns) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
+            isset($svea->customerIdentity->zipCode) && in_array("zip", $existing_columns) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
         }
         else // private individual customer
         {
-            if( isset($svea->customerIdentity->firstName) &&  isset($svea->customerIdentity->lastName) ){
+            if( isset($svea->customerIdentity->firstName) &&  isset($svea->customerIdentity->lastName)){
                $sveaAddresses["first_name"] = $svea->customerIdentity->firstName;
                $sveaAddresses["last_name"] = $svea->customerIdentity->lastName;
             }
@@ -263,13 +267,13 @@ class SveaHelper {
                 $sveaAddresses["first_name"] = $svea->customerIdentity->fullName;
                 $sveaAddresses["last_name"] = "";
             }
-            isset($svea->customerIdentity->firstName) ? $sveaAddresses["first_name"] = $svea->customerIdentity->firstName : "";
-            isset($svea->customerIdentity->lastName) ? $sveaAddresses["last_name"] = $svea->customerIdentity->lastName : "";
-            isset($svea->customerIdentity->street) ? $sveaAddresses["address_1"] = $svea->customerIdentity->street : "";
-            isset($svea->customerIdentity->houseNumber) ? $sveaAddresses["house_no"] = $svea->customerIdentity->houseNumber : "";
-            isset($svea->customerIdentity->coAddress) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
-            isset($svea->customerIdentity->locality) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
-            isset($svea->customerIdentity->zipCode) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
+            isset($svea->customerIdentity->firstName) && in_array("first_name", $existing_columns) ? $sveaAddresses["first_name"] = $svea->customerIdentity->firstName : "";
+            isset($svea->customerIdentity->lastName) && in_array("last_name", $existing_columns) ? $sveaAddresses["last_name"] = $svea->customerIdentity->lastName : "";
+            isset($svea->customerIdentity->street) && in_array("address_1", $existing_columns) ? $sveaAddresses["address_1"] = $svea->customerIdentity->street : "";
+            isset($svea->customerIdentity->houseNumber) && in_array("house_no", $existing_columns) ? $sveaAddresses["house_no"] = $svea->customerIdentity->houseNumber : "";
+            isset($svea->customerIdentity->coAddress) && in_array("address_2", $existing_columns) ? $sveaAddresses["address_2"] = $svea->customerIdentity->coAddress : "";
+            isset($svea->customerIdentity->locality) && in_array("city", $existing_columns) ? $sveaAddresses["city"] = $svea->customerIdentity->locality : "";
+            isset($svea->customerIdentity->zipCode) && in_array("zip", $existing_columns) ? $sveaAddresses["zip"] = $svea->customerIdentity->zipCode : "";
         }
         return $sveaAddresses;
     }
