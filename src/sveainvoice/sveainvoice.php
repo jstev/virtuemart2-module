@@ -112,7 +112,7 @@
                     $q2 = $svea_invoice_id ? '' : ' ADD svea_invoice_id VARCHAR(64)';
                     $q3 = $svea_creditinvoice_id ? '' : ' ADD svea_creditinvoice_id VARCHAR(64)';
                     //run if anything needs to be added
-                    if($svea_order_id || $svea_invoice_id || $svea_creditinvoice_id ){
+                    if($svea_order_id == false || $svea_invoice_id == false || $svea_creditinvoice_id == false ){
                         $query = "ALTER TABLE `" . $this->_tablename . "`" .
                         $q1 . (($q1 != '' && $q2 != '') ? ',' : '') .
                         $q2 . (($q2 != '' && $q3 != '') ? ',' : '') .
@@ -919,8 +919,8 @@
                 if($session->get('svea_zipCode') != '' && $session->get('svea_zipCode') != NULL) { $cart->BT['zip'] = $session->get('svea_zipCode'); }
                 if($session->get('svea_locality') != '' && $session->get('svea_locality') != NULL) { $cart->BT['city'] = $session->get('svea_locality'); }
 
-                $cart->BT['virtuemart_country_id'] =
-                $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : $countryId);
+//                $cart->BT['virtuemart_country_id'] =
+//                $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : $countryId);
                //ship to if module setup says so if Vm-customer setting not already will do that for us
                 if(isset($method) && $method->shipping_billing == '1' && $cart->STsameAsBT == 0){
                     if( $cart->ST == 0 ) $cart->ST = array(); // fix for "uninitialised" ST
@@ -938,8 +938,8 @@
                     if($session->get('svea_zipCode') != '' && $session->get('svea_zipCode') != NULL) { $cart->ST['zip'] = $session->get('svea_zipCode'); }
                     if($session->get('svea_locality') != '' && $session->get('svea_locality') != NULL) { $cart->ST['city'] = $session->get('svea_locality'); }
 
-                    $cart->ST['virtuemart_country_id'] =
-                    $session->get('svea_virtuemart_country_id', !empty($cart->ST['virtuemart_country_id']) ? $cart->ST['virtuemart_country_id'] : $countryId);
+//                    $cart->ST['virtuemart_country_id'] =
+//                    $session->get('svea_virtuemart_country_id', !empty($cart->ST['virtuemart_country_id']) ? $cart->ST['virtuemart_country_id'] : $countryId);
                 }
 //                // keep other cart attributes, if set. also, vm does own validation on checkout.
                 return true;
@@ -1377,7 +1377,7 @@
                     .$getAddressButton.
                     '<div id="svea_address_div_'.$paymentId.'"></div>
                 </fieldset>
-                <input type="hidden" name="svea_shipping_billing" id="svea_shipping_billing" value="'.$shipping_billing.'" />
+                <input type="hidden" name="svea_shipping_billing" id="svea_shipping_billing_'.$paymentId.'" value="'.$shipping_billing.'" />
             ';
             /**
              * Adjustment to compatibility to RuposTel onestep plugin:
@@ -1389,6 +1389,7 @@
 
                 jQuery(document).ready(function($) {
                     var svea_picked_'.$paymentId.' = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
+
                     var sveaid_'.$paymentId.' = jQuery("#paymenttypesvea_'.$paymentId.'").val();
                     if(svea_picked_'.$paymentId.' != sveaid_'.$paymentId.'){
                         jQuery("#svea_getaddress_'.$paymentId.'").hide();
@@ -1414,8 +1415,8 @@
              * rupostel onestep adjustments, and probably for others too
              */
             $javascript .= '
+
                 function rupostel_autofill_address(data,customer_type){
-                console.log(data);
                     //if only one address in data
                     if(customer_type == "svea_invoice_customertype_company") {
                         if(data[0].fullName.length > 0) {
@@ -1430,7 +1431,7 @@
                     if($("#city_field").length > 0) { if(data[0].locality.length > 0){ $("#city_field").val(data[0].locality); } }
                     if(data[0].virtuemart_country_id.length > 0){ $("#virtuemart_country_id").val(data[0].virtuemart_country_id); }
 
-                    if($("#svea_shipping_billing").val() == "1") {
+                    if($("#svea_shipping_billing_'.$paymentId.'").val() == "1") {
                          if(customer_type == "svea_invoice_customertype_company") {
                             if(data[0].fullName.length > 0) {
                                 if($("#shipto_company_field").length > 0) { if(data[0].fullName.length > 0){ $("#shipto_company_field").val(data[0].fullName); } }
@@ -1443,10 +1444,12 @@
                         if($("#shipto_zip_field").length > 0) { if(data[0].zipCode.length > 0){ $("#shipto_zip_field").val(data[0].zipCode); } }
                         if($("#shipto_city_field").length > 0) { if(data[0].locality.length > 0){ $("#shipto_city_field").val(data[0].locality); } }
                         if(data[0].virtuemart_country_id.length > 0){ $("#shipto_virtuemart_country_id").val(data[0].virtuemart_country_id); }
-                        //trigger show shipment address so customer see it has changed
-                        if($("#sachone").length > 0){ $("#sachone").trigger("click"); }
-                        var sa = $("#sachone").get(0);
-                        if(typeof Onepage === "undefined"){ }else{ Onepage.showSA(sa, "idsa");  }
+                        //trigger show shipment address so customer see it has changed.
+                        if($("#sachone").length > 0){
+                             $("#sachone").prop("checked", true);
+                             var sa = $("#sachone").get(0);
+                             $("#idsa").show();
+                        }
                     }
 
                 }';
@@ -1481,7 +1484,7 @@
             ";
 
             //ajax for getAddress
-            $sveaUrlAjax = juri::root () . '/index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice';
+            $sveaUrlAjax = juri::root () . 'index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveainvoice';
 
             $javascript .=
             "
