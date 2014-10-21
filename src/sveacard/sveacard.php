@@ -79,15 +79,17 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                     }
                 }
                 $q1 = $cost_per_transaction ? '' : ' ADD cost_per_transaction DECIMAL(10,2)';
-                $q2 = $tax_id ? '' : 'ADD tax_id SMALLINT(1)';
-                $q3 = $svea_transaction_id ? '' : 'ADD svea_transaction_id VARCHAR(64)';
-
-                $query = "ALTER TABLE `" . $this->_tablename . "`" .
-                        $q1 . ($q1 != '' ? ',' : '') .
-                        $q2 . ($q2 != '' ? ',' : '') .
-                        $q3;
-                $db->setQuery($query);
-                $db->query();
+                $q2 = $tax_id ? '' : ' ADD tax_id SMALLINT(1)';
+                $q3 = $svea_transaction_id ? '' : ' ADD svea_transaction_id VARCHAR(64)';
+                //run if anything needs to be added
+                if($cost_per_transaction == false || $tax_id == false || $svea_transaction_id == false ){
+                    $query = "ALTER TABLE `" . $this->_tablename . "`" .
+                            $q1 . ($q1 != '' ? ',' : '') .
+                            $q2 . ($q2 != '' ? ',' : '') .
+                            $q3;
+                    $db->setQuery($query);
+                    $db->query();
+                }
             }
             return $this->createTableSQL('Payment Svea Card Table');
 	}
@@ -182,6 +184,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                          ->setCountryCode("")
                          ->setCurrency($currency_code_3)
                          ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
+//                        ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id.  rand(0, 30000)) //use when testing
                          ->setOrderDate(date('c'))
                          ->usePaymentMethod(PaymentMethod::KORTCERT)
                              ->setReturnUrl($return_url)
@@ -424,11 +427,11 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 			if ($this->checkConditions ($cart, $method, $cart->pricesUnformatted)) {
 				$methodSalesPrice = $this->calculateSalesPrice ($cart, $method, $cart->pricesUnformatted);
 				$method->$method_name = $this->renderPluginName ($method);
-				$html [] = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
+				$svea_string = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
                                 //include svea stuff on editpayment page
-                                $html[] = $this->getSveaCardHtml($method->virtuemart_paymentmethod_id,$cart->pricesUnformatted['basePriceWithTax']);
+                                $svea_string .= $this->getSveaCardHtml($method->virtuemart_paymentmethod_id,$cart->pricesUnformatted['basePriceWithTax']);
                                 //svea stuff end
-
+                                $html [] = $svea_string;
 			}
 		}
 		if (!empty($html)) {
@@ -866,32 +869,33 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                   </fieldset>
                 </fieldset>';
       //start skript and set vars
-        $html .= "<script type='text/javascript'>
-                    var checked_$paymentId = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
+        //Document ready start
+        $html .= " <script type='text/javascript'>
+            jQuery(document).ready(function ($){";
+        $html .= "
+                    var svea_picked_$paymentId = jQuery('input[name=\'virtuemart_paymentmethod_id\']:checked').val();
                     var sveaid_$paymentId = jQuery('#paymenttypesvea_$paymentId').val();";
 
 
-       //Document ready start
-        $html .= " jQuery(document).ready(function ($){";
 
+//show all the time instead
          //hide show box
-        $html .= "
-                        if(checked_$paymentId != sveaid_$paymentId){
-                            jQuery('#svea_card_$paymentId').hide();
-                        }else{
-                            jQuery('#svea_card_$paymentId').show();
-                        }
-                    ";
+//        $html .= "
+//                        if(svea_picked_$paymentId == sveaid_$paymentId){
+//                            jQuery('#svea_card_$paymentId').show();
+//                        }else{
+//                            jQuery('#svea_card_$paymentId').hide();
+//                        }
+//                    ";
         //toggle display form
-        $html .=        '
-                        jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
-                            checked_'.$paymentId.' = jQuery("input[name=\'virtuemart_paymentmethod_id\']:checked").val();
-                            if(checked_'.$paymentId.' == sveaid_'.$paymentId.'){
-                                  jQuery("#svea_card_'.$paymentId.'").show();
-                            }else{
-                                jQuery("#svea_card_'.$paymentId.'").hide();
-                            }
-                            });';
+//        $html .=        '
+//                        jQuery("input[name=\'virtuemart_paymentmethod_id\']").change(function(){
+//                            if(svea_picked_'.$paymentId.' == sveaid_'.$paymentId.'){
+//                                jQuery("#svea_card_'.$paymentId.'").show();
+//                            }else{
+//                                jQuery("#svea_card_'.$paymentId.'").hide();
+//                            }
+//                            });';
 
 
         //append form to parent form in Vm
