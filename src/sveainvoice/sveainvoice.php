@@ -207,7 +207,7 @@
                     $svea = $svea
                           ->setCountryCode($countryCode)
                           ->setCurrency($currency_code_3)
-                          ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
+                          ->setClientOrderNumber($order['details']['BT']->order_number)
                           ->setOrderDate(date('c'))
                           ->useInvoicePayment()
                             ->doRequest();
