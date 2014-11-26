@@ -180,8 +180,8 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $form = $svea
                         ->setCountryCode($countryCode)
                         ->setCurrency($currency_code_3)
-                        ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id)
-//                        ->setClientOrderNumber($order['details']['BT']->virtuemart_order_id.  rand(0, 30000)) //use when testing
+                        ->setClientOrderNumber($order['details']['BT']->order_number)
+//                        ->setClientOrderNumber($order['details']['BT']->order_number.  rand(0, 30000)) //use when testing
                         ->setOrderDate(date('c'))
                         ->usePaymentMethod($session->get("svea_bank_$method->virtuemart_paymentmethod_id"))
                             ->setReturnUrl($return_url)
