@@ -160,6 +160,8 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 vmError ($e->getMessage (), $e->getMessage ());
                 return NULL;
            }
+            $jlang = JFactory::getLanguage ();
+            $currentLang = substr ($jlang->getName (), 0, 2);
              //order items
             $svea = SveaHelper::formatOrderRows($svea, $order,$method->payment_currency);
              //add shipping
@@ -179,6 +181,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
             $cancel_url = JROUTE::_ (JURI::root () .'index.php?option=com_virtuemart&view=pluginresponse&task=pluginUserPaymentCancel&on=' . $order['details']['BT']->virtuemart_order_id);
             //add customer
             $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
+
             try {
                  $form = $svea
                          ->setCountryCode("")
@@ -187,6 +190,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 //                        ->setClientOrderNumber($order['details']['BT']->order_number.  rand(0, 30000)) //use when testing
                          ->setOrderDate(date('c'))
                          ->usePaymentMethod(PaymentMethod::KORTCERT)
+                            ->setCardPageLanguage(strtolower($currentLang))
                              ->setReturnUrl($return_url)
                              //->setCancelUrl($cancel_url)//Not used by Certitrade cardpage
                              //->setCallbackUrl($cancel_url)//Not used by Certitrade cardpage
