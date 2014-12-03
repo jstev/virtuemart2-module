@@ -1207,7 +1207,6 @@
                     vmError ('Svea Error: '.$svea->errormessage, 'Svea Error: '.$svea->errormessage);
                 }  else {
                      foreach ($svea->customerIdentity as $ci){
-
                         $name = ($ci->fullName) ? $ci->fullName : $ci->legalName;
 
                         $returnArray[] =  array(
@@ -1216,7 +1215,7 @@
                             "lastName" => $ci->lastName,
                             "street"    => $ci->street,
                             "address_2" => $ci->coAddress,
-                            "zipCode"  => (string)$ci->zipCode,//is an int. error in php-lib doc
+                            "zipCode"  => $ci->zipCode,
                             "locality"  => $ci->locality,
                             "addressSelector" => $ci->addressSelector,
                             "virtuemart_country_id" => ShopFunctions::getCountryIDByName(JRequest::getVar('countrycode'))
