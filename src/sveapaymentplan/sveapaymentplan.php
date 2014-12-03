@@ -839,7 +839,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                 return FALSE;//do not know what country, there for don´t know what fields to show.
                             }
                             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                           $html_string .= $this->getSveaGetPaymentplanHtml($method->virtuemart_paymentmethod_id,$countryCode,$cart->pricesUnformatted['billSub'],$method->shipping_billing);
+                           $html_string .= $this->getSveaGetPaymentplanHtml($method->virtuemart_paymentmethod_id,$countryCode,$cart->pricesUnformatted['billTotal'],$method->shipping_billing);
                            $html[] = $html_string;
                            //svea stuff end
                     }
@@ -1266,7 +1266,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         "lastName" => $ci->lastName,
                         "street"    => $ci->street,
                         "address_2" => $ci->coAddress,
-                        "zipCode"  => (string)$ci->zipCode,
+                        "zipCode"  => $ci->zipCode,
                         "locality"  => $ci->locality,
                         "addressSelector" => $ci->addressSelector,
                         "virtuemart_country_id" => ShopFunctions::getCountryIDByName(JRequest::getVar('countrycode'))
@@ -1297,7 +1297,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
                 $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
                 $formattedPrice   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
-
                 $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params,$currencyId);
                 $display = SveaHelper::getCurrencySymbols($currencyId);
 
