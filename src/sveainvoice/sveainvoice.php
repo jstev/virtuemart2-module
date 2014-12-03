@@ -1215,7 +1215,7 @@
                             "lastName" => $ci->lastName,
                             "street"    => $ci->street,
                             "address_2" => $ci->coAddress,
-                            "zipCode"  => $ci->zipCode,
+                            "zipCode"  => (string)$ci->zipCode,
                             "locality"  => $ci->locality,
                             "addressSelector" => $ci->addressSelector,
                             "virtuemart_country_id" => ShopFunctions::getCountryIDByName(JRequest::getVar('countrycode'))
