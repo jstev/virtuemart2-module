@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<install version="1.5" type="plugin" group="vmpayment" >
+<install version="1.5" type="plugin" group="vmpayment">
     <name>SveaWebPay Card</name>
     <creationDate>January 2014</creationDate>
     <author>Anneli Halld'n, Kristian Grossman-Madsen</author>
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
-    <version>2.4.9</version>
+    <version>2.4.7</version>
     <description>SveaWebPay Card payment plugin for Virtuemart 2</description>
     <files>
 	<filename plugin="sveacard">sveacard.php</filename>
@@ -20,8 +20,12 @@
 		 directory="/plugins/vmpayment/svealib/assets/images"
 		default="default" hide_default="1" hide_none="1"
 		stripext="0"   exclude="^_" />
-
-        <param name="testmode" type="radio" default="1" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
+	<param	name="card_logos" type="vmfiles" label="Cards"
+		description=""
+		 directory="/plugins/vmpayment/svealib/assets/images/cards"
+		default="default" hide_default="1" hide_none="1"
+		stripext="0"   exclude="^_" />
+        <param name="testmode" type="radio" default="visa" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
              <option value="1">COM_VIRTUEMART_YES</option>
              <option value="0">COM_VIRTUEMART_NO</option>
         </param>
