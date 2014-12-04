@@ -433,7 +433,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
 				$method->$method_name = $this->renderPluginName ($method);
 				$svea_string = $this->getPluginHtml ($method, $selected, $methodSalesPrice);
                                 //include svea stuff on editpayment page
-                                $svea_string .= $this->getSveaCardHtml($method->virtuemart_paymentmethod_id,$cart->pricesUnformatted['basePriceWithTax']);
+                                $svea_string .= $this->getSveaCardHtml($method->virtuemart_paymentmethod_id,$cart->pricesUnformatted['basePriceWithTax'],$method->card_logos);
                                 //svea stuff end
                                 $html [] = $svea_string;
 			}
@@ -859,18 +859,20 @@ class plgVmPaymentSveacard extends vmPSPlugin {
      * @param type $countryCode
      * @return string
      */
-    public function getSveaCardHtml($paymentId,$cartTotal) {
-         $imageRoot = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/';
+    public function getSveaCardHtml($paymentId,$cartTotal,$cardLogos) {
+        $imageRoot = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/cards/';
 
         //box for form
         $html = '<fieldset id="svea_card_'.$paymentId.'">
                     <input type="hidden" id="paymenttypesvea_'.$paymentId.'" value="'. $paymentId . '" />
                     <input type="hidden" id="carttotal_'.$paymentId.'" value="'. $cartTotal . '" />
-                   <fieldset>
-                      <img src="'.$imageRoot.'KORTCERT.png" />
-                       <img src="'.$imageRoot.'AMEX.png" />
-                       <img src="'.$imageRoot.'DINERS.png" />
-                  </fieldset>
+                ';
+        if(sizeof($cardLogos) > 0){
+            foreach ($cardLogos as $logo) {
+                $html .= '<img src="'.$imageRoot.$logo.'" />';
+            }
+        }
+        $html .= '
                 </fieldset>';
       //start skript and set vars
         //Document ready start
