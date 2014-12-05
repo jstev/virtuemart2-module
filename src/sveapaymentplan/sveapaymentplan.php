@@ -172,7 +172,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                       ->setCurrency($currency_code_3)
                       ->setClientOrderNumber($order['details']['BT']->order_number)
                       ->setOrderDate(date('c'))
-                      ->usePaymentPlanPayment($session->get("svea__campaigncode__$method->virtuemart_paymentmethod_id"))
+                      ->usePaymentPlanPayment($session->get("svea_campaigncode"))
                         ->doRequest();
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
