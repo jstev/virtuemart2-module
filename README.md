@@ -1,7 +1,7 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
 
-##Version 2.4.11
+##Version 2.4.12
 This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments.
 Admin functions such as Deliver, Confirm, Credit and Cancel orders is implemented into Virtuemarts admin functions.
 This module is updated for the latest payment systems at SveaWebPay.
@@ -243,4 +243,9 @@ As our servers are using SSL certificates, when using POST to fetch the response
 There's a bug in how VirtueMart calculates the discount vat in orders containing products with different tax rates, when a SveaWebPay Invoice fee is applied to the order. The bug involves the discount mean vat rate being calculated incorrectly, due to the invoice fee being included along with the product subtotal in the calculation. The sums are correct, but the vat tax rate is wrong. To workaround this, follow the below procedure:
 
 Create a separate tax rule to use for your invoice fee. In VirtueMart admin, go to the Products and Taxes & Calculation rules. Add a new rule with the following: "Vat tax per product", "+%", <your vat rate>. Then go to Shop -> Payment methods, and for your SveaWebPay Invoice payment method instances set the "Tax" setting to use this vat rule. The Discount vat should now be correct on checkout.
+
+### Onepage Rupostel compatibility fix
+The Svea Virtuemart module will, for fraud reasons, overwrite the billing address. For that reason the Rupostel onepage plugin will go back to checkout to warn the shopper.
+This de-selects the Svea payment. To avoide this from happening, you need to outcomment a section in the onepage code. In file components/com_onepage/controllers/opc.php on row 1814 - 1840 as followed:
+![Rupostel code] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/rupostel_fix.PNG "Rupostel onepage fix")
 
