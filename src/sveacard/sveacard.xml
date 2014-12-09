@@ -11,10 +11,14 @@
     <files>
 	<filename plugin="sveacard">sveacard.php</filename>
     </files>
+    <params addpath="/plugins/vmpayment/svealib/elements"/>
+    <params addpath="/plugins/vmpayment/svealib/svealib/elements"/>
     <params addpath="/administrator/components/com_virtuemart/elements">
 	<param type="vmjpluginwarning" />
         <param type="spacer" default="VMPAYMENT_SVEA_CARD" level="level1"/>
         <param type="spacer" default="VMPAYMENT_SVEA_VERSION" level="level1"/>
+          <!-- gets json from github by elements/svealib -->
+        <param type="getsvealib" level="level1"/>
 	<param	name="payment_logos" type="vmfiles" label="VMPAYMENT_SVEA_LOGOS"
 		description="VMPAYMENT_SVEA_LOGOS_DESC"
 		 directory="/plugins/vmpayment/svealib/assets/images"
