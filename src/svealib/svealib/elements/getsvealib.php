@@ -28,7 +28,7 @@ class JElementGetSvealib extends JElement {
 	var $_name = 'getSvealib';
 
 	function fetchElement ($name, $value, &$node, $control_name) {
-
+                $update_url = "https://github.com/sveawebpay/virtuemart2-module/archive/master.zip";
                 $url = "https://raw.githubusercontent.com/sveawebpay/virtuemart2-module/master/docs/info.json";
                 $json = file_get_contents($url);
                 $data = json_decode($json);
@@ -36,9 +36,10 @@ class JElementGetSvealib extends JElement {
                 if($data->module_version == JText::sprintf('VMPAYMENT_SVEA_VERSION')){
                     $html .= "You have the latest ". $data->module_version . " verson.";
                 }else{
-                    $html .= "UPDATE FOUND! ".$data->module_version;
+                    $html .= "UPDATE FOUND! <br />".$data->module_version;
+                    $img = '<img src="'.JURI::root ().'/plugins/vmpayment/svealib/assets/images/download.png" height="56" widh="56" />';
+                    $html .= "&nbsp;<br /><a href='$update_url'>$img</a>";
                 }
-
                 $html .= "</div>";
 		return $html;
 	}
