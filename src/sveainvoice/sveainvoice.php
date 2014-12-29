@@ -76,6 +76,8 @@
                     $varsToPush = $this->getVarsToPush();
                     $this->setConfigParameterable($this->_configTableFieldName, $varsToPush);
 
+                   
+
             }
 
             /**

@@ -49,7 +49,7 @@ class SveaHelper {
                     ->setVatPercent(intval($taxPercent))
                     ->setName($product->order_item_name)
                     ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
-                    ->setArticleNumber($product->virtuemart_product_id)
+                    ->setArticleNumber($product->order_item_sku)
                     ->setDescription($product->product_attribute)
             );
         }
