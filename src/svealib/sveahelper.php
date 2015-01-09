@@ -50,7 +50,7 @@ class SveaHelper {
                     ->setName($product->order_item_name)
                     ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
                     ->setArticleNumber($product->order_item_sku)
-                    ->setDescription($product->product_attribute)
+//                    ->setDescription($product->product_attribute)//contained json with html, caused problems on descriptionrow in Svea systems
             );
         }
         return $svea;
