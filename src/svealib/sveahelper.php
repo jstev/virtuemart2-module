@@ -45,7 +45,7 @@ class SveaHelper {
              $svea = $svea
                     ->addOrderRow(WebPayItem::orderRow()
                     ->setQuantity(floatval($product->product_quantity))
-                    ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$product->product_item_price,FALSE)))
+                    ->setAmountIncVat(floatval($paymentCurrency->convertCurrencyTo($currency,$product->product_subtotal_with_tax,FALSE)))
                     ->setVatPercent(intval($taxPercent))
                     ->setName($product->order_item_name)
                     ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
@@ -142,9 +142,10 @@ class SveaHelper {
                         break;
                 }
         }
+
         $svea = $svea->addFee(
                         WebPayItem::shippingFee()
-                            ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_shipment,FALSE)))
+                            ->setAmountIncVat(floatval($paymentCurrency->convertCurrencyTo($currency,($order['details']['BT']->order_shipment + $order['details']['BT']->order_shipment_tax),FALSE)))
                             ->setName(JText::sprintf("VMPAYMENT_SVEA_SHIPMENT_FEE"))
                             ->setVatPercent(intval($shippingTaxPercent))
                             ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
@@ -164,7 +165,7 @@ class SveaHelper {
         $svea = $svea->addFee(
                     WebPayItem::invoiceFee()
                         ->setName(JText::sprintf ("VMPAYMENT_SVEA_INVOICEFEE"))
-                        ->setAmountExVat(floatval($paymentCurrency->convertCurrencyTo($currency,$order['details']['BT']->order_payment,FALSE)))
+                        ->setAmountIncVat(floatval($paymentCurrency->convertCurrencyTo($currency,($order['details']['BT']->order_payment + $order['details']['BT']->order_payment_tax),FALSE)))
                         ->setVatPercent(intval($fee_tax_percent))
                         ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
                     );

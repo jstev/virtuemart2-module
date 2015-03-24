@@ -1,6 +1,4 @@
-updated 2014-10-16
-
-Changes in ConfigurationProvider, needs changes in implementation.
+updated 2015-03-24
 
 version
-2.2.3
+2.2.14
