@@ -76,7 +76,7 @@
                     $varsToPush = $this->getVarsToPush();
                     $this->setConfigParameterable($this->_configTableFieldName, $varsToPush);
 
-                   
+
 
             }
 
@@ -232,7 +232,7 @@
                     $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
                     //Print html on thank you page. Will also say "thank you for your order!"
-                    $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
+                    $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/logo/sveaekonomi.png';
                     $html =  '<img src="'.$logoImg.'" /><br /><br />';
                     $html .= '<div class="vmorder-done">' . "\n";
                     $html .= '<div class="vmorder-done-payinfo">'.JText::sprintf('VMPAYMENT_SVEA_INVOICE').'</div>';
@@ -799,18 +799,19 @@
 	protected function displayLogos ($logo_list) {
 
 		$img = "";
-
 		if (!(empty($logo_list))) {
-
-			$url = JURI::root () . 'plugins/vmpayment/svealib/assets/images/';
-
-			//$url = JURI::root () . 'images/stories/virtuemart/' . $this->_psType . '/';
 			if (!is_array ($logo_list)) {
 				$logo_list = (array)$logo_list;
 			}
 			foreach ($logo_list as $logo) {
+                            //get logo from cdn even if logo from folder is selected
+                            if($logo == 'SveaFinans.png'){
+                                $url = "http://cdn.svea.com/sveafinans/rgb_svea-finans_small.png";
+                            } else {
+                                $url = "http://cdn.svea.com/sveaekonomi/rgb_ekonomi_small.png";
+                            }
 				$alt_text = substr ($logo, 0, strpos ($logo, '.'));
-				$img .= '<span class="vmCartPaymentLogo" ><img align="middle" src="' . $url . $logo . '"  alt="' . $alt_text . '" /></span> ';
+				$img .= '<span class="vmCartPaymentLogo" ><img height="50" align="middle" src="' . $url . '' . '"  alt="' . $alt_text . '" /></span> ';
 			}
 		}
 		return $img;
