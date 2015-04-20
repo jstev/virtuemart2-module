@@ -737,8 +737,11 @@ class plgVmPaymentSveadirectbank extends vmPSPlugin {
                 $order['customer_notified'] = 1;
                 $order['comments'] = '';
                 $modelOrder->updateStatusForOneOrder ($virtuemart_order_id, $order, TRUE);
-
-                $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
+                if($countryCode == "NO" || $countryCode == "DK" || $countryCode == "NL"){
+                    $logoImg = "http://cdn.svea.com/sveafinans/rgb_svea-finans_small.png";
+                } else {
+                    $logoImg = "http://cdn.svea.com/sveaekonomi/rgb_ekonomi_small.png";
+                }
                 $html =  '<img src="'.$logoImg.'" /><br /><br />';
                 $html .= '<div class="vmorder-done">' . "\n";
 		$html .= '<div class="vmorder-done-payinfo">'.JText::sprintf('VMPAYMENT_SVEA_DIRECTBANK').'</div>';

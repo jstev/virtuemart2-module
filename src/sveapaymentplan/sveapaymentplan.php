@@ -191,8 +191,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $dbValues['svea_approved_amount']        = $svea->amount;
                 $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
-                  //Print html on thank you page. Will also say "thank you for your order!"
-                 $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/logo/sveaekonomi.png';
+                //Print html on thank you page. Will also say "thank you for your order!"
+                if($countryCode == "NO" || $countryCode == "DK" || $countryCode == "NL"){
+                    $logoImg = "http://cdn.svea.com/sveafinans/rgb_svea-finans_small.png";
+                } else {
+                    $logoImg = "http://cdn.svea.com/sveaekonomi/rgb_ekonomi_small.png";
+                }
 
                 $html =  '<img src="'.$logoImg.'" /><br /><br />';
                 $html .= '<div class="vmorder-done">' . "\n";
