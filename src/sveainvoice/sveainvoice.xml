@@ -23,7 +23,7 @@
         <param type="spacer" default="" level="level1"/>
         <param	name="payment_logos" type="vmfiles" label="VMPAYMENT_SVEA_LOGOS"
                     description="VMPAYMENT_SVEA_LOGOS_DESC"
-                    directory="/plugins/vmpayment/svealib/assets/images"
+                    directory="/plugins/vmpayment/svealib/assets/images/logo"
                     default="default" hide_default="1" hide_none="1"
                     stripext="0"   exclude="^_" />
         <param name="testmode" type="radio" default="1" label="VMPAYMENT_SVEA_TESTMODE" description="VMPAYMENT_SVEA_TESTMODE_DESC">
