@@ -811,7 +811,7 @@
                                 $url = "http://cdn.svea.com/sveaekonomi/rgb_ekonomi_small.png";
                             }
 				$alt_text = substr ($logo, 0, strpos ($logo, '.'));
-				$img .= '<span class="vmCartPaymentLogo" ><img height="50" align="middle" src="' . $url . '' . '"  alt="' . $alt_text . '" /></span> ';
+				$img .= '<span class="vmCartPaymentLogo" ><img height="50" align="middle" src="' . $url . '"  alt="' . $alt_text . '" /></span> ';
 			}
 		}
 		return $img;
