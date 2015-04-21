@@ -42,7 +42,7 @@ if($viewData['svea_paymentplan'] != NULL && $viewData['svea_invoice'] != NULL){
              "><img width="170"
                style="position:absolute;
                      z-index:1;"
-                     src="<?php echo JURI::root(TRUE) ?>/plugins/vmpayment/svealib/assets/images/svea/svea_background.png" />
+                     src="<?php echo JURI::root(TRUE) ?>/plugins/vmpayment/svealib/assets/images/svea/<?php echo $data['logo_background']; ?>.png" />
         </div>
          <div id="svea_price_arrow" style="display:block;">
              <div id="svea_arrow" style="
@@ -59,7 +59,7 @@ if($viewData['svea_paymentplan'] != NULL && $viewData['svea_invoice'] != NULL){
                  display: block;
                 position:absolute;
                  z-index:2;
-                 left:36px;
+                 left:50px;
                  top:26px;
                 color: #002A46;
                 width:auto;

@@ -550,6 +550,16 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 if($activated != 1){
                     return FALSE;
                 }
+                $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
+		$db = JFactory::getDBO();
+		$db->setQuery($q);
+		$currency_code_3 = $db->loadResult();
+                 if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
+                {
+                    $country = ShopFunctions::getCountryByID($method->countries[0],'country_2_code');
+                } else {
+                    return;
+                }
                 foreach ($this->methods as $method) {
                     if($method->product_display == "1"){
                     $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
@@ -599,8 +609,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         }
 
                         $view = array();
+                        $view['logo_background'] = ($country == "NO" || $country == "DK" || $country == "NL") ? "svea_finans_background" : "svea_background";
                         $view['price_list'] = $prices;
-                         $view['lowest_price'] = round($priceList[0]['pricePerMonth']);
+                        $view['lowest_price'] = round($priceList[0]['pricePerMonth']);
                         $view['currency_display'] = $value['symbol'] . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
                         $view['line'] = '<img width="163" height="1" src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/grey_line.png" />';
                         $view['text_from'] = JText::sprintf("VMPAYMENT_SVEA_TEXT_FROM")." ";

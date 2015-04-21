@@ -484,7 +484,7 @@
 
 
                     $view = array();
-
+                    $view['logo_background'] = ($country == "NO" || $country == "DK" || $country == "NL") ? "svea_finans_background" : "svea_background";
                     $view['price_list'] = $prices;
                     $view['lowest_price'] =  round($price,$currency_decimals);
                     $view['currency_display'] =  $display[0]->currency_symbol;
