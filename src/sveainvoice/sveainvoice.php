@@ -542,7 +542,7 @@
          private function svea_get_invoice_lowest($svea_country_code) {
         switch ($svea_country_code) {
             case "SE":
-                return 100;
+                return 50;
                 break;
             case "NO":
                 return 100;

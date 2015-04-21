@@ -581,6 +581,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $objectWithArray['campaignCodes'] = $arrayWithObj;
                 //run thru method to get price per month
                 $currency_decimals = $currency_code_3 == 'EUR' ? 1 : 0;
+                $display = SveaHelper::getCurrencySymbols($method->payment_currency);
                 $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
                     if(sizeof($priceList) > 0){
                         $prices = array();
@@ -599,7 +600,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                                     margin-right: auto;
                                                     float:left;'>
                                                 <strong>".
-                                                    round($value['pricePerMonth'],$currency_decimals) . " ".$value['symbol'] .
+                                                    round($value['pricePerMonth'],$currency_decimals) . " ".$display[0]->currency_symbol .
                                                     "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH").
                                                 "</strong>
                                             </div>
