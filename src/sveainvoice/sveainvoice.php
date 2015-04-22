@@ -484,7 +484,7 @@
 
 
                     $view = array();
-
+                    $view['logo_background'] = ($country == "NO" || $country == "DK" || $country == "NL") ? "svea_finans_background" : "svea_background";
                     $view['price_list'] = $prices;
                     $view['lowest_price'] =  round($price,$currency_decimals);
                     $view['currency_display'] =  $display[0]->currency_symbol;
@@ -542,7 +542,7 @@
          private function svea_get_invoice_lowest($svea_country_code) {
         switch ($svea_country_code) {
             case "SE":
-                return 100;
+                return 50;
                 break;
             case "NO":
                 return 100;
