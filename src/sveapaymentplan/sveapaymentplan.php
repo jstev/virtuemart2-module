@@ -191,8 +191,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $dbValues['svea_approved_amount']        = $svea->amount;
                 $dbValues['svea_expiration_date']        = $svea->expirationDate;
 
-                  //Print html on thank you page. Will also say "thank you for your order!"
-                 $logoImg = JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/sveawebpay.png';
+                //Print html on thank you page. Will also say "thank you for your order!"
+                if($countryCode == "NO" || $countryCode == "DK" || $countryCode == "NL"){
+                    $logoImg = "http://cdn.svea.com/sveafinans/rgb_svea-finans_small.png";
+                } else {
+                    $logoImg = "http://cdn.svea.com/sveaekonomi/rgb_ekonomi_small.png";
+                }
 
                 $html =  '<img src="'.$logoImg.'" /><br /><br />';
                 $html .= '<div class="vmorder-done">' . "\n";
@@ -546,6 +550,16 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 if($activated != 1){
                     return FALSE;
                 }
+                $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
+		$db = JFactory::getDBO();
+		$db->setQuery($q);
+		$currency_code_3 = $db->loadResult();
+                 if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
+                {
+                    $country = ShopFunctions::getCountryByID($method->countries[0],'country_2_code');
+                } else {
+                    return;
+                }
                 foreach ($this->methods as $method) {
                     if($method->product_display == "1"){
                     $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
@@ -567,6 +581,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $objectWithArray['campaignCodes'] = $arrayWithObj;
                 //run thru method to get price per month
                 $currency_decimals = $currency_code_3 == 'EUR' ? 1 : 0;
+                $display = SveaHelper::getCurrencySymbols($method->payment_currency);
                 $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
                     if(sizeof($priceList) > 0){
                         $prices = array();
@@ -585,7 +600,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                                     margin-right: auto;
                                                     float:left;'>
                                                 <strong>".
-                                                    round($value['pricePerMonth'],$currency_decimals) . " ".$value['symbol'] .
+                                                    round($value['pricePerMonth'],$currency_decimals) . " ".$display[0]->currency_symbol .
                                                     "/".JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH").
                                                 "</strong>
                                             </div>
@@ -595,8 +610,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         }
 
                         $view = array();
+                        $view['logo_background'] = ($country == "NO" || $country == "DK" || $country == "NL") ? "svea_finans_background" : "svea_background";
                         $view['price_list'] = $prices;
-                         $view['lowest_price'] = round($priceList[0]['pricePerMonth']);
+                        $view['lowest_price'] = round($priceList[0]['pricePerMonth']);
                         $view['currency_display'] = $value['symbol'] . "/" . JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH");
                         $view['line'] = '<img width="163" height="1" src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/grey_line.png" />';
                         $view['text_from'] = JText::sprintf("VMPAYMENT_SVEA_TEXT_FROM")." ";
@@ -874,8 +890,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 				$logo_list = (array)$logo_list;
 			}
 			foreach ($logo_list as $logo) {
+                              //get logo from cdn even if logo from folder is selected
+                            if($logo == 'SveaFinans.png'){
+                                $url = "http://cdn.svea.com/sveafinans/rgb_svea-finans_small.png";
+                            } else {
+                                $url = "http://cdn.svea.com/sveaekonomi/rgb_ekonomi_small.png";
+                            }
 				$alt_text = substr ($logo, 0, strpos ($logo, '.'));
-				$img .= '<span class="vmCartPaymentLogo" ><img align="middle" src="' . $url . $logo . '"  alt="' . $alt_text . '" /></span> ';
+				$img .= '<span class="vmCartPaymentLogo" ><img align="middle" src="' . $url . '"  alt="' . $alt_text . '" /></span> ';
 			}
 		}
 		return $img;
