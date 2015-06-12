@@ -58,7 +58,7 @@ class SveaHelper {
 
     public static function formatCustomer($svea, $order,$countryCode) {
         $session = JFactory::getSession();
-        $customerType = $session->get("svea_customertype");
+        $customerType = $session->get("svea_customertype_".$order['details']['BT']->virtuemart_paymentmethod_id);
         if($countryCode == "DE" || $countryCode == "NL") // split streetname and housenumber
         {
             $addressArr = Svea\Helper::splitStreetAddress( $order['details']['BT']->address_1 );
@@ -81,16 +81,16 @@ class SveaHelper {
                          ->setIpAddress($order['details']['BT']->ip_address)
                          ->setPhoneNumber(isset($order['details']['BT']->phone_1) ? $order['details']['BT']->phone_1 : $order['details']['BT']->phone_2);
             if($countryCode == "DE" || $countryCode == "NL"){
-                $item = $item->setVatNumber( $session->get("svea_ssn") );
+                $item = $item->setVatNumber( $session->get("svea_ssn_".$order['details']['BT']->virtuemart_paymentmethod_id) );
             }else{
-                $item = $item->setNationalIdNumber( $session->get("svea_ssn"));
-                $item = $item->setAddressSelector($session->get("svea_addressselector"));
+                $item = $item->setNationalIdNumber( $session->get("svea_ssn_".$order['details']['BT']->virtuemart_paymentmethod_id));
+                $item = $item->setAddressSelector($session->get("svea_addressselector_".$order['details']['BT']->virtuemart_paymentmethod_id));
             }
             $svea = $svea->addCustomerDetails($item);
         }else{
             $item = WebPayItem::individualCustomer();
             //send customer filled address to svea. Svea will use address from getAddress for the invoice.
-            $item = $item->setNationalIdNumber( $session->get("svea_ssn"))
+            $item = $item->setNationalIdNumber( $session->get("svea_ssn_".$order['details']['BT']->virtuemart_paymentmethod_id))
                          ->setEmail($order['details']['BT']->email)
                          ->setName($order['details']['BT']->first_name,$order['details']['BT']->last_name)
                          ->setStreetAddress($addressArr[1],$addressArr[2])
@@ -100,10 +100,10 @@ class SveaHelper {
                          ->setPhoneNumber(isset($order['details']['BT']->phone_1) ? $order['details']['BT']->phone_1 : $order['details']['BT']->phone_2);
 
             if($countryCode == "DE" || $countryCode == "NL"){
-                $item = $item->setBirthDate($session->get("svea_birthyear"), $session->get("svea_birthmonth"), $session->get("svea_birthday"));
+                $item = $item->setBirthDate($session->get("svea_birthyear_".$order['details']['BT']->virtuemart_paymentmethod_id), $session->get("svea_birthmonth_".$order['details']['BT']->virtuemart_paymentmethod_id), $session->get("svea_birthday_".$order['details']['BT']->virtuemart_paymentmethod_id));
             }
             if($countryCode == "NL"){
-                $item = $item->setInitials($session->get("svea_initials"));
+                $item = $item->setInitials($session->get("svea_initials_".$order['details']['BT']->virtuemart_paymentmethod_id));
             }
             $svea = $svea->addCustomerDetails($item);
         }

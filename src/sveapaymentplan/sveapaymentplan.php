@@ -172,7 +172,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                       ->setCurrency($currency_code_3)
                       ->setClientOrderNumber($order['details']['BT']->order_number)
                       ->setOrderDate(date('c'))
-                      ->usePaymentPlanPayment($session->get("svea_campaigncode"))
+                      ->usePaymentPlanPayment($session->get("svea_campaigncode_".$order['details']['BT']->virtuemart_paymentmethod_id))
                         ->doRequest();
            } catch (Exception $e) {
                 $html = SveaHelper::errorResponse('',$e->getMessage ());
@@ -710,14 +710,14 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
        {
             $methodId = $request['virtuemart_paymentmethod_id'];
 
-            $countryCode = $request['svea_countryCode_'.$methodId];
+            $countryCode = $request['svea__countryCode__'.$methodId];
 
             // getAddress countries need the addressSelector
             if( $countryCode == 'SE' ||
                 $countryCode == 'DK'
             )
             {
-                if( !array_key_exists( "svea_addressSelector_".$methodId, $request ) )    // no addresselector => did not press getAddress
+                if( !array_key_exists( "svea__addressSelector__".$methodId, $request ) )    // no addresselector => did not press getAddress
                 {
                     throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
@@ -725,10 +725,10 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
             // FI, NO private need SSN
             if( $countryCode == 'FI' ||
-                ($countryCode == 'NO' && $request['svea_customertype_'.$methodId] == 'svea_invoice_customertype_private')
+                ($countryCode == 'NO' && $request['svea__customertype__'.$methodId] == 'svea_invoice_customertype_private')
             )
             {
-                if( $request["svea_ssn_".$methodId] == "" ) // i.e. field was left blank
+                if( $request["svea__ssn__".$methodId] == "" ) // i.e. field was left blank
                 {
                      throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
                 }
@@ -740,9 +740,9 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 $countryCode == 'NL'
             )
             {
-                if( ( $request["svea_birthday_".$methodId] == "" ) ||
-                    ( $request["svea_birthmonth_".$methodId] == "" ) ||
-                    ( $request["svea_birthyear_".$methodId] == "" )
+                if( ( $request["svea__birthday__".$methodId] == "" ) ||
+                    ( $request["svea__birthmonth__".$methodId] == "" ) ||
+                    ( $request["svea__birthyear__".$methodId] == "" )
                 )
                 {
                     throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
@@ -751,7 +751,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             if( $countryCode == 'NL'
             )
             {
-                if( ( $request["svea_initials_".$methodId] == "" )
+                if( ( $request["svea__initials__".$methodId] == "" )
                 )
                 {
                     throw new Exception( JText::sprintf("VMPAYMENT_SVEA_TEXT_REQUIRED_FIELDS") );
@@ -783,7 +783,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                     $svea_attribute = $request_explode[1]; //substr($key, strlen($svea_prefix)+1, -(strlen(strval($methodId))+1) ); // svea_xxx_## => xxx
                     $svea_prefix = $request_explode[0]; //$svea_prefix."_".$svea_attribute;
                     //methodId wasn't the last param, therefore probably an addresselector
-                    $session->set($svea_prefix."_".$svea_attribute, $value);
+                    $session->set($svea_prefix."_".$svea_attribute."_".$methodId, $value);
                 }  elseif (( $request_explode[0] == $svea_prefix) && $methodId == $request_explode[3]) {
 
                     // getAddress countries have the addressSelector address fields set
@@ -794,7 +794,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         $svea_attribute = $request_explode[2];
 
                     }
-                    $session->set($svea_prefix."_".$svea_attribute, $value);
+                    $session->set($svea_prefix."_".$svea_attribute."_".$methodId, $value);
 
                 }
             }
@@ -1025,12 +1025,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 //              if($session->get('svea_fullName') != '' && $session->get('svea_fullName') != NULL) { $cart->BT['company'] = $session->get('svea_fullName'); }
 
 //            }
-            if($session->get('svea_firstName') != '' && $session->get('svea_firstName') != NULL) { $cart->BT['first_name'] = $session->get('svea_firstName'); }
-            if($session->get('svea_lastName') != '' && $session->get('svea_lastName') != NULL) { $cart->BT['last_name'] = $session->get('svea_lastName'); }
-            if($session->get('svea_street') != '' && $session->get('svea_street') != NULL) { $cart->BT['address_1'] = $session->get('svea_street'); }
-            if($session->get('svea_address_2') != '' && $session->get('svea_address_2') != NULL) { $cart->BT['address_2'] = $session->get('svea_address_2'); }
-            if($session->get('svea_zipCode') != '' && $session->get('svea_zipCode') != NULL) { $cart->BT['zip'] = $session->get('svea_zipCode'); }
-            if($session->get('svea_locality') != '' && $session->get('svea_locality') != NULL) { $cart->BT['city'] = $session->get('svea_locality'); }
+            if($session->get('svea_firstName_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_firstName_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->BT['first_name'] = $session->get('svea_firstName_'.$cart->virtuemart_paymentmethod_id); }
+            if($session->get('svea_lastName_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_lastName_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->BT['last_name'] = $session->get('svea_lastName_'.$cart->virtuemart_paymentmethod_id); }
+            if($session->get('svea_street_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_street_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->BT['address_1'] = $session->get('svea_street_'.$cart->virtuemart_paymentmethod_id); }
+            if($session->get('svea_address_2_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_address_2_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->BT['address_2'] = $session->get('svea_address_2_'.$cart->virtuemart_paymentmethod_id); }
+            if($session->get('svea_zipCode_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_zipCode_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->BT['zip'] = $session->get('svea_zipCode_'.$cart->virtuemart_paymentmethod_id); }
+            if($session->get('svea_locality_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_locality_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->BT['city'] = $session->get('svea_locality_'.$cart->virtuemart_paymentmethod_id); }
 
 
 //            $cart->BT['virtuemart_country_id'] =
@@ -1044,12 +1044,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 //                {
 //                    if($session->get('svea_fullName') != '' && $session->get('svea_fullName') != NULL) { $cart->ST['company'] = $session->get('svea_fullName'); }
 //                }
-                    if($session->get('svea_firstName') != '' && $session->get('svea_firstName') != NULL) { $cart->ST['first_name'] = $session->get('svea_firstName'); }
-                    if($session->get('svea_lastName') != '' && $session->get('svea_lastName') != NULL) { $cart->ST['last_name'] = $session->get('svea_lastName'); }
-                    if($session->get('svea_street') != '' && $session->get('svea_street') != NULL) { $cart->ST['address_1'] = $session->get('svea_street'); }
-                    if($session->get('svea_address_2') != '' && $session->get('svea_address_2') != NULL) { $cart->ST['address_2'] = $session->get('svea_address_2'); }
-                    if($session->get('svea_zipCode') != '' && $session->get('svea_zipCode') != NULL) { $cart->ST['zip'] = $session->get('svea_zipCode'); }
-                    if($session->get('svea_locality') != '' && $session->get('svea_locality') != NULL) { $cart->ST['city'] = $session->get('svea_locality'); }
+                    if($session->get('svea_firstName_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_firstName_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->ST['first_name'] = $session->get('svea_firstName_'.$cart->virtuemart_paymentmethod_id); }
+                    if($session->get('svea_lastName_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_lastName_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->ST['last_name'] = $session->get('svea_lastName_'.$cart->virtuemart_paymentmethod_id); }
+                    if($session->get('svea_street_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_street_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->ST['address_1'] = $session->get('svea_street_'.$cart->virtuemart_paymentmethod_id); }
+                    if($session->get('svea_address_2_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_address_2_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->ST['address_2'] = $session->get('svea_address_2_'.$cart->virtuemart_paymentmethod_id); }
+                    if($session->get('svea_zipCode_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_zipCode_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->ST['zip'] = $session->get('svea_zipCode_'.$cart->virtuemart_paymentmethod_id); }
+                    if($session->get('svea_locality_'.$cart->virtuemart_paymentmethod_id) != '' && $session->get('svea_locality_'.$cart->virtuemart_paymentmethod_id) != NULL) { $cart->ST['city'] = $session->get('svea_locality_'.$cart->virtuemart_paymentmethod_id); }
 
 //                $cart->ST['virtuemart_country_id'] =
 //                $session->get('svea_virtuemart_country_id', !empty($cart->BT['virtuemart_country_id']) ? $cart->BT['virtuemart_country_id'] : $countryId);
