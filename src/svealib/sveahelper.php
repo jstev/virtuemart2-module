@@ -45,7 +45,7 @@ class SveaHelper {
              $svea = $svea
                     ->addOrderRow(WebPayItem::orderRow()
                     ->setQuantity(floatval($product->product_quantity))
-                    ->setAmountIncVat(floatval($paymentCurrency->convertCurrencyTo($currency,$product->product_subtotal_with_tax,FALSE)))
+                    ->setAmountIncVat(floatval($paymentCurrency->convertCurrencyTo($currency,$product->product_final_price,FALSE)))
                     ->setVatPercent(intval($taxPercent))
                     ->setName($product->order_item_name)
                     ->setUnit(JText::sprintf ("VMPAYMENT_SVEA_UNIT"))
