@@ -233,7 +233,6 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 }
                 $this->storePSPluginInternalData($dbValues);
                 $order['customer_notified'] = 1;
-                $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
                   //Overwrite billto address
                 SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
@@ -241,6 +240,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                 if($method->shipping_billing == '1' && $cart->STsameAsBT == 0){
                     SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
                 }
+                //Do this after updating order address to send confirmation to the correct one
+                 $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
             }
             else {
                 $order['customer_notified'] = 0;
