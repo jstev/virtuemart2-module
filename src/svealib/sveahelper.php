@@ -84,7 +84,7 @@ class SveaHelper {
                 $item = $item->setVatNumber( $session->get("svea_ssn_".$order['details']['BT']->virtuemart_paymentmethod_id) );
             }else{
                 $item = $item->setNationalIdNumber( $session->get("svea_ssn_".$order['details']['BT']->virtuemart_paymentmethod_id));
-                $item = $item->setAddressSelector($session->get("svea_addressselector_".$order['details']['BT']->virtuemart_paymentmethod_id));
+                $item = $item->setAddressSelector($session->get("svea_addressSelector_".$order['details']['BT']->virtuemart_paymentmethod_id));
             }
             $svea = $svea->addCustomerDetails($item);
         }else{
