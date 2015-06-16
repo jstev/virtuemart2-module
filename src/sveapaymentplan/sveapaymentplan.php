@@ -272,7 +272,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 		$html .= $this->getHtmlHeaderBE();
                 $html .= $this->getHtmlRowBE('VMPAYMENT_SVEA_PAYMENTMETHOD', $paymentTable->payment_name);
 //                $html .= '<tr class="row2"><td>' . JText::sprintf('VMPAYMENT_SVEA_INVOICEFEE').'</td><td align="left">'. $paymentTable->cost_per_transaction.'</td></tr>';
-                $html .= $this->getHtmlRowBE('Approved amount', $paymentTable->svea_approved_amount);
+                $html .= $this->getHtmlRowBE('Approved amount', $paymentTable->svea_approved_amount . " " . $paymentTable->payment_currency);
                 $html .= $this->getHtmlRowBE('Expiration date', $paymentTable->svea_expiration_date);
                 $html .= $this->getHtmlRowBE('Svea order id', $paymentTable->svea_order_id);
                 $html .= $this->getHtmlRowBE('Svea contract number', $paymentTable->svea_contract_number);

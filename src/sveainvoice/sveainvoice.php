@@ -307,7 +307,7 @@
                     $html .= $this->getHtmlHeaderBE();
                     $html .= $this->getHtmlRowBE( 'VMPAYMENT_SVEA_PAYMENTMETHOD',$paymentTable->payment_name);
                     $html .= $this->getHtmlRowBE('VMPAYMENT_SVEA_INVOICEFEE',$paymentTable->cost_per_transaction);
-                    $html .= $this->getHtmlRowBE('Approved amount',$paymentTable->svea_approved_amount);
+                    $html .= $this->getHtmlRowBE('Approved amount',$paymentTable->svea_approved_amount . " " . $paymentTable->payment_currency);
                     $html .= $this->getHtmlRowBE('Expiration date',$paymentTable->svea_expiration_date);
                     $html .= $this->getHtmlRowBE('Svea order id',$paymentTable->svea_order_id);
                     $html .= $this->getHtmlRowBE('Svea invoice id',$paymentTable->svea_invoice_id);

@@ -263,7 +263,7 @@ class plgVmPaymentSveacard extends vmPSPlugin {
                 $html = '<table class="adminlist">' . "\n";
 		$html .= $this->getHtmlHeaderBE();
                 $html .= $this->getHtmlRowBE('VMPAYMENT_SVEA_PAYMENTMETHOD', $paymentTable->payment_name);
-                $html .= $this->getHtmlRowBE('Amount', $paymentTable->payment_order_total);
+                $html .= $this->getHtmlRowBE('Amount', $paymentTable->payment_order_total . " " . $paymentTable->payment_currency);
                 $html .= $this->getHtmlRowBE('Transaction id', $paymentTable->svea_transaction_id);
 		$html .= '</table>' . "\n";
 		return $html;
