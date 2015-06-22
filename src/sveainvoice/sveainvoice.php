@@ -270,7 +270,6 @@
                     }
                     $this->storePSPluginInternalData($dbValues);
                     $order['customer_notified'] = 1;
-                    $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
 
                      //Overwrite billto address
                     SveaHelper::updateBTAddress($svea, $order['details']['BT']->virtuemart_order_id);
@@ -278,6 +277,8 @@
                     if($method->shipping_billing == '1' && $cart->STsameAsBT == 0){
                         SveaHelper::updateSTAddress($svea, $order['details']['BT']->virtuemart_order_id);
                     }
+                    //Do this after updating order address to send confirmation to the correct one
+                     $modelOrder->updateStatusForOneOrder ($order['details']['BT']->virtuemart_order_id, $order, TRUE);
                 }  else {
                     $order['customer_notified'] = 0;
                     $order['order_status'] = $method->status_denied;
@@ -306,7 +307,7 @@
                     $html .= $this->getHtmlHeaderBE();
                     $html .= $this->getHtmlRowBE( 'VMPAYMENT_SVEA_PAYMENTMETHOD',$paymentTable->payment_name);
                     $html .= $this->getHtmlRowBE('VMPAYMENT_SVEA_INVOICEFEE',$paymentTable->cost_per_transaction);
-                    $html .= $this->getHtmlRowBE('Approved amount',$paymentTable->svea_approved_amount);
+                    $html .= $this->getHtmlRowBE('Approved amount',$paymentTable->svea_approved_amount . " " . $paymentTable->payment_currency);
                     $html .= $this->getHtmlRowBE('Expiration date',$paymentTable->svea_expiration_date);
                     $html .= $this->getHtmlRowBE('Svea order id',$paymentTable->svea_order_id);
                     $html .= $this->getHtmlRowBE('Svea invoice id',$paymentTable->svea_invoice_id);
@@ -700,16 +701,16 @@
                     //methodId wasn't the last param, therefore probably an addresselector
                     }  elseif (( $request_explode[0] == $svea_prefix) && $methodId == $request_explode[3]) {
                                                 // getAddress countries have the addressSelector address fields set
-                        if( $countryCode == 'SE' ||
+                        if( ($countryCode == 'SE' ||
                             $countryCode == 'DK' ||
-                            ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_company')
+                            ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_company')) &&
+                            $request_explode[1] ==  $session->get($svea_prefix."_addressSelector_".$methodId) //is this the selected addressSelector?
                         )
                         {
                             $svea_attribute = $request_explode[2];
+                            $session->set($svea_prefix."_".$svea_attribute."_".$methodId, $value);
                         }
-                     $session->set($svea_prefix."_".$svea_attribute."_".$methodId, $value);
                     }
-
                 }
             }
 

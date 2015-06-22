@@ -1,7 +1,7 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
 
-##Version 2.4.18
+##Version 2.4.19
 This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments.
 Admin functions such as Deliver, Confirm, Credit and Cancel orders is implemented into Virtuemarts admin functions.
 This module is updated for the latest payment systems at SveaWebPay.
@@ -20,8 +20,7 @@ These instructions detail how to install the various SveaWebPay payment methods 
 
 We assume that you have a working installation of Joomla and Virtuemart 2 to begin with.
 
-Note: if you are upgrading from an older version of the module, make sure to delete the paymentmethod before installing the new module.
-You then need to create a new paymentmethod and refill in the form with your credentials.
+Note: if you are upgrading from an older version of the module, make sure to delete the old paymentmethod instances (taking note of your settings) before upgrading to the new module. You then need to re-create your paymentmethods and re-enter your settings.
 
 ### Installing the SveaWebPay Payment Methods in VirtueMart 2
 
@@ -79,7 +78,7 @@ For countries where Get Address functionality is provided, we will also pre-fill
 * Status Order Delivered -- the virtuemart status given to an order after it has been (auto-)delivered to SveaWebPay.
 
 * SveaWebPay invoice fee -- if you charge extra for orders made with this payment method, set the fee, excluding tax, here.
-* Tax -- select the invoice fee tax rate from the dropdown list. See also under Troubleshooting below.
+* Tax -- select the invoice fee tax rate from the dropdown list. The tax rate should be applicable in the same name as the payment method instance client id used. See also under Troubleshooting below.
 * Show Product Price Widget -- If set to true, the Svea Product Price Widget will be shown on product pages, displaying the minimum invoice amount to pay. Note: Only applicable if Svea buys the invoices, and for private customers. Only applies in Sweden, Norway, Finland and the Netherlands (see Product Price Widget threshold below). Please contact your Svea account manager if you have further questions.
 * Product Price Widget threshold -- If Show Product Price Widget is set to true, the Svea Product Price Widget will be displayed if the product price equals or exceeds this amount. If not set, the Product Price Widget will be displayed regardless of product price.
 - **Limitations:** You can only have the widget activated on one Invoice method to apply this feature.
@@ -162,7 +161,7 @@ Install one or more instances of the SveaWebPay Card payment method. The instanc
 ### SveaWebPay Direct Bank payment
 Install one or more instances of the SveaWebPay Direct Bank payment method. The instances will be presented to all users regardless of registration status.
 
-#### C Information tab settings
+#### Direct Bank Information tab settings
 ![SveaWebPay Direct Bank Information tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Direct_information.PNG "SveaWebPay Direct Bank Information tab")
 
 * Payment Name -- set to "SveaWebPay Direkt Bank" or the equivalent in your language.
@@ -173,7 +172,7 @@ Install one or more instances of the SveaWebPay Direct Bank payment method. The 
 * Shopper Group -- if needed, set the shopper group here.
 * List Order -- defines the order in which the available payment methods are presented to the user.
 
-#### Card Configuration tab settings
+#### Direct Bank Configuration tab settings
 ![SveaWebPay Direct Bank Configuration tab] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/Direct_configuration.PNG "SveaWebPay Direct Bank Configuration tab")
 
 * Logos -- select the logo file corresponding to the payment method instance language from the dropdown list.
@@ -249,3 +248,5 @@ The Svea Virtuemart module will, for fraud reasons, overwrite the billing addres
 This de-selects the Svea payment. To avoide this from happening, you need to outcomment a section in the onepage code. In file components/com_onepage/controllers/opc.php on row 1814 - 1840 as followed:
 ![Rupostel code] (https://raw.github.com/sveawebpay/virtuemart2-module/develop/docs/image/rupostel_fix.PNG "Rupostel onepage fix")
 
+### Tax rules: invoice and payment plan supported tax rate types
+For the invoice and payment plan payment methods (only), the SveaWebPay module only supports Tax & Calculation Rules using the "Tax" and "VatTax" Types of Arithmetic Operation.
