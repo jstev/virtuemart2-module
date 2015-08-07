@@ -1304,36 +1304,32 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
         //Get payment plan params request
         elseif(JRequest::getVar('type') == 'getParams'){
-              if (!class_exists ('CurrencyDisplay')) {
-			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
-		}
-                $objectWithArray = $this->getStoredCampaigns($method);
-                $price = JRequest::getVar('sveacarttotal');
-                $CurrencyCode = SveaHelper::getCurrencyCodeByCountry(JRequest::getVar('countrycode'));
-                $currencyId = ShopFunctions::getCurrencyIDByName($CurrencyCode);
+            if (!class_exists ('CurrencyDisplay')) {
+                require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
+            }
+            $objectWithArray = $this->getStoredCampaigns($method);
+            $price = JRequest::getVar('sveacarttotal');
+            $CurrencyCode = SveaHelper::getCurrencyCodeByCountry(JRequest::getVar('countrycode'));
+            $currencyId = ShopFunctions::getCurrencyIDByName($CurrencyCode);
 
-                $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
-                $formattedPrice   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
-                $campaigns = SveaHelper::paymentPlanPricePerMonth($formattedPrice, (object)$objectWithArray,$currencyId);
-                $display = SveaHelper::getCurrencySymbols($currencyId);
+            $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
+            $formattedPrice   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
+            $campaigns = SveaHelper::paymentPlanPricePerMonth($formattedPrice, (object)$objectWithArray,$currencyId);
+            $display = SveaHelper::getCurrencySymbols($currencyId);
 
-                if(sizeof($campaigns->values) > 0){
-                    foreach ($campaigns->values as $cc){
-                    $returnArray[] = array("campaignCode" => $cc['campaignCode'],
-                                            "description" => $cc['description'],
-                                            "price_per_month" => round($cc['pricePerMonth'],$display[0]->currency_decimal_place) ." ". $display[0]->currency_symbol. "/",
-                                            "per_month" => JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
-                                        );
+            if(sizeof($campaigns->values) > 0){
+                foreach ($campaigns->values as $cc){
+                $returnArray[] = array("campaignCode" => $cc['campaignCode'],
+                                        "description" => $cc['description'],
+                                        "price_per_month" => round($cc['pricePerMonth'],$display[0]->currency_decimal_place) ." ". $display[0]->currency_symbol. "/",
+                                        "per_month" => JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
+                                    );
 
-                    }
-                }else{
-                     $returnArray = array("svea_error" => "error");
                 }
-
-//            }
-
+            }else{
+                 $returnArray = array("svea_error" => "error");
+            }
         }
-
         echo json_encode($returnArray);
         jexit();
     }

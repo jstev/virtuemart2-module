@@ -33,9 +33,9 @@ class JElementGetSvealib extends JElement {
                 $json = file_get_contents($url);
                 $data = json_decode($json);
                 $html .= "<div>";
-                if($data->module_version == JText::sprintf('VMPAYMENT_SVEA_VERSION')){
-                    $html .= "You have the latest ". $data->module_version . " verson.";
-                }else{
+                if($data->module_version <= JText::sprintf('VMPAYMENT_SVEA_VERSION')){
+                    $html .= "You have the latest ". $data->module_version . " version.";
+                }elseif ($data->module_version > JText::sprintf('VMPAYMENT_SVEA_VERSION')) {
                     $html .= "UPDATE FOUND! <br />".$data->module_version;
                     $img = '<img src="'.JURI::root ().'/plugins/vmpayment/svealib/assets/images/download.png" height="56" widh="56" />';
                     $html .= "&nbsp;<br /><a href='$update_url'>$img</a>";
