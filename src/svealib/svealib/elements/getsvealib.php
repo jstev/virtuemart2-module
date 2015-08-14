@@ -36,7 +36,7 @@ class JElementGetSvealib extends JElement {
                 $html .= "<div>Version: $this->sveaVersion</div><br />";
                 $html .= "<div>";
                 if($data->module_version <= $this->sveaVersion){
-                    $html .= "You have the latest ". $this->sveaVersion . " version.";
+                    $html .= "You have the latest version.";
                 }elseif ($data->module_version > $this->sveaVersion) {
                     $html .= "UPDATE FOUND! <br />".$data->module_version;
                     $img = '<img src="'.JURI::root ().'/plugins/vmpayment/svealib/assets/images/download.png" height="56" widh="56" />';
