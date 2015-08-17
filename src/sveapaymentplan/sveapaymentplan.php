@@ -1317,8 +1317,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             $campaigns = SveaHelper::paymentPlanPricePerMonth($formattedPrice, (object)$objectWithArray,$currencyId);
             $display = SveaHelper::getCurrencySymbols($currencyId);
 
-            if(sizeof($campaigns->values) > 0){
-                foreach ($campaigns->values as $cc){
+            if(sizeof($campaigns) > 0){
+                foreach ($campaigns as $cc){
                 $returnArray[] = array("campaignCode" => $cc['campaignCode'],
                                         "description" => $cc['description'],
                                         "price_per_month" => round($cc['pricePerMonth'],$display[0]->currency_decimal_place) ." ". $display[0]->currency_symbol. "/",
