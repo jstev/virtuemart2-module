@@ -538,52 +538,35 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
 	function plgVmOnProductDisplayPayment ($product, &$productDisplay) {
             $vendorId = 1;
-		if ($this->getPluginMethods ($vendorId) === 0) {
-			return FALSE;
-		}
-                $activated = 0;
-                foreach ($this->methods as $method) {
-
-                    if($method->product_display == "1")
-                        $activated++;
-                }
-                //Svea restrictions: Widget can only be active for one instance of Svea Invoice
-                if($activated != 1){
+            if ($this->getPluginMethods ($vendorId) === 0) {
                     return FALSE;
-                }
-                $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
-		$db = JFactory::getDBO();
-		$db->setQuery($q);
-		$currency_code_3 = $db->loadResult();
-                 if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
-                {
-                    $country = ShopFunctions::getCountryByID($method->countries[0],'country_2_code');
-                } else {
-                    return;
-                }
-                foreach ($this->methods as $method) {
-                    if($method->product_display == "1"){
-                    $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
-                            `monthlyAnnuityFactor`,`initialFee`, `notificationFee`,`interestRatePercent`,
-                            `numberOfInterestFreeMonths`,`numberOfPaymentFreeMonths`,`fromAmount`,`toAmount`
-                        FROM `#__svea_params_table`
-                        WHERE `timestamp`=(SELECT MAX(timestamp) FROM `#__svea_params_table` WHERE  `paymentmethodid` = '".$method->virtuemart_paymentmethod_id."' )
-                        AND  `paymentmethodid` = '".$method->virtuemart_paymentmethod_id."'
-                        ORDER BY `monthlyAnnuityFactor` ASC";
+            }
+            $activated = 0;
+            foreach ($this->methods as $method) {
 
-                $db = JFactory::getDBO();
-                $db->setQuery($q);
-                $params = $db->loadAssocList();
-                //rebuild list to fit svea paymentPlanPricePerMonth param type
-                $arrayWithObj = array();
-                foreach ($params as $campaign) {
-                    $arrayWithObj[] = (object)$campaign;
-                }
-                $objectWithArray['campaignCodes'] = $arrayWithObj;
-                //run thru method to get price per month
-                $currency_decimals = $currency_code_3 == 'EUR' ? 1 : 0;
-                $display = SveaHelper::getCurrencySymbols($method->payment_currency);
-                $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
+                if($method->product_display == "1")
+                    $activated++;
+            }
+            //Svea restrictions: Widget can only be active for one instance of Svea Invoice
+            if($activated != 1){
+                return FALSE;
+            }
+            $q  = 'SELECT `currency_code_3` FROM `#__virtuemart_currencies` WHERE `virtuemart_currency_id`="' . $method->payment_currency . '" ';
+            $db = JFactory::getDBO();
+            $db->setQuery($q);
+            $currency_code_3 = $db->loadResult();
+             if( sizeof($method->countries)== 1 ) // single country configured in payment method, use this for unregistered users
+            {
+                $country = ShopFunctions::getCountryByID($method->countries[0],'country_2_code');
+            } else {
+                return;
+            }
+            foreach ($this->methods as $method) {
+                if($method->product_display == "1"){
+                    $objectWithArray = $this->getStoredCampaigns($method);
+                    $currency_decimals = $currency_code_3 == 'EUR' ? 1 : 0;
+                    $display = SveaHelper::getCurrencySymbols($method->payment_currency);
+                    $priceList = SveaHelper::paymentPlanPricePerMonth($product->prices['salesPrice'], (object)$objectWithArray,$method->payment_currency);
                     if(sizeof($priceList) > 0){
                         $prices = array();
                         $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">'.
@@ -668,6 +651,27 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
             return TRUE;
 	}
 
+        public function getStoredCampaigns($method) {
+            $q = "SELECT `campaignCode`,`description`,`paymentPlanType`,`contractLengthInMonths`,
+                `monthlyAnnuityFactor`,`initialFee`, `notificationFee`,`interestRatePercent`,
+                `numberOfInterestFreeMonths`,`numberOfPaymentFreeMonths`,`fromAmount`,`toAmount`
+                FROM `#__svea_params_table`
+                WHERE `timestamp`=(SELECT MAX(timestamp) FROM `#__svea_params_table` WHERE  `paymentmethodid` = '".$method->virtuemart_paymentmethod_id."' )
+                AND  `paymentmethodid` = '".$method->virtuemart_paymentmethod_id."'
+                ORDER BY `monthlyAnnuityFactor` ASC";
+
+                $db = JFactory::getDBO();
+                $db->setQuery($q);
+                $params = $db->loadAssocList();
+                //rebuild list to fit svea paymentPlanPricePerMonth param type
+                $arrayWithObj = array();
+                foreach ($params as $campaign) {
+                    $arrayWithObj[] = (object)$campaign;
+                }
+                $objectWithArray['campaignCodes'] = $arrayWithObj;
+
+                return $objectWithArray;
+        }
 
         /**
 	 * This event is fired after the payment method has been selected. It can be used to store
@@ -1300,46 +1304,32 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 
         //Get payment plan params request
         elseif(JRequest::getVar('type') == 'getParams'){
-              if (!class_exists ('CurrencyDisplay')) {
-			require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
-		}
-            $svea_params = WebPay::getPaymentPlanParams($sveaConfig);
-            try {
-                 $svea_params = $svea_params->setCountryCode(JRequest::getVar('countrycode'))
-                    ->doRequest();
-            } catch (Exception $e) {
-                 vmError ($e->getMessage (), $e->getMessage ());
-                    return NULL;
+            if (!class_exists ('CurrencyDisplay')) {
+                require(JPATH_VM_ADMINISTRATOR . DS . 'helpers' . DS . 'currencydisplay.php');
             }
-          if(isset($svea_params->errormessage) === true && $svea_params->errormessage !== ''){
-                $returnArray = array("svea_error" => "Svea error: " .$svea_params->errormessage);
-            } else {
-                $price = JRequest::getVar('sveacarttotal');
-                $CurrencyCode = SveaHelper::getCurrencyCodeByCountry(JRequest::getVar('countrycode'));
-                $currencyId = ShopFunctions::getCurrencyIDByName($CurrencyCode);
+            $objectWithArray = $this->getStoredCampaigns($method);
+            $price = JRequest::getVar('sveacarttotal');
+            $CurrencyCode = SveaHelper::getCurrencyCodeByCountry(JRequest::getVar('countrycode'));
+            $currencyId = ShopFunctions::getCurrencyIDByName($CurrencyCode);
 
-                $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
-                $formattedPrice   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
-                $campaigns = WebPay::paymentPlanPricePerMonth($formattedPrice, $svea_params,$currencyId);
-                $display = SveaHelper::getCurrencySymbols($currencyId);
+            $paymentCurrency = CurrencyDisplay::getInstance($currencyId);
+            $formattedPrice   = $paymentCurrency->convertCurrencyTo($currencyId,$price,FALSE);
+            $campaigns = SveaHelper::paymentPlanPricePerMonth($formattedPrice, (object)$objectWithArray,$currencyId);
+            $display = SveaHelper::getCurrencySymbols($currencyId);
 
-                if(sizeof($campaigns->values) > 0){
-                    foreach ($campaigns->values as $cc){
-                    $returnArray[] = array("campaignCode" => $cc['campaignCode'],
-                                            "description" => $cc['description'],
-                                            "price_per_month" => round($cc['pricePerMonth'],$display[0]->currency_decimal_place) ." ". $display[0]->currency_symbol. "/",
-                                            "per_month" => JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
-                                        );
+            if(sizeof($campaigns) > 0){
+                foreach ($campaigns as $cc){
+                $returnArray[] = array("campaignCode" => $cc['campaignCode'],
+                                        "description" => $cc['description'],
+                                        "price_per_month" => round($cc['pricePerMonth'],$display[0]->currency_decimal_place) ." ". $display[0]->currency_symbol. "/",
+                                        "per_month" => JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_MONTH")
+                                    );
 
-                    }
-                }else{
-                     $returnArray = array("svea_error" => "error");
                 }
-
+            }else{
+                 $returnArray = array("svea_error" => "error");
             }
-
         }
-
         echo json_encode($returnArray);
         jexit();
     }

@@ -6,7 +6,7 @@
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
-    <version>2.4.19</version>
+    <version>2.4.20</version>
     <description>SveaWebPay Card payment plugin for Virtuemart 2</description>
     <files>
 	<filename plugin="sveacard">sveacard.php</filename>
@@ -16,7 +16,7 @@
     <params addpath="/administrator/components/com_virtuemart/elements">
 	<param type="vmjpluginwarning" />
         <param type="spacer" default="VMPAYMENT_SVEA_CARD" level="level1"/>
-        <param type="spacer" default="VMPAYMENT_SVEA_VERSION" level="level1"/>
+        <!--<param type="spacer" default="VMPAYMENT_SVEA_VERSION" level="level1"/>-->
         <param type="spacer" default="" level="level1"/>
         <!-- gets json from github by elements/svealib -->
         <param type="getsvealib" level="level1"/>
