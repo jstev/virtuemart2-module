@@ -779,7 +779,7 @@
                             return FALSE; //do not know what country, therefore don´t know what fields to show.
                         }
                         $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                        $html_string .= $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id,$countryCode,$method->shipping_billing);
+                        $html_string .= $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id,$countryCode,$method->shipping_billing,$method->payment_info);
                         $html[] = $html_string;
                         //svea stuff end
                     }
@@ -1239,7 +1239,7 @@
          * Svea GetAddress view for html and jQuery
          * @return string
          */
-        public function getSveaGetAddressHtml($paymentId,$countryCode,$shipping_billing) {
+        public function getSveaGetAddressHtml($paymentId,$countryCode,$shipping_billing,$paymentInfo) {
             $session = JFactory::getSession();
             $inputFields = '';
             $getAddressButton = '';
@@ -1384,6 +1384,7 @@
                     '<div id="svea_getaddress_error_'.$paymentId.'" style="color: red; "></div>'
                     .$getAddressButton.
                     '<div id="svea_address_div_'.$paymentId.'"></div>
+                    <div id="svea_paymentinfo_'.$paymentId.'">'.$paymentInfo.'</div>
                 </fieldset>
                 <input type="hidden" name="svea_shipping_billing" id="svea_shipping_billing_'.$paymentId.'" value="'.$shipping_billing.'" />
             ';

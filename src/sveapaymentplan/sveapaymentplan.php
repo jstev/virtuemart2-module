@@ -860,7 +860,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                                 return FALSE;//do not know what country, there for don´t know what fields to show.
                             }
                             $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                           $html_string .= $this->getSveaGetPaymentplanHtml($method->virtuemart_paymentmethod_id,$countryCode,$cart->pricesUnformatted['billTotal'],$method->shipping_billing);
+                           $html_string .= $this->getSveaGetPaymentplanHtml($method->virtuemart_paymentmethod_id,$countryCode,$cart->pricesUnformatted['billTotal'],$method->shipping_billing,$method->payment_info);
                            $html[] = $html_string;
                            //svea stuff end
                     }
@@ -1340,7 +1340,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
      * @param type $countryCode
      * @return string
      */
-    public function getSveaGetPaymentplanHtml($paymentId,$countryCode,$cartTotal,$shipping_billing) {
+    public function getSveaGetPaymentplanHtml($paymentId,$countryCode,$cartTotal,$shipping_billing,$paymentInfo) {
         $session = JFactory::getSession();
         $sveaUrlAjax = juri::root () . 'index.php?option=com_virtuemart&view=plugin&vmtype=vmpayment&name=sveapaymentplan';
         $inputFields = '';
@@ -1430,6 +1430,7 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                        .$getAddressButton.
                        ' <div id="svea_address_div_'.$paymentId.'"></div>
                        <ul id="svea_params_div_'.$paymentId.'" style="list-style-type: none;"></ul>
+                         <div id="svea_paymentinfo_'.$paymentId.'">'.$paymentInfo.'</div>
                 </fieldset>
                 <input type="hidden" name="svea_shipping_billing" id="svea_shipping_billing_'.$paymentId.'" value="'.$shipping_billing.'" />
                 ';
