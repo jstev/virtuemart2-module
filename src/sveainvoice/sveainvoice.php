@@ -435,7 +435,6 @@
             }
             $activated = 0;
             foreach ($this->methods as $method) {
-
                 if($method->product_display == "1")
                     $activated++;
             }
@@ -478,7 +477,8 @@
                                                 margin-right: auto;
                                                 float:left;">
                                         <strong >'.
-                                          round($price,$currency_decimals)." ".$display[0]->currency_symbol.
+                                          number_format(round($price, 1,PHP_ROUND_HALF_EVEN),$currency_decimals,"."," ").
+                                         " ".$display[0]->currency_symbol.
                                         '</strong>
                                     </div>
                                 </div>';
@@ -487,7 +487,8 @@
                     $view = array();
                     $view['logo_background'] = ($country == "NO" || $country == "DK" || $country == "NL") ? "svea_finans_background" : "svea_background";
                     $view['price_list'] = $prices;
-                    $view['lowest_price'] =  round($price,$currency_decimals);
+                    $view['lowest_price'] =    number_format(round($price, 1,PHP_ROUND_HALF_EVEN),$currency_decimals,"."," ");
+//                    $view['lowest_price'] =  round($price,$currency_decimals);
                     $view['currency_display'] =  $display[0]->currency_symbol;
                     $view['line'] = '<img width="163" height="1" src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/grey_line.png" />';
                     $view['text_from'] = JText::sprintf("VMPAYMENT_SVEA_TEXT_FROM")." ";
