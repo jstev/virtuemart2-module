@@ -71,7 +71,7 @@
         <param name="cost_per_transaction" type="text" default="" label="VMPAYMENT_SVEA_INVOICEFEE" description="VMPAYMENT_SVEA_INVOICEFEE_EXPLAIN" />
         <param name="tax_id" type="vmtaxes" scope="com_virtuemart" label="VMPAYMENT_SVEA_TAX" description="VMPAYMENT_SVEA_TAX_DESC" />
         <param type="spacer" default="Price on product page" level="level1"/>
-        <param name="product_display" type="radio" default="0" label="Show Product Price Widget" description="The Svea Product Price Widget will be shown on product pages, displaying the minimum invoice amount to pay. Note: Only applicable if Svea buys the invoices, and for private customers. Only applies in Sweden, Norway, Finland and the Netherlands">
+        <param name="product_display" type="radio" default="0" label="Show Product Price Widget" description="The Svea Product Price Widget will be shown on product pages, displaying the minimum invoice amount to pay. Note: Only applicable if Svea buys the invoices, and for private customers. Only applies in Sweden, Norway, Finland and the Netherlands. Can only handle one Invoice paymentmethod configured.">
              <option value="0">COM_VIRTUEMART_NO</option>
              <option value="1">COM_VIRTUEMART_YES</option>
         </param>
