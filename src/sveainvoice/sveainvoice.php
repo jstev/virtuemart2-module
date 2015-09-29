@@ -435,7 +435,6 @@
             }
             $activated = 0;
             foreach ($this->methods as $method) {
-
                 if($method->product_display == "1")
                     $activated++;
             }
@@ -478,7 +477,8 @@
                                                 margin-right: auto;
                                                 float:left;">
                                         <strong >'.
-                                          round($price,$currency_decimals)." ".$display[0]->currency_symbol.
+                                          number_format(round($price, 1,PHP_ROUND_HALF_EVEN),$currency_decimals,"."," ").
+                                         " ".$display[0]->currency_symbol.
                                         '</strong>
                                     </div>
                                 </div>';
@@ -487,7 +487,8 @@
                     $view = array();
                     $view['logo_background'] = ($country == "NO" || $country == "DK" || $country == "NL") ? "svea_finans_background" : "svea_background";
                     $view['price_list'] = $prices;
-                    $view['lowest_price'] =  round($price,$currency_decimals);
+                    $view['lowest_price'] =    number_format(round($price, 1,PHP_ROUND_HALF_EVEN),$currency_decimals,"."," ");
+//                    $view['lowest_price'] =  round($price,$currency_decimals);
                     $view['currency_display'] =  $display[0]->currency_symbol;
                     $view['line'] = '<img width="163" height="1" src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/grey_line.png" />';
                     $view['text_from'] = JText::sprintf("VMPAYMENT_SVEA_TEXT_FROM")." ";
@@ -779,7 +780,7 @@
                             return FALSE; //do not know what country, therefore don´t know what fields to show.
                         }
                         $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
-                        $html_string .= $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id,$countryCode,$method->shipping_billing);
+                        $html_string .= $this->getSveaGetAddressHtml($method->virtuemart_paymentmethod_id,$countryCode,$method->shipping_billing,$method->payment_info);
                         $html[] = $html_string;
                         //svea stuff end
                     }
@@ -1239,7 +1240,7 @@
          * Svea GetAddress view for html and jQuery
          * @return string
          */
-        public function getSveaGetAddressHtml($paymentId,$countryCode,$shipping_billing) {
+        public function getSveaGetAddressHtml($paymentId,$countryCode,$shipping_billing,$paymentInfo) {
             $session = JFactory::getSession();
             $inputFields = '';
             $getAddressButton = '';
@@ -1384,6 +1385,7 @@
                     '<div id="svea_getaddress_error_'.$paymentId.'" style="color: red; "></div>'
                     .$getAddressButton.
                     '<div id="svea_address_div_'.$paymentId.'"></div>
+                    <div id="svea_paymentinfo_'.$paymentId.'">'.$paymentInfo.'</div>
                 </fieldset>
                 <input type="hidden" name="svea_shipping_billing" id="svea_shipping_billing_'.$paymentId.'" value="'.$shipping_billing.'" />
             ';

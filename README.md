@@ -1,7 +1,7 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
 
-##Version 2.4.20
+##Version 2.4.21
 This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments.
 Admin functions such as Deliver, Confirm, Credit and Cancel orders is implemented into Virtuemarts admin functions.
 This module is updated for the latest payment systems at SveaWebPay.
@@ -52,7 +52,7 @@ For countries where Get Address functionality is provided, we will also pre-fill
 * Payment Name -- set to "SveaWebPay Invoice" or the equivalent in your language.
 * Sef Alias -- no need to change the default
 * Published -- if set to "Yes", this payment method will be available for use by your customers.
-* Payment Description -- we recommend that the description state what country the payment method instance corresponds to, i.e. "Sweden".
+* Payment Description -- an optional short description of the payment method.
 * Payment Method -- select "SveaWebPay Invoice" from the dropdown list of payment methods.
 * Shopper Group -- if needed, set the shopper group here.
 * List Order -- defines the order in which the available payment methods are presented to the user. We recommend presenting invoice as the first choice.
@@ -70,7 +70,7 @@ For countries where Get Address functionality is provided, we will also pre-fill
 * Country -- select the country corresponding to this instance client id.
 * Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.
 
-* Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
+* Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page.
 * Status Order Created -- the virtuemart status given to an order after it has been accepted by SveaWebPay.
 * Shipping same as billing -- determines whether to use the svea billing address for both shipping and billing. It will ignore if customer tries to change the shipping address. Should be set to true if your contract with Svea does not tell otherwise.
 
@@ -103,7 +103,7 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 * Payment Name -- set to "SveaWebPay Payment Plan" or the equivalent in your language.
 * Sef Alias -- no need to change the default
 * Published -- if set to "Yes", this payment method will be available for use by your customers.
-* Payment Description -- we recommend that the description state what country the payment method instance corresponds to, i.e. "Sweden".
+* Payment Description -- an optional short description of the payment method.
 * Payment Method -- select "SveaWebPay Payment Plan" from the dropdown list of payment methods.
 * Shopper Group -- if needed, set the shopper group here.
 * List Order -- defines the order in which the available payment methods are presented to the user. We recommend presenting part payment as the second choice.
@@ -120,7 +120,7 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 * Country -- select the country corresponding to this instance client id.
 * Minimum Amount, Maximum Amount -- the order value must fall within these limits for the payment method to be shown as available to the user. Use the values found in your SveaWebPay account credentials.
 
-* Payment Info -- Enter a message to display with the order, as well as on the post-checkout confirmation thank you-page. May be left blank if desired.
+* Payment Info -- Enter a message to display with the order, in the checkout, as well as on the post-checkout confirmation thank you-page. Enter info about the initialfee here.
 * Status Order Created -- determines whether to use the svea billing address for both shipping and billing. It will ignore if customer tries to change the shipping address. Should be set to true if your contract with Svea does not tell otherwise.
 * Shipping same as billing -- determines whether to use the svea billing address for both shipping and billing. It will ignore if customer tries to change the shipping address. Should be set to true if your contract with Svea does not tell otherwise.
 
