@@ -26,7 +26,7 @@ class JElementGetSvealib extends JElement {
 	 * @var        string
 	 */
 	var $_name = 'getSvealib';
-        var $sveaVersion = '2.4.20';
+        var $sveaVersion = '2.4.21';
 
 	function fetchElement ($name, $value, &$node, $control_name) {
                 $update_url = "https://github.com/sveawebpay/virtuemart2-module/archive/master.zip";
