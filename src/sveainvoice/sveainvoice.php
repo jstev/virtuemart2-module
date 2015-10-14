@@ -204,11 +204,12 @@
                 $countryCode = shopFunctions::getCountryByID($countryId,'country_2_code');
                 //add customer
                 $svea = SveaHelper::formatCustomer($svea,$order,$countryCode);
-
+                $session = JFactory::getSession();
                 try {
                     $svea = $svea
                           ->setCountryCode($countryCode)
                           ->setCurrency($currency_code_3)
+                            ->setCustomerReference($session->get("svea_customerreference_".$order['details']['BT']->virtuemart_paymentmethod_id))
                           ->setClientOrderNumber($order['details']['BT']->order_number)
                           ->setOrderDate(date('c'))
                           ->useInvoicePayment()
@@ -1376,19 +1377,34 @@
                 </fieldset>';
             }
 
+             if(    $countryCode == "SE" ||
+                    $countryCode == "DK" ||
+                    $countryCode == "DE" ||
+                    $countryCode == "NL" ||
+                    $countryCode == "NO" ||
+                    $countryCode == "FI")
+            {
             //box for form
-            $html =
-            '
-                <fieldset id="svea_getaddress_'.$paymentId.'">
-                    <input type="hidden" id="paymenttypesvea_'.$paymentId.'" value="'. $paymentId . '" />'
-                    .$inputFields.
-                    '<div id="svea_getaddress_error_'.$paymentId.'" style="color: red; "></div>'
-                    .$getAddressButton.
-                    '<div id="svea_address_div_'.$paymentId.'"></div>
-                    <div id="svea_paymentinfo_'.$paymentId.'">'.$paymentInfo.'</div>
-                </fieldset>
-                <input type="hidden" name="svea_shipping_billing" id="svea_shipping_billing_'.$paymentId.'" value="'.$shipping_billing.'" />
-            ';
+                $html =
+                '
+                    <fieldset id="svea_getaddress_'.$paymentId.'">
+                        <input type="hidden" id="paymenttypesvea_'.$paymentId.'" value="'. $paymentId . '" />'
+                        .$inputFields.
+                        '<div id="svea_getaddress_error_'.$paymentId.'" style="color: red; "></div>'
+                        .$getAddressButton.
+                        '<div id="svea_address_div_'.$paymentId.'"></div>
+                        <div id="svea_customerreference_div_'.$paymentId.'" style="display:none">
+                            <label for="svea_customerreference_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_CUSTOMER_REFERENCE").':</label>
+                            <input type="text" id="svea_customerreference_'.$paymentId.'" name="svea__customerreference__'.$paymentId.'"
+                                value="'.$session->get("svea_customerreference_$paymentId").'" />
+                        </div>
+                        <div id="svea_paymentinfo_'.$paymentId.'">'.$paymentInfo.'</div>
+                    </fieldset>
+                    <input type="hidden" name="svea_shipping_billing" id="svea_shipping_billing_'.$paymentId.'" value="'.$shipping_billing.'" />
+                ';
+            } else {
+                $html ='';
+            }
             /**
              * Adjustment to compatibility to RuposTel onestep plugin:
              * var name checked is overwritten. new var name is svea_picked
@@ -1474,6 +1490,7 @@
 
                          $('#svea_ssn_fieldset".$paymentId."').show();
                          $('#svea_vat_fieldset".$paymentId."').hide();
+                        $('#svea_customerreference_div_".$paymentId."').hide();
                         //NL and DE
                          $('#svea_birthdate_".$paymentId."').show();
                         //nl
@@ -1483,6 +1500,7 @@
 
                         $('#svea_ssn_fieldset".$paymentId."').hide();
                         $('#svea_vat_fieldset".$paymentId."').show();
+                        $('#svea_customerreference_div_".$paymentId."').show();
                         //NL and DE
                         $('#svea_birthdate_".$paymentId."').hide();
 
@@ -1535,6 +1553,10 @@
                                 else // handle response address data
                                 {
                                      rupostel_autofill_address(json_$paymentId,customertype_$paymentId); //adjustment to fit rupostel plugin
+                                    if(customertype_$paymentId == 'svea_invoice_customertype_company') // company, may get several addresses
+                                    {
+                                        //show customer reference input
++                                       jQuery('#svea_customerreference_div_$paymentId').show();
 
                                         jQuery('#svea_address_div_$paymentId').empty().append(
                                             '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea__addressSelector__$paymentId\"></select>'
@@ -1574,8 +1596,7 @@
                                                 '<input type=\"text\" id=\"svea_'+value.addressSelector+'_virtuemart_country_id\" name=\"svea__'+value.addressSelector+'__virtuemart_country_id__".$paymentId."\" value=\"'+value.virtuemart_country_id+'\" />'
                                             );
                                         });
-                                    if(customertype_$paymentId == 'svea_invoice_customertype_company') // company, may get several addresses
-                                    {
+
                                         //empty
                                     }
                                     else // private individual, only one address
