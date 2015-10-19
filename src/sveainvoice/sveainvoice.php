@@ -1390,14 +1390,16 @@
                     <fieldset id="svea_getaddress_'.$paymentId.'">
                         <input type="hidden" id="paymenttypesvea_'.$paymentId.'" value="'. $paymentId . '" />'
                         .$inputFields.
-                        '<div id="svea_getaddress_error_'.$paymentId.'" style="color: red; "></div>'
-                        .$getAddressButton.
-                        '<div id="svea_address_div_'.$paymentId.'"></div>
+                        '<div id="svea_getaddress_error_'.$paymentId.'" style="color: red; "></div>
                         <div id="svea_customerreference_div_'.$paymentId.'" style="display:none">
                             <label for="svea_customerreference_'.$paymentId.'">'.JText::sprintf("VMPAYMENT_SVEA_FORM_TEXT_CUSTOMER_REFERENCE").':</label>
                             <input type="text" id="svea_customerreference_'.$paymentId.'" name="svea__customerreference__'.$paymentId.'"
-                                value="'.$session->get("svea_customerreference_$paymentId").'" />
+                                value="'.$session->get("svea_customerreference_$paymentId").'" size="32" maxlength="32" />
                         </div>
+                        '
+                        .$getAddressButton.
+                        '<div id="svea_address_div_'.$paymentId.'"></div>
+
                         <div id="svea_paymentinfo_'.$paymentId.'">'.$paymentInfo.'</div>
                     </fieldset>
                     <input type="hidden" name="svea_shipping_billing" id="svea_shipping_billing_'.$paymentId.'" value="'.$shipping_billing.'" />
