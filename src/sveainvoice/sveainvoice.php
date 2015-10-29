@@ -1604,7 +1604,7 @@
                                     else // private individual, only one address
                                     {
                                         jQuery('#svea_address_div_$paymentId select').hide();   // hide dropdown for individuals
-                                        jQuery('#svea_address_div_$paymentId').append(          // show individual address
+                                        jQuery('#svea_address_div_$paymentId').empty().append(          // show individual address
                                             '<div id=\"sveaAddressDiv_$paymentId\">'+
                                                 //'<strong>'+json_$paymentId"."[0].fullName+'</strong><br> '+
                                                 '<strong>'+json_$paymentId"."[0].firstName+' '+
