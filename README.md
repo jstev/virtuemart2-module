@@ -1,7 +1,7 @@
 # Virtuemart 2 - SveaWebPay WebPay payment module installation guide
 
 
-##Version 2.4.21
+##Version 2.5.0
 This module supports invoice and payment plan payments in Sweden, Finland, Norway, Denmark, Netherlands and Germany, as well as creditcard and direct bank payments.
 Admin functions such as Deliver, Confirm, Credit and Cancel orders is implemented into Virtuemarts admin functions.
 This module is updated for the latest payment systems at SveaWebPay.
@@ -41,6 +41,8 @@ To add a new payment method instance, press the "new" icon. You will then be pre
 
 ### SveaWebPay Invoice
 Install one instance of the SveaWebPay Invoice payment method for each country that you wish to accept invoice payments from. If you plan on accepting invoice payments from customers in several countries, you will need to configure multiple instances of the method, each instance should accept payments from one country only, as each client id is valid for one country only. See further under client id and country settings below.
+
+To make sure the right payment with the right country specific fields are shown, force the customer to register country by choosing Configuration -> Checkout->*Only registered users can checkout* in the shop configuration.
 
 In payment method selection, for registered users, we present the instance corresponding to the user country, if given. The invoice payment method may also be used by unregistered users -- we then present all method instances, and it is up to the user to select the correct instance corresponding to the customer country.
 
@@ -85,6 +87,8 @@ For countries where Get Address functionality is provided, we will also pre-fill
 
 ### SveaWebPay Payment Plan
 Install one instance of the SveaWebPay Payment Plan payment method for each country that you wish to accept payment plan payments from. If you plan on accepting payment plan payments from customers in several countries, you will need to configure multiple instances of the method, each instance should accept payments from one country only, as each client id is valid for one country only. See further under client id and country settings below.
+
+To make sure the right payment with the right country specific fields are shown, force the customer to register country by choosing Configuration -> Checkout->*Only registered users can checkout* in the shop configuration.
 
 In payment method selection, for registered users, we present the instance corresponding to the user country, if given. The payment plan payment method may also be used by unregistered users -- we then present all method instances, and it is up to the user to select the correct instance corresponding to the customer country.
 
