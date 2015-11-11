@@ -72,4 +72,18 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider
     public function getSecret($type, $country) {
         return property_exists( $this->config, "secret_test" ) ? $this->config->secret_test : false;
     }
+
+    public function getIntegrationCompany() {
+
+    }
+
+    public function getIntegrationPlatform() {
+
+    }
+
+    public function getIntegrationVersion() {
+        print_r(SveaHelper::getSveaVersion());die;
+        return SveaHelper::getSveaVersion();
+//        return '111';
+    }
 }

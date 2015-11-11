@@ -11,11 +11,12 @@
  * other free or open source software licenses.
  */
 defined ('JPATH_BASE') or die();
-
 /**
  * Renders a label element
  */
-
+if (!class_exists ('SveaHelper')) {
+    require ( JPATH_ROOT . DS . 'plugins' . DS . 'vmpayment' . DS . 'svealib' .DS . 'sveahelper.php');
+}
 
 class JElementGetSvealib extends JElement {
 
@@ -26,24 +27,26 @@ class JElementGetSvealib extends JElement {
 	 * @var        string
 	 */
 	var $_name = 'getSvealib';
-        var $sveaVersion = '2.5.1';
+        var $sveaVersion;
 
 	function fetchElement ($name, $value, &$node, $control_name) {
-                $update_url = "https://github.com/sveawebpay/virtuemart2-module/archive/master.zip";
-                $url = "https://raw.githubusercontent.com/sveawebpay/virtuemart2-module/master/docs/info.json";
-                $json = file_get_contents($url);
-                $data = json_decode($json);
-                $html .= "<div>Version: $this->sveaVersion</div><br />";
-                $html .= "<div>";
-                if($data->module_version <= $this->sveaVersion){
-                    $html .= "You have the latest version.";
-                }elseif ($data->module_version > $this->sveaVersion) {
-                    $html .= "UPDATE FOUND! <br />".$data->module_version;
-                    $img = '<img src="'.JURI::root ().'/plugins/vmpayment/svealib/assets/images/download.png" height="56" widh="56" />';
-                    $html .= "&nbsp;<br /><a href='$update_url'>$img</a>";
-                }
-                $html .= "</div>";
-		return $html;
+            $this->sveaVersion = SveaHelper::getSveaVersion();
+            $update_url = "https://github.com/sveawebpay/virtuemart2-module/archive/master.zip";
+            $url = "https://raw.githubusercontent.com/sveawebpay/virtuemart2-module/master/docs/info.json";
+            $json = file_get_contents($url);
+            $data = json_decode($json);
+            $html .= "<div>Version: $this->sveaVersion</div><br />";
+            $html .= "<div>";
+            if($data->module_version <= $this->sveaVersion){
+                $html .= "You have the latest version.";
+            }elseif ($data->module_version > $this->sveaVersion) {
+                $html .= "UPDATE FOUND! <br />".$data->module_version;
+                $img = '<img src="'.JURI::root ().'/plugins/vmpayment/svealib/assets/images/download.png" height="56" widh="56" />';
+                $html .= "&nbsp;<br /><a href='$update_url'>$img</a>";
+            }
+            $html .= "</div>";
+
+            return $html;
 	}
 
 

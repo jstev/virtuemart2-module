@@ -72,4 +72,16 @@ class SveaVmConfigurationProviderProd implements ConfigurationProvider
     public function getSecret($type, $country) {
         return property_exists( $this->config, "secret_prod" ) ? $this->config->secret_prod : false;
     }
+
+    public function getIntegrationCompany() {
+
+    }
+
+    public function getIntegrationPlatform() {
+
+    }
+
+    public function getIntegrationVersion() {
+
+    }
 }
