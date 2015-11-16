@@ -74,16 +74,15 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider
     }
 
     public function getIntegrationCompany() {
-
+        return "Svea Ekonomi : Virtuemart 2 module";
     }
 
     public function getIntegrationPlatform() {
-
+        return 'Virtuemart 2';
     }
 
     public function getIntegrationVersion() {
-        print_r(SveaHelper::getSveaVersion());die;
-        return SveaHelper::getSveaVersion();
-//        return '111';
+        $version = SveaHelper::getSveaVersion();
+        return $version;
     }
 }
