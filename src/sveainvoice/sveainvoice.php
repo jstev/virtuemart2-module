@@ -619,10 +619,10 @@
                 $customerType = $request['svea__customertype__'.$methodId];
 
                 //prepare errormessage
-                // getAddress countries need the addressSelector
-                if( $countryCode == 'SE' ||
+                // getAddress countries need the addressSelector for company customers
+                if( ($countryCode == 'SE' ||
                     $countryCode == 'DK' ||
-                    ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_company')
+                    $countryCode == 'NO') && $customerType == 'svea_invoice_customertype_company'
                 )
                 {
                     if( !array_key_exists( "svea__addressSelector__".$methodId, $request ) )    // no addresselector => did not press getAddress
@@ -1558,7 +1558,7 @@
                                     if(customertype_$paymentId == 'svea_invoice_customertype_company') // company, may get several addresses
                                     {
                                         //show customer reference input
-+                                       jQuery('#svea_customerreference_div_$paymentId').show();
+                                       jQuery('#svea_customerreference_div_$paymentId').show();
 
                                         jQuery('#svea_address_div_$paymentId').empty().append(
                                             '<select id=\"sveaAddressDiv_$paymentId\" name=\"svea__addressSelector__$paymentId\"></select>'
