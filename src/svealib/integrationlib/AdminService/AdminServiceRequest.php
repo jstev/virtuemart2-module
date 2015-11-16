@@ -23,14 +23,13 @@ abstract class AdminServiceRequest {
 
     /**
      * Set up the soap client and perform the soap call, with the soap action and prepared request from the relevant subclass.
-     * Returns the apropriate request response class, as determined by SveaResponse matching on request action.
+     * Returns the appropriate request response class, as determined by SveaResponse matching on request action.
      */
     public function doRequest( $resendOrderWithFlippedPriceIncludingVat = false ) {
-
-        $endpoint = $this->orderBuilder->conf->getEndPoint( \ConfigurationProvider::ADMIN_TYPE );   // get test or prod using child instance data
+        
         $requestObject = $this->prepareRequest( $resendOrderWithFlippedPriceIncludingVat );
 
-        $soapClient = new AdminSoap\SoapClient( $endpoint );
+        $soapClient = new AdminSoap\SoapClient( $this->orderBuilder->conf, \ConfigurationProvider::ADMIN_TYPE );
         $soapResponse = $soapClient->doSoapCall($this->action, $requestObject );
         $sveaResponse = new \SveaResponse( $soapResponse, null, null, $this->action );
         $response = $sveaResponse->getResponse();
@@ -81,8 +80,8 @@ abstract class AdminServiceRequest {
     abstract function validate(); // validate is defined by subclasses, should validate all elements required for call is present
 
     /**
-     * the integration package ConfigurationProvider::INVOICE_TYPE and ::PAYMENTPLAN_TYPE constanst are all caps, whereas the admin service
-     * enumeration used in the calls are CamelCase. This function converts the package constants so they work with the admin service.
+     * the integration package ConfigurationProvider::INVOICE_TYPE and ::PAYMENTPLAN_TYPE constants are all caps, whereas the admin service
+     * enumeration used in the calls are CamelCase. This function converts the package constants so that they work with the admin service.
      */
     public static function CamelCaseOrderType( $orderTypeAsConst ) {
         switch( $orderTypeAsConst ) {
@@ -133,18 +132,29 @@ abstract class AdminServiceRequest {
             $orderRows[] = new \SoapVar(
                 new AdminSoap\OrderRow(
                     $orderRow->articleNumber, 
-                    $orderRow->name . ": " . $orderRow->description, 
+                    $this->formatRowNameAndDescription($orderRow),                        
                     !isset($orderRow->discountPercent) ? 0 : $orderRow->discountPercent, 
                     $orderRow->quantity, 
                     $amount, 
                     $orderRow->unit, 
                     $orderRow->vatPercent, 
-                    $priceIncludingVat
+                    $priceIncludingVat // attribute is set in correct (alphabetical) position via OrderRow constructor, see AdminSoap/OrderRow
                 ), SOAP_ENC_OBJECT, null, null, 'OrderRow', "http://schemas.datacontract.org/2004/07/DataObjects.Webservice"
             );
         }
         return $orderRows;
     }    
+    
+    /**
+     * wraps Svea\WebServiceRowFormatter->formatRowNameAndDescription to create a request description from order builder row name & description fields
+     *
+     * @param OrderRow|ShippingFee|et al. $webPayItemRow  an instance of the order row classes from WebPayItem
+     * @return string  the combined description string that should be written to Description
+     */
+    private function formatRowNameAndDescription( $webPayItemRow ) {        
+        $wsrf = new \Svea\WebService\WebServiceRowFormatter( null, null );
+        return $wsrf->formatRowNameAndDescription( $webPayItemRow );
+    }
     
     protected function getAdminSoapNumberedOrderRowsFromBuilderOrderRowsUsingVatFlag($builderOrderRows, $priceIncludingVat) {
         $amount = 0;
@@ -162,7 +172,7 @@ abstract class AdminServiceRequest {
             $numberedOrderRows[] = new \SoapVar(
                 new AdminSoap\NumberedOrderRow(
                     $orderRow->articleNumber,
-                    $orderRow->name.": ".$orderRow->description,
+                    $this->formatRowNameAndDescription($orderRow),                        
                     !isset($orderRow->discountPercent) ? 0 : $orderRow->discountPercent,
                     $orderRow->quantity,
                     $amount,
@@ -171,7 +181,7 @@ abstract class AdminServiceRequest {
                     $orderRow->creditInvoiceId,
                     $orderRow->invoiceId,
                     $orderRow->rowNumber,
-                    $priceIncludingVat
+                    $priceIncludingVat // attribute is set in correct (alphabetical) position via OrderRow constructor, see AdminSoap/OrderRow
                 ),
                 SOAP_ENC_OBJECT, null, null, 'NumberedOrderRow', "http://schemas.datacontract.org/2004/07/DataObjects.Admin.Service"
             );
