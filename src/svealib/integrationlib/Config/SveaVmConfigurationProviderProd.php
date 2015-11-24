@@ -78,7 +78,7 @@ class SveaVmConfigurationProviderProd implements ConfigurationProvider
     }
 
     public function getIntegrationPlatform() {
-        return 'Virtuemart 2';
+         return 'Joomla ' . JVERSION . ', Virtuemart ' . vmVersion::$RELEASE;
     }
 
     public function getIntegrationVersion() {
