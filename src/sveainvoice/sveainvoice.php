@@ -1610,7 +1610,7 @@
                                                 json_$paymentId"."[0].lastName+'</strong><br> '+
                                                 json_$paymentId"."[0].street+' <br> '+
                                                 json_$paymentId"."[0].zipCode+' '+json_$paymentId"."[0].locality+'</div><input type=\"hidden\" id=\"sveaAddressDiv_$paymentId\" name=\"svea__addressSelector__$paymentId\" value=\"private\" />'
-                                        );
+                                    );
 
 
                                     }
