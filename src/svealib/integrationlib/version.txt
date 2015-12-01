@@ -1,6 +1,6 @@
-updated 2015-11-06
+updated 2015-12-01
 
 version
-2.2.24
+2.2.25
 
 Remember to activate integration functions in Config/ConfigurationProvider.php on update
