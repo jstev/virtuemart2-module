@@ -614,16 +614,15 @@
             private function validateDataFromSelectPayment( $request )
             {
                 $methodId = $request['virtuemart_paymentmethod_id'];
-
                 $countryCode = $request['svea__countryCode__'.$methodId];
                 $customerType = $request['svea__customertype__'.$methodId];
 
                 //prepare errormessage
                 // getAddress countries need the addressSelector for company customers
-                if( ($countryCode == 'SE' ||
+                if( $countryCode == 'SE' ||
                     $countryCode == 'DK' ||
-                    $countryCode == 'NO') && $customerType == 'svea_invoice_customertype_company'
-                )
+                    ($countryCode == 'NO' && $customerType == 'svea_invoice_customertype_company' )
+                    )
                 {
                     if( !array_key_exists( "svea__addressSelector__".$methodId, $request ) )    // no addresselector => did not press getAddress
                     {
@@ -1610,9 +1609,10 @@
                                                 '<strong>'+json_$paymentId"."[0].firstName+' '+
                                                 json_$paymentId"."[0].lastName+'</strong><br> '+
                                                 json_$paymentId"."[0].street+' <br> '+
-                                                json_$paymentId"."[0].zipCode+' '+json_$paymentId"."[0].locality+
-                                            '</div>'
-                                        );
+                                                json_$paymentId"."[0].zipCode+' '+json_$paymentId"."[0].locality+'</div><input type=\"hidden\" id=\"sveaAddressDiv_$paymentId\" name=\"svea__addressSelector__$paymentId\" value=\"private\" />'
+                                    );
+
+
                                     }
                                     jQuery('#svea_address_div_$paymentId').show();
                                     jQuery('#svea_getaddress_error_$paymentId').hide();

@@ -72,4 +72,17 @@ class SveaVmConfigurationProviderTest implements ConfigurationProvider
     public function getSecret($type, $country) {
         return property_exists( $this->config, "secret_test" ) ? $this->config->secret_test : false;
     }
+
+    public function getIntegrationCompany() {
+        return "Svea Ekonomi : Virtuemart 2 module";
+    }
+
+    public function getIntegrationPlatform() {
+        return 'Joomla ' . JVERSION . ', Virtuemart ' . vmVersion::$RELEASE;
+    }
+
+    public function getIntegrationVersion() {
+        $version = SveaHelper::getSveaVersion();
+        return $version;
+    }
 }
