@@ -35,7 +35,7 @@ class JElementGetSvealib extends JElement {
             $url = "https://raw.githubusercontent.com/sveawebpay/virtuemart2-module/master/docs/info.json";
             $json = file_get_contents($url);
             $data = json_decode($json);
-            $html .= "<div>Version: $this->sveaVersion</div><br />";
+            $html = "<div>Version: $this->sveaVersion</div><br />";
             $html .= "<div>";
             if($data->module_version <= $this->sveaVersion){
                 $html .= "You have the latest version.";
