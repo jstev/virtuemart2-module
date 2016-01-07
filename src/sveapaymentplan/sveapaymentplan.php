@@ -381,6 +381,12 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
 	 *
 	 */
 	function plgVmOnStoreInstallPaymentPluginTable($jplugin_id) {
+            if (!($method = $this->getVmPluginMethod($order['details']['BT']->virtuemart_paymentmethod_id))) {
+                    return NULL; // Another method was selected, do nothing
+            }
+            if (!$this->selectedThisElement($method->payment_element)) {
+                    return false;
+            }
             //create Svea table if not exists
             $this->sveaCreateParamsTable();
             //get paymentplan params
