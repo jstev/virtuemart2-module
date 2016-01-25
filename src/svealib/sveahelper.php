@@ -28,7 +28,7 @@ if (!class_exists('Includes.php')) {
 class SveaHelper {
 
     static function getSveaVersion() {
-        return '2.5.2';
+        return '2.5.3';
     }
 
     /**
