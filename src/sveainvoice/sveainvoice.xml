@@ -75,7 +75,6 @@
              <option value="0">COM_VIRTUEMART_NO</option>
              <option value="1">COM_VIRTUEMART_YES</option>
         </param>
-        <param name="min_amount_product" type="text"  label="Product Price Widget threshold" description="If Show Product Price Widget is set to true, the Svea Product Price Widget will be displayed if the product price equals or exceeds this amount. If not set, the Product Price Widget will be displayed regardless of product price. " />
     </params>
 </install>
 
