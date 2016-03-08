@@ -6,7 +6,7 @@
     <authorUrl>http://www.sveawebpay.se</authorUrl>
     <copyright>Copyright (C) 2012 SveaWebPay - Svea Ekonomi</copyright>
     <license> http://www.apache.org/licenses/LICENSE-2.0</license>
-    <version>2.5.3</version>
+    <version>2.5.4</version>
     <description>SveaWebPay library for SweaWebPay payment plugins for Virtuemart 2. Do not use as payment.</description>
     <files>
 	<filename plugin="svealib">sveahelper.php</filename>
