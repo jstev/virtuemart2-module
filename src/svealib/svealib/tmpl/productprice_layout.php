@@ -121,14 +121,12 @@ if($viewData['svea_paymentplan'] != NULL && $viewData['svea_invoice'] != NULL){
                 jQuery("#svea_product_price_all").click(function (){
                      jQuery("#svea_product_price_all").slideUp();
                 });
-                jQuery("#svea_price_arrow").toggle(
+                jQuery("#svea_price_arrow").click(
                     function (){
-                         jQuery("#svea_product_price_all").slideDown();
+                         jQuery("#svea_product_price_all").slideToggle();
                          jQuery(this).css({"cursor" : "pointer"});
-                   },
-                    function(){
-                         jQuery("#svea_product_price_all").slideUp();
-                   });
+                        }
+                    );
 
                });
 </script>

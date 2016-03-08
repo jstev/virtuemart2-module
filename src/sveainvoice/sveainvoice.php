@@ -443,7 +443,6 @@
             if($activated != 1){
                 return true;
             }
-
             foreach ($this->methods as $method) {
                  if($method->product_display == "1"){
 
@@ -461,12 +460,14 @@
                 } else {
                     return;
                 }
-                if($price >= $method->min_amount_product ){
-                    $lowest_to_pay = $this->svea_get_invoice_lowest($country);//TODO:hämta countrycode med id:$method->countries
+                $lowest_to_pay = $this->svea_get_invoice_lowest($country);//TODO:hämta countrycode med id:$method->countries
+
+                if($price >= $lowest_to_pay ){
+
                     $prices = array();
                     $prices[] = '<h4 style="display:block;  list-style-position:outside; margin: 5px 10px 10px 10px">'.
                          JText::sprintf("VMPAYMENT_INVOICE").'</h4>';
-                    $price = $product->prices['salesPrice'] * 0.03 < $lowest_to_pay ? $lowest_to_pay : $product->prices['salesPrice'] * 0.03;
+                    $lowest_price = $price * 0.03 < $lowest_to_pay ? $lowest_to_pay : $price * 0.03;
 
                     $prices[] = '<div class="svea_product_price_item" style="display:block; margin: 5px 10px 10px 10px">
                                     <div style="float:left;">'.
@@ -478,7 +479,7 @@
                                                 margin-right: auto;
                                                 float:left;">
                                         <strong >'.
-                                          number_format(round($price, 1,PHP_ROUND_HALF_EVEN),$currency_decimals,"."," ").
+                                          number_format(round($lowest_price, 1,PHP_ROUND_HALF_EVEN),$currency_decimals,"."," ").
                                          " ".$display[0]->currency_symbol.
                                         '</strong>
                                     </div>
@@ -488,7 +489,7 @@
                     $view = array();
                     $view['logo_background'] = ($country == "NO" || $country == "DK" || $country == "NL") ? "svea_finans_background" : "svea_background";
                     $view['price_list'] = $prices;
-                    $view['lowest_price'] =    number_format(round($price, 1,PHP_ROUND_HALF_EVEN),$currency_decimals,"."," ");
+                    $view['lowest_price'] =    number_format(round($lowest_price, 1,PHP_ROUND_HALF_EVEN),$currency_decimals,"."," ");
 //                    $view['lowest_price'] =  round($price,$currency_decimals);
                     $view['currency_display'] =  $display[0]->currency_symbol;
                     $view['line'] = '<img width="163" height="1" src="'. JURI::root(TRUE) . '/plugins/vmpayment/svealib/assets/images/svea/grey_line.png" />';
