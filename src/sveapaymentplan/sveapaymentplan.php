@@ -1139,8 +1139,8 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                  if($svea->accepted == 1){
 
                     $query = 'UPDATE #__virtuemart_payment_plg_sveapaymentplan
-                            SET `svea_contract_number` = "' . $svea->contractNumber . '"' .
-                            'WHERE `order_number` = "' . $paymentTable->order_number.'"';
+                              SET `svea_contract_number` = "' . $svea->contractNumber . '"' .
+                             'WHERE `order_number` = "' . $paymentTable->order_number.'"';
 
                     $db->setQuery($query);
                     $db->query();
@@ -1169,7 +1169,57 @@ class plgVmPaymentSveapaymentplan extends vmPSPlugin {
                         vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage, 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage);
                         return FALSE;
                      }
-                }
+            }
+            // Refund Order
+            elseif($_formData->order_status == 'R'){
+                    try {
+                        $svea_query = WebPayAdmin::queryOrder($sveaConfig)
+                            ->setOrderId($paymentTable->svea_order_id)
+                            ->setCountryCode($country)
+                            ->queryInvoiceOrder()
+                            ->doRequest();
+                    } catch (Exception $e) {
+                        vmError ('Svea error: ' . $e->getMessage () . ' Order was not refunded.', 'Svea error: ' . $e->getMessage () . ' Order was not refunded.');
+                        return FALSE;
+                    }
+
+                    if($svea_query->accepted != 1){
+                        vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.', 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.');
+                        return FALSE;
+                    }
+
+                    $row_numbers = array();
+                    foreach ($svea_query->numberedOrderRows as $value) {
+                        $row_numbers[] = $value->rowNumber;
+                    }
+
+                    try {
+                        $svea = WebPayAdmin::creditOrderRows($sveaConfig)
+                            ->setCountryCode($country)
+                            ->setRowsToCredit($row_numbers)
+                            ->setContractNumber($svea_query->paymentPlanDetailsContractNumber)
+                            ->creditPaymentplanOrderRows()
+                                ->doRequest();
+                    } catch (Exception $e) {
+                        vmError ('Svea error: '.$e->getMessage () . ' Order was not refunded.', 'Svea error: '.$e->getMessage () . ' Order was not refunded.');
+                        return FALSE;
+                    }
+
+                    if($svea->accepted == TRUE) {
+                        $query = 'UPDATE #__virtuemart_payment_plg_sveapaymentplan
+                                    SET `svea_contract_number` = "' . $svea->paymentPlanDetailsContractNumber . '"' .
+                            'WHERE `order_number` = "' . $paymentTable->order_number.'"';
+
+                        $db->setQuery($query);
+                        $db->query();
+
+                        return TRUE;
+                    }  else {
+                        vmError ('Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.', 'Svea Error: '. $svea->resultcode . ' : ' .$svea->errormessage . ' Order was not refunded.');
+                        return FALSE;
+                    }
+            }
+            // credit end
 	}
 
 	/**
